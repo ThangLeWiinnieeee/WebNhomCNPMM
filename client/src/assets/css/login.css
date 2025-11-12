@@ -1,0 +1,67 @@
+/* Đặt màu nền chung cho trang */
+body {
+  background-color: #fffafc !important; 
+}
+
+/* Container chính của trang */
+.login-page-container {
+  min-height: 100vh;
+}
+
+/* Tùy chỉnh card đăng nhập */
+.login-card {
+  max-width: 420px;
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05) !important;
+  padding: 1.5rem 2.5rem; /* Thêm padding tùy chỉnh */
+}
+
+/* Tiêu đề */
+.login-card h2 {
+  font-weight: 700;
+}
+
+/* Text phụ */
+.login-card .subtitle {
+  color: #666;
+}
+
+/* Ghi đè màu của nút Primary (nút Đăng Nhập) */
+.btn-primary {
+  background-color: #e91e63 !important;
+  border-color: #e91e63 !important;
+  padding: 0.75rem !important;
+  font-weight: 700 !important;
+}
+
+.btn-primary:hover,
+.btn-primary:active,
+.btn-primary:focus {
+  background-color: #d81b60 !important;
+  border-color: #d81b60 !important;
+  box-shadow: none !important;
+}
+
+/* Tùy chỉnh các đường link */
+.forgot-link,
+.signup-link a {
+  color: #e91e63;
+  font-weight: 600;
+  text-decoration: none;
+}
+.forgot-link:hover,
+.signup-link a:hover {
+  text-decoration: underline;
+}
+
+/* Đường kẻ "OR" */
+.separator {
+  color: #aaa;
+}
+
+/* Tùy chỉnh label */
+.form-label {
+  font-weight: 600;
+  color: #444;
+}
