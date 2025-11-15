@@ -1,18 +1,30 @@
 const express = require('express');
-require('dotenv').config()
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const accountRoute = require('./src/routes/account.route');
+const userRoute = require('./src/routes/user.route');
 const databaseConfig = require('./src/config/database.config');
+const { verifyToken } = require('./src/middlewares/auth.middleware')
+
+require('dotenv').config()
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.use('/api/auth',accountRoute);
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
+
+//Public Routes
+app.use('/account',accountRoute);
+
+//Private Routes
+app.use(verifyToken);// Áp dụng middleware xác thực cho các route bên dưới
+app.use('/users', userRoute);
 
 // Kết nối database
-databaseConfig.connectDatabase();
-
-app.use(cors()); // Cho phép React gọi API
-app.use(express.json({ extended: false })); // Body parser
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server đang chạy trên cổng ${PORT}`));
+databaseConfig.connectDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server đang chạy tại http://localhost:${PORT}`);
+    });
+});
