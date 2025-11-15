@@ -7,6 +7,7 @@ import { store, persistor } from './stores/store.js'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'font-awesome/css/font-awesome.min.css';
 
 import App from './App.jsx'
 import './index.css'
