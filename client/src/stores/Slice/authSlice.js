@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from '../../utils/api';
+import api from '../../api/axiosConfig';
 
 // Async thunk để verify token
 export const verifyToken = createAsyncThunk(
@@ -88,4 +88,3 @@ const authSlice = createSlice({
 
 export const { login, logout, setLoading, setError, clearError, updateUser } = authSlice.actions;
 export default authSlice.reducer;
-

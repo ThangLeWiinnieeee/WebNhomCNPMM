@@ -14,13 +14,9 @@ import './index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <Provider store={store}>
-      <PersistGate loading={<div>Đang tải...</div>} persistor={persistor}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </PersistGate>
-    </Provider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
 
     <ToastContainer
       position="top-right"
