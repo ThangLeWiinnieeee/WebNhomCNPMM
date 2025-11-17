@@ -9,10 +9,6 @@ import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
 
 const loginSchema = z.object({
-    email: z.string()
-        .min(1, "Vui lòng nhập email!") 
-        .email("Email không đúng định dạng!"),
-
     password: z.string()
         .min(1, "Vui lòng nhập mật khẩu!")
         .min(8, "Mật khẩu phải có ít nhất 8 ký tự!") 
@@ -20,37 +16,29 @@ const loginSchema = z.object({
         .regex(/[a-z]/, "Mật khẩu phải có ít nhất một chữ cái viết thường!")
         .regex(/\d/, "Mật khẩu phải có ít nhất một chữ số!")
         .regex(/[~!@#$%^&*]/, "Mật khẩu phải có ít nhất một ký tự đặc biệt! (~!@#$%^&*)"),
+    confirmPassword: z.string()
+        .min(1, "Vui lòng nhập lại mật khẩu!")
+}).refine((data) => data.password === data.confirmPassword, {
+    message: "Mật khẩu xác nhận không khớp!",
+    path: ["confirmPassword"],
 });
 
-const LoginPage = () => {
+const ResetPasswordPage = () => {
 
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
 
-    const onLoginSubmit = async (data) => {
+    const onResetPasswordSubmit = async (data) => {
         console.log("Đăng nhập với dữ liệu:", data);
     }
 
     return (
         <AuthLayout>
-            <h1 className="login-title">Đăng nhập</h1>
-            <p className="login-subtitle">Vui lòng nhập email và mật khẩu</p>
+            <h1 className="login-title">Đổi mật khẩu</h1>
+            <p className="login-subtitle">Vui lòng nhập mật khẩu để tiếp tục</p>
             
-            <form id="loginForm" onSubmit={handleSubmit(onLoginSubmit)} noValidate>
-                <div className="mb-3">
-                    <label htmlFor="email" className="form-label">Email</label>
-                    <input 
-                        type="email" 
-                        className="form-control" 
-                        id="email" 
-                        name="email"
-                        placeholder="Nhập email của bạn"
-                        {...register("email")}
-                    />
-                    {errors.email && <p className="error-message">{errors.email.message}</p>}
-                </div>
-                
+            <form id="loginForm" onSubmit={handleSubmit(onResetPasswordSubmit)} noValidate>
                 <div className="mb-3">
                     <label htmlFor="password" className="form-label">Mật khẩu</label>
                     <input 
@@ -63,30 +51,32 @@ const LoginPage = () => {
                     />
                     {errors.password && <p className="error-message">{errors.password.message}</p>}
                 </div>
-                
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                    <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="remember"/>
-                        <label className="form-check-label" htmlFor="remember">
-                            Nhớ mật khẩu
-                        </label>
-                    </div>
-                    <Link to={'/forgot-password'} className="forgot-password">Quên Mật Khẩu?</Link>
+
+                <div className="mb-3">
+                    <label htmlFor="confirmPassword" className="form-label">Nhập lại mật khẩu</label>
+                    <input 
+                        type="password" 
+                        className="form-control" 
+                        id="confirmPassword" 
+                        name="confirmPassword"
+                        placeholder="Nhập mật khẩu"
+                        {...register("confirmPassword")}
+                    />
+                    {errors.confirmPassword && <p className="error-message">{errors.confirmPassword.message}</p>}
                 </div>
                 
                 <button type="submit" className="btn btn-login" disabled={isSubmitting}>
-                    {isSubmitting ? 'Đang đăng nhập...' : 'Đăng Nhập'}
+                    {isSubmitting ? 'Đang thay đổi...' : 'Thay đổi mật khẩu'}
                 </button>
                 
                 <Divider />
-                <GoogleLoginButton onClick={() => {}} />
-                
+            
                 <p className="signup-text">
-                    Bạn chưa có tài khoản? <Link to="/register" className="signup-link">Tạo tài khoản</Link>
+                    Bạn đã nhớ mật khẩu? <Link to="/login" className="signup-link">Đăng nhập</Link>
                 </p>
             </form>
         </AuthLayout>
     )
 }
 
-export default LoginPage;
+export default ResetPasswordPage;

@@ -1,70 +1,63 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useForm } from 'react-hook-form';
+import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from "@hookform/resolvers/zod";
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
 
 const registerSchema = z.object({
-    firstname: z.string().min(1, "Họ không được để trống"),
-    lastname: z.string().min(1, "Tên không được để trống"),
-    username: z.string().min(3, "Tên đăng nhập phải có ít nhất 3 ký tự"),
-    email: z.email("Địa chỉ email không hợp lệ"),
-    password: z.string().min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
+    fullName: z.string()
+        .min(1, "Vui lòng nhập họ tên!") 
+        .min(5, "Họ tên phải có ít nhất 5 ký tự!") 
+        .max(50, "Họ tên không được vượt quá 50 ký tự!"),
+
+    email: z.string()
+        .min(1, "Vui lòng nhập email!") 
+        .email("Email không đúng định dạng!"), 
+
+    password: z.string()
+        .min(1, "Vui lòng nhập mật khẩu!")
+        .min(8, "Mật khẩu phải có ít nhất 8 ký tự!") 
+        .regex(/[A-Z]/, "Mật khẩu phải có ít nhất một chữ cái viết hoa!")
+        .regex(/[a-z]/, "Mật khẩu phải có ít nhất một chữ cái viết thường!")
+        .regex(/\d/, "Mật khẩu phải có ít nhất một chữ số!")
+        .regex(/[~!@#$%^&*]/, "Mật khẩu phải có ít nhất một ký tự đặc biệt! (~!@#$%^&*)"),
+
+    agree: z.boolean()
+        .refine(val => val === true, {
+        message: "Bạn phải đồng ý với các điều khoản và điều kiện!"
+    }),
 });
 
 const RegisterPage = () => {
-    const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+    const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(registerSchema)
     });
 
-    const onRegisterSubmit = (data) => {
-        
+    const onRegisterSubmit = async (data) => {
+        console.log("Đăng ký với dữ liệu:", data);
     }
+
     return (
         <AuthLayout>
             <h1 className="login-title">Đăng Ký</h1>
             <p className="login-subtitle">Chào mừng bạn đã đến! Hãy đăng ký để bắt đầu</p>
             
-            <form onSubmit={handleSubmit(onRegisterSubmit)}>
-                <div className="row mb-3">
-                    <div className="col-md-6">
-                        <label htmlFor="fisrtname" className="form-label">Họ của bạn</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            id="fisrtname" 
-                            placeholder="Nhập họ của bạn"
-                            {...register("firstname")}
-                        />
-                        {errors.firstname && <div className="invalid-feedback d-block">{errors.firstname.message}</div>}
-                    </div>
-                    <div className="col-md-6">
-                        <label htmlFor="lastname" className="form-label">Tên của bạn</label>
-                        <input 
-                            type="text" 
-                            className="form-control" 
-                            id="lastname" 
-                            placeholder="Nhập tên của bạn"
-                            {...register("lastname")}
-                        />
-                        {errors.lastname && <div className="invalid-feedback d-block">{errors.lastname.message}</div>}
-                    </div>
-                </div>
-
+            <form id="registerForm" onSubmit={handleSubmit(onRegisterSubmit)} noValidate>
                 <div className="mb-3">
-                    <label htmlFor="username" className="form-label">Tên đăng nhập</label>
+                    <label htmlFor="fullName" className="form-label">Tên đăng nhập</label>
                     <input 
                         type="text" 
                         className="form-control" 
-                        id="username" 
-                        placeholder= "Nhập tên đăng nhập của bạn"
-                        {...register("username")}
+                        name="fullName"
+                        id="fullName" 
+                        placeholder= "Lê Văn A"
+                        {...register("fullName")}
                     />
-                    {errors.username && <div className="invalid-feedback d-block">{errors.username.message}</div>}
+                    {errors.fullName && <p className="error-message">{errors.fullName.message}</p>}
                 </div>
 
                 <div className="mb-3">
@@ -72,11 +65,12 @@ const RegisterPage = () => {
                     <input 
                         type="email" 
                         className="form-control" 
+                        name="email"
                         id="email" 
-                        placeholder="Wiinniee@gmail.com"
+                        placeholder="levana@gmail.com"
                         {...register("email")}
                     />
-                    {errors.email && <div className="invalid-feedback d-block">{errors.email.message}</div>}
+                    {errors.email && <p className="error-message">{errors.email.message}</p>}
                 </div>
                 
                 <div className="mb-3">
@@ -84,23 +78,27 @@ const RegisterPage = () => {
                     <input 
                         type="password" 
                         className="form-control" 
+                        name="password"
                         id="password" 
                         placeholder="Nhập mật khẩu"
                         {...register("password")}
                     />
-                    {errors.password && <div className="invalid-feedback d-block">{errors.password.message}</div>}
+                    {errors.password && <p className="error-message">{errors.password.message}</p>}
                 </div>
                 
                 <div className="d-flex justify-content-between align-items-center mb-1">
                     <div className="form-check">
-                        <input className="form-check-input" type="checkbox" id="remember"/>
-                        <label className="form-check-label" htmlFor="remember">
+                        <input className="form-check-input" type="checkbox" name="agree" id="agree" {...register("agree")}/>
+                        <label className="form-check-label" htmlFor="agree">
                             Tôi chấp nhận các điều khoản và điều kiện
                         </label>
+                        {errors.agree && <p className="error-message">{errors.agree.message}</p>}
                     </div>
                 </div>
                 
-                <button type="submit" className="btn btn-login" disabled={isSubmitting}>Đăng Ký</button>
+                <button type="submit" className="btn btn-login" disabled={isSubmitting}>
+                    {isSubmitting ? 'Đang đăng ký...' : 'Đăng Ký'}
+                </button>
                 
                 <Divider />
                 <GoogleLoginButton onClick={() => {}} />

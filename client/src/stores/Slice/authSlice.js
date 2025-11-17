@@ -1,6 +1,52 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/axiosConfig';
 
+// Thunk để login
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/account/login', credentials);
+      const token = response.data.accessToken;
+
+      // Lấy profile bằng access token
+      const profileRes = await api.get('/user/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return { token, user: profileRes.data };
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Lỗi khi đăng nhập');
+    }
+  }
+);
+
+// Thunk để đăng ký
+export const registerUser = createAsyncThunk(
+  'auth/registerUser',
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/account/register', payload);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Lỗi khi đăng ký');
+    }
+  }
+);
+
+// Thunk để logout
+export const logoutUser = createAsyncThunk(
+  'auth/logoutUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/account/logout');
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.error || 'Lỗi khi đăng xuất');
+    }
+  }
+);
+
 // Async thunk để verify token
 export const verifyToken = createAsyncThunk(
   'auth/verifyToken',
@@ -13,12 +59,11 @@ export const verifyToken = createAsyncThunk(
         return rejectWithValue('Không có token');
       }
 
-      const response = await api.get('/verify-token');
-      if (response.data.valid) {
-        return response.data.user;
-      } else {
-        return rejectWithValue('Token không hợp lệ');
-      }
+      const response = await api.get('/user/profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.error || 'Lỗi xác thực token');
     }
@@ -31,7 +76,7 @@ const authSlice = createSlice({
     user: null,
     token: null,
     isAuthenticated: false,
-    loading: true,
+    loading: false,
     error: null,
   },
   reducers: {
@@ -66,6 +111,56 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // loginUser
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
+      })
+
+      // registerUser
+      .addCase(registerUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // logoutUser
+      .addCase(logoutUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(logoutUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // verifyToken
       .addCase(verifyToken.pending, (state) => {
         state.loading = true;
         state.error = null;

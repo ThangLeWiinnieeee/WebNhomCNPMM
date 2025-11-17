@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const schema = new mongoose.Schema({
     userID: {
@@ -25,4 +25,4 @@ schema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const session = mongoose.model('Session', schema, "sessions");
 
-module.exports = session;
+export default session;

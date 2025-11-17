@@ -1,4 +1,4 @@
-const jwt = require('jsonwebtoken')
+import jwt from 'jsonwebtoken';
 const userModel = require('../models/user.model');
 
 // Middleware xác minh user là ai 

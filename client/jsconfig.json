@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    // === DÒNG QUAN TRỌNG ĐỂ FIX LỖI ===
+    "skipLibCheck": true,
+
+    // Các cài đặt này giúp VS Code hiểu React
+    "jsx": "react-jsx",
+    "baseUrl": "src"
+  },
+  "include": [
+    "src"
+  ]
+}
