@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5001/api', // URL backend của bạn
+  baseURL: import.meta.env.VITE_BACKEND_URL, // URL backend của bạn
   withCredentials: true, // Gửi cookie cùng với request
   headers: {
     'Content-Type': 'application/json',
@@ -15,14 +15,24 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
-    // Log request để debug (có thể bỏ trong production)
-    console.log('Request:', config.method.toUpperCase(), config.url);
-    
     return config;
   },
   (error) => {
     console.error('Request Error:', error);
+    return Promise.reject(error);
+  }
+);
+
+axiosInstance.interceptors.response.use(
+  (response) => {
+    // Log response để debug (có thể bỏ trong production)
+    if (response && response.data) {
+      return response.data;
+    }
+    return response;
+  },
+  (error) => {
+    console.error('Response Error:', error.response?.status, error.response?.config?.url);
     return Promise.reject(error);
   }
 );

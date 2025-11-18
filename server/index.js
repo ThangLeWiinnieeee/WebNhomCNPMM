@@ -10,7 +10,7 @@ const PORT = process.env.PORT;
 
 //Cấu hình CORS
 app.use(cors({
-    origin: "*",
+    origin: 'http://localhost:5173',
     credentials: true,
 }))
 
@@ -19,11 +19,14 @@ app.use(express.json());
 app.use(cookieParser());
 
 //Public Routes
-app.use('/',routes);
+app.use('/api',routes);
 
 // Kết nối database
 databaseConfig.connectDatabase().then(() => {
     app.listen(PORT, () => {
         console.log(`Server đang chạy tại http://localhost:${PORT}`);
+        console.log("Frontend: http://localhost:5173");
     });
+}).catch((error) => {
+    console.error("Lỗi kết nối database:", error);
 });
