@@ -9,7 +9,10 @@ const app = express();
 const PORT = process.env.PORT;
 
 //Cấu hình CORS
-app.use(cors({origin: "*"}))
+app.use(cors({
+    origin: "*",
+    credentials: true,
+}))
 
 // Middleware
 app.use(express.json());
