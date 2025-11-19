@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
-const userModel = require('../models/user.model');
+import userModel from '../models/user.model.js'
 
 // Middleware xác minh user là ai 
-module.exports.verifyToken = async (req, res, next) => {
+const verifyToken = async (req, res, next) => {
   try {
       // Lấy token từ header Authorization
       const authHeader = req.headers['authorization'];
@@ -12,9 +12,11 @@ module.exports.verifyToken = async (req, res, next) => {
         }
         // Xác minh token
         jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedUser) => {
-            if (err) {
-                console.error("Lỗi xác minh token",err);
-                return res.status(403).json({ error: 'Token không hợp lệ hoặc đã hết hạn' });
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).json({ error: 'Token đã hết hạn' });
+            }
+            if (err.name === 'JsonWebTokenError') {
+                return res.status(403).json({ error: 'Token không hợp lệ' });
             }
             // Lấy thông tin user từ database
             const user = await userModel.findById(decodedUser.userId).select('-password');
@@ -30,3 +32,5 @@ module.exports.verifyToken = async (req, res, next) => {
       return res.status(500).json({ error: 'Lỗi hệ thống' });
   }
 }
+
+export default verifyToken

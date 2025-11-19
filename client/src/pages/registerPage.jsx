@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +7,7 @@ import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
+import axios from "../api/axiosConfig.js";
 
 const registerSchema = z.object({
     fullName: z.string()
@@ -33,12 +34,15 @@ const registerSchema = z.object({
 });
 
 const RegisterPage = () => {
+    const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(registerSchema)
     });
 
     const onRegisterSubmit = async (data) => {
-        console.log("Đăng ký với dữ liệu:", data);
+        const response = await axios.post('/account/register', data);
+        navigate('/login')
+        console.log("Đăng ký với dữ liệu:", response);
     }
 
     return (

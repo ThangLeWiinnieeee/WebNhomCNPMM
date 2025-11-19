@@ -1,4 +1,4 @@
-import {Route, Routes } from 'react-router-dom';
+import { Route, Routes } from 'react-router-dom';
 import 'react-toastify/dist/ReactToastify.css';
 import LoginPage from "./pages/login";
 import RegisterPage from "./pages/registerPage";

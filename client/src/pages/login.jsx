@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,6 +7,7 @@ import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
+import axios from "../api/axiosConfig.js";
 
 const loginSchema = z.object({
     email: z.string()
@@ -23,13 +24,15 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
-
+    const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
 
     const onLoginSubmit = async (data) => {
-        console.log("Đăng nhập với dữ liệu:", data);
+        const response = await axios.post('/account/login', data)
+        navigate('/')
+        console.log("Đăng nhập với dữ liệu:", response);
     }
 
     return (

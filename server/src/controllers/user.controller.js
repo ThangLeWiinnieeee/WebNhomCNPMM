@@ -27,6 +27,7 @@ const registerPost = async (req, res) => {
             email: email,
             password: hashedPassword,
         });
+        console.log(req.body)
 
         res.status(201).json({ message: 'Đăng ký thành công' });
 
@@ -60,7 +61,7 @@ const loginPost = async (req, res) => {
 
         // Tạo access token với JWT
         const accessToken = jwt.sign(
-            { userId: user._id },
+            { userId: findEmail._id, email: findEmail.email },
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: '1h' }
         );
@@ -70,7 +71,7 @@ const loginPost = async (req, res) => {
 
         // Gửi refesh token cho database
         await sessionModel.create({
-            userID: user._id,
+            userID: findEmail._id,
             refreshToken: refreshToken,
             expiresAt: new Date(Date.now() + 15*24*60*60*1000) // 15 ngày
         });
