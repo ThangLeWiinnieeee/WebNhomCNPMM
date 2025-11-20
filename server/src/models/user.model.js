@@ -21,10 +21,6 @@ const schema = new mongoose.Schema({
   avatarID: {
     type: String
   },
-  bio: { 
-    type: String,
-    maxLength: 500
-  },
   phone: { 
     type: String,
     sparse: true //Cho phép trường này có thể null nhưng vẫn giữ tính unique

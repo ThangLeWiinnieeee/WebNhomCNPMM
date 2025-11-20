@@ -19,7 +19,7 @@ const otpPasswordPage = () => {
     });
     
     const onOTPPasswordSubmit = async (data) => {
-        console.log("Đăng nhập với dữ liệu:", data);
+        // TODO: Implement OTP verification logic
     }
 
     return (

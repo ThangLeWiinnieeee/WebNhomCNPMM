@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 //Public Routes
-app.use('/api', routes);
+app.use('/', routes);
 
 // Kết nối database
 databaseConfig.connectDatabase().then(() => {

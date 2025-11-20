@@ -20,7 +20,7 @@ const ForgotPasswordPage = () => {
     });
     
     const onForgotPasswordSubmit = async (data) => {
-        console.log("Đăng nhập với dữ liệu:", data);
+        // TODO: Implement forgot password logic
     }
 
     return (

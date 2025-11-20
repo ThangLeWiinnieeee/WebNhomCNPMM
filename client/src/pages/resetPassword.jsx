@@ -30,7 +30,7 @@ const ResetPasswordPage = () => {
     });
 
     const onResetPasswordSubmit = async (data) => {
-        console.log("Đăng nhập với dữ liệu:", data);
+        // TODO: Implement reset password logic
     }
 
     return (

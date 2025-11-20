@@ -3,11 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../stores/Slice/authSlice';
+import { toast } from 'sonner';
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
-import "../assets/css/authForm.css"
-import axios from "../api/axiosConfig.js";
+import "../assets/css/authForm.css";
 
 const registerSchema = z.object({
     fullName: z.string()
@@ -35,14 +37,21 @@ const registerSchema = z.object({
 
 const RegisterPage = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { loading, error } = useSelector((state) => state.auth);
+    
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(registerSchema)
     });
 
     const onRegisterSubmit = async (data) => {
-        const response = await axios.post('/account/register', data);
-        navigate('/login')
-        console.log("Đăng ký với dữ liệu:", response);
+        try {
+            await dispatch(registerUser(data)).unwrap();
+            toast.success("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
+            navigate('/login');
+        } catch (error) {
+            toast.error(error || "Đăng ký thất bại!");
+        }
     }
 
     return (
@@ -100,8 +109,8 @@ const RegisterPage = () => {
                     </div>
                 </div>
                 
-                <button type="submit" className="btn btn-login" disabled={isSubmitting}>
-                    {isSubmitting ? 'Đang đăng ký...' : 'Đăng Ký'}
+                <button type="submit" className="btn btn-login" disabled={isSubmitting || loading}>
+                    {(isSubmitting || loading) ? 'Đang đăng ký...' : 'Đăng Ký'}
                 </button>
                 
                 <Divider />

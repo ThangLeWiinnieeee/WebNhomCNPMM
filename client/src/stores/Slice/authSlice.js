@@ -7,16 +7,38 @@ export const loginUser = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/login', credentials);
-      const token = response.data.accessToken;
+      
+      // Kiểm tra response structure
+      if (response.code === "error") {
+        return rejectWithValue(response.message || 'Đăng nhập thất bại');
+      }
 
-      // Lấy profile bằng access token
-      const profileRes = await api.get('/user/profile', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // Lưu token vào localStorage
+      const token = response.data?.accessToken || response.accessToken;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
 
-      return { token, user: profileRes.data };
+      // Lấy thông tin user từ response hoặc từ API
+      let userData = response.data?.user || response.user;
+      
+      // Nếu không có user data trong response, gọi API profile
+      if (!userData && token) {
+        try {
+          const profileRes = await api.get('/user/profile', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          userData = profileRes.data || profileRes;
+        } catch (profileError) {
+          // Sử dụng email từ credentials nếu không lấy được profile
+          userData = { email: credentials.email };
+        }
+      }
+
+      return { token, user: userData };
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Lỗi khi đăng nhập');
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi đăng nhập';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -27,9 +49,16 @@ export const registerUser = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/register', payload);
-      return response.data;
+      
+      // Kiểm tra response
+      if (response.code === "error") {
+        return rejectWithValue(response.message || 'Đăng ký thất bại');
+      }
+      
+      return response.data || response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Lỗi khi đăng ký');
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi đăng ký';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -39,21 +68,32 @@ export const logoutUser = createAsyncThunk(
   'auth/logoutUser',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.post('/account/logout');
-      return response.data;
+      // Gọi API logout
+      await api.post('/account/logout');
+      
+      // Xóa token khỏi localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      return true;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Lỗi khi đăng xuất');
+      // Dù có lỗi vẫn xóa token local
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      const errorMessage = error?.message || 'Lỗi khi đăng xuất';
+      return rejectWithValue(errorMessage);
     }
   }
 );
 
-// Async thunk để verify token
+// Thunk để verify token
 export const verifyToken = createAsyncThunk(
   'auth/verifyToken',
   async (_, { rejectWithValue, getState }) => {
     try {
       const state = getState();
-      const token = state.auth.token;
+      const token = state.auth.token || localStorage.getItem('token');
       
       if (!token) {
         return rejectWithValue('Không có token');
@@ -63,9 +103,42 @@ export const verifyToken = createAsyncThunk(
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      return response.data;
+      return response.data || response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.error || 'Lỗi xác thực token');
+      // Xóa token nếu không hợp lệ
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      const errorMessage = error?.message || 'Token không hợp lệ';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk để cập nhật thông tin user
+export const updateUserProfile = createAsyncThunk(
+  'auth/updateUserProfile',
+  async (userData, { rejectWithValue }) => {
+    try {
+      const response = await api.put('/user/profile', userData);
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || 'Lỗi khi cập nhật thông tin';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk để đổi mật khẩu
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/user/change-password', passwordData);
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || 'Lỗi khi đổi mật khẩu';
+      return rejectWithValue(errorMessage);
     }
   }
 );
@@ -80,38 +153,57 @@ const authSlice = createSlice({
     error: null,
   },
   reducers: {
-    login: (state, action) => {
+    // Set credentials manually (for Google login, etc.)
+    setCredentials: (state, action) => {
       const { token, user } = action.payload;
       state.token = token;
       state.user = user;
       state.isAuthenticated = true;
-      state.loading = false;
       state.error = null;
+      
+      // Lưu vào localStorage
+      if (token) localStorage.setItem('token', token);
+      if (user) localStorage.setItem('user', JSON.stringify(user));
     },
-    logout: (state) => {
+    
+    // Logout manual
+    clearCredentials: (state) => {
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      state.loading = false;
       state.error = null;
+      
+      // Xóa localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
+    
+    // Set loading state
     setLoading: (state, action) => {
       state.loading = action.payload;
     },
+    
+    // Set error
     setError: (state, action) => {
       state.error = action.payload;
       state.loading = false;
     },
+    
+    // Clear error
     clearError: (state) => {
       state.error = null;
     },
+    
+    // Update user info
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
+      // Cập nhật localStorage
+      localStorage.setItem('user', JSON.stringify(state.user));
     },
   },
   extraReducers: (builder) => {
     builder
-      // loginUser
+      // ============ LOGIN USER ============
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -122,19 +214,24 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.loading = false;
         state.error = null;
+        
+        // Lưu vào localStorage
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
       })
 
-      // registerUser
+      // ============ REGISTER USER ============
       .addCase(registerUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(registerUser.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
       })
@@ -143,10 +240,9 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
-      // logoutUser
+      // ============ LOGOUT USER ============
       .addCase(logoutUser.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
@@ -155,15 +251,17 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
-      .addCase(logoutUser.rejected, (state, action) => {
+      .addCase(logoutUser.rejected, (state) => {
+        // Vẫn logout dù có lỗi
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
         state.loading = false;
-        state.error = action.payload;
       })
 
-      // verifyToken
+      // ============ VERIFY TOKEN ============
       .addCase(verifyToken.pending, (state) => {
         state.loading = true;
-        state.error = null;
       })
       .addCase(verifyToken.fulfilled, (state, action) => {
         state.user = action.payload;
@@ -171,15 +269,54 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
       })
-      .addCase(verifyToken.rejected, (state, action) => {
+      .addCase(verifyToken.rejected, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
+        state.loading = false;
+      })
+
+      // ============ UPDATE USER PROFILE ============
+      .addCase(updateUserProfile.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.user = { ...state.user, ...action.payload };
+        state.loading = false;
+        state.error = null;
+        
+        // Cập nhật localStorage
+        localStorage.setItem('user', JSON.stringify(state.user));
+      })
+      .addCase(updateUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ============ CHANGE PASSWORD ============
+      .addCase(changePassword.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(changePassword.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(changePassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
   },
 });
 
-export const { login, logout, setLoading, setError, clearError, updateUser } = authSlice.actions;
+export const { 
+  setCredentials, 
+  clearCredentials, 
+  setLoading, 
+  setError, 
+  clearError, 
+  updateUser 
+} = authSlice.actions;
+
 export default authSlice.reducer;

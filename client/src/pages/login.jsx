@@ -1,13 +1,15 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../stores/Slice/authSlice';
+import { toast } from 'sonner';
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
-import "../assets/css/authForm.css"
-import axios from "../api/axiosConfig.js";
+import "../assets/css/authForm.css";
 
 const loginSchema = z.object({
     email: z.string()
@@ -25,14 +27,35 @@ const loginSchema = z.object({
 
 const LoginPage = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const { loading, error } = useSelector((state) => state.auth);
+    
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
 
     const onLoginSubmit = async (data) => {
-        const response = await axios.post('/account/login', data)
-        navigate('/')
-        console.log("Đăng nhập với dữ liệu:", response);
+        try {
+            const result = await dispatch(loginUser(data)).unwrap();
+            
+            toast.success("Đăng nhập thành công!");
+            
+            // Kiểm tra role và điều hướng
+            const userRole = result.user?.role || result.user?.role_id;
+            
+            if (userRole === 'user' || userRole === 'member' || userRole === 'customer') {
+                // User thường -> Trang chủ
+                navigate('/', { replace: true });
+            } else if (userRole === 'admin' || userRole === 'administrator') {
+                // Admin -> Dashboard
+                navigate('/admin/dashboard', { replace: true });
+            } else {
+                // Mặc định về trang chủ
+                navigate('/', { replace: true });
+            }
+        } catch (error) {
+            toast.error(error || "Đăng nhập thất bại!");
+        }
     }
 
     return (
@@ -77,8 +100,8 @@ const LoginPage = () => {
                     <Link to={'/forgot-password'} className="forgot-password">Quên Mật Khẩu?</Link>
                 </div>
                 
-                <button type="submit" className="btn btn-login" disabled={isSubmitting}>
-                    {isSubmitting ? 'Đang đăng nhập...' : 'Đăng Nhập'}
+                <button type="submit" className="btn btn-login" disabled={isSubmitting || loading}>
+                    {(isSubmitting || loading) ? 'Đang đăng nhập...' : 'Đăng Nhập'}
                 </button>
                 
                 <Divider />
