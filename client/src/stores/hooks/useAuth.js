@@ -1,12 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { registerUser, loginUser, logoutUser, verifyToken } from '../thunks/authThunks';
+import { updateUserProfile, changePassword } from '../thunks/userThunks';
 import { 
-  loginUser, 
-  registerUser, 
-  logoutUser, 
-  verifyToken,
-  updateUserProfile,
-  changePassword,
   setCredentials,
   clearCredentials,
   clearError 
@@ -14,8 +10,6 @@ import {
 
 /**
  * Custom hook để quản lý authentication
- * Sử dụng với sooner/toast cho notifications
- * @returns {Object} Auth state và functions
  */
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -55,7 +49,6 @@ export const useAuth = () => {
 
   /**
    * Đăng xuất
-   * @returns {Promise}
    */
   const logout = async () => {
     try {
@@ -69,7 +62,6 @@ export const useAuth = () => {
 
   /**
    * Xác thực token hiện tại
-   * @returns {Promise}
    */
   const verify = async () => {
     try {
@@ -83,7 +75,6 @@ export const useAuth = () => {
   /**
    * Cập nhật thông tin user
    * @param {Object} userData - Thông tin cần cập nhật
-   * @returns {Promise}
    */
   const updateProfile = async (userData) => {
     try {
@@ -97,7 +88,6 @@ export const useAuth = () => {
   /**
    * Đổi mật khẩu
    * @param {Object} passwordData - {oldPassword, newPassword}
-   * @returns {Promise}
    */
   const updatePassword = async (passwordData) => {
     try {
@@ -133,7 +123,6 @@ export const useAuth = () => {
   /**
    * Kiểm tra quyền user (có thể mở rộng)
    * @param {String} role - Role cần kiểm tra
-   * @returns {Boolean}
    */
   const hasRole = (role) => {
     if (!user || !user.role) return false;

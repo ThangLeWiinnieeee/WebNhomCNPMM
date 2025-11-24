@@ -23,7 +23,7 @@ createRoot(document.getElementById('root')).render(
             position="top-right" 
             richColors 
             expand={true}
-            duration={3000}
+            duration={1000}
           />
         </BrowserRouter>
       </PersistGate>

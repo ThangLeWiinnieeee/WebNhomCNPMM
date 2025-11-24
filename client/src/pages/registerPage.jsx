@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector } from 'react-redux';
-import { registerUser } from '../stores/Slice/authSlice';
+import { useAuth } from '../stores/hooks/useAuth';
 import { toast } from 'sonner';
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
@@ -37,20 +36,20 @@ const registerSchema = z.object({
 
 const RegisterPage = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { loading, error } = useSelector((state) => state.auth);
+    const { register: registerAuth, loading } = useAuth();
     
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(registerSchema)
     });
 
     const onRegisterSubmit = async (data) => {
-        try {
-            await dispatch(registerUser(data)).unwrap();
+        const result = await registerAuth(data);
+        
+        if (result.success) {
             toast.success("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
             navigate('/login');
-        } catch (error) {
-            toast.error(error || "Đăng ký thất bại!");
+        } else {
+            toast.error(result.error || "Đăng ký thất bại!");
         }
     }
 

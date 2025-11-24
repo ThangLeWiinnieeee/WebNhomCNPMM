@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../stores/hooks';
+import { useAuth } from '../../stores/hooks/useAuth';
 
 /**
  * Component bảo vệ route - yêu cầu đăng nhập

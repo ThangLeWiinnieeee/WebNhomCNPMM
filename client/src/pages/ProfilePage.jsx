@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../stores/hooks';
+import { useAuth } from '../stores/hooks/useAuth';
 import { toast } from 'sonner';
 import Header from '../components/Header/Header';
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
+import Footer from '../components/Footer/Footer';
 import '../assets/css/homePage.css';
 
 const HomePage = () => {
@@ -42,7 +43,6 @@ const HomePage = () => {
                         <div className="col-lg-4 col-md-6">
                             <div className="card h-100 border-0 shadow-sm service-card">
                                 <div className="card-body text-center p-4">
-                                    <div className="service-icon fs-1 mb-3">🎭</div>
                                     <h3 className="h5 fw-bold mb-3">Tổ chức tiệc cưới</h3>
                                     <p className="text-muted">
                                         Lên kế hoạch và tổ chức tiệc cưới hoàn hảo theo phong cách của bạn
@@ -54,7 +54,6 @@ const HomePage = () => {
                         <div className="col-lg-4 col-md-6">
                             <div className="card h-100 border-0 shadow-sm service-card">
                                 <div className="card-body text-center p-4">
-                                    <div className="service-icon fs-1 mb-3">📸</div>
                                     <h3 className="h5 fw-bold mb-3">Chụp ảnh cưới</h3>
                                     <p className="text-muted">
                                         Lưu giữ những khoảnh khắc đẹp nhất của ngày trọng đại
@@ -66,7 +65,6 @@ const HomePage = () => {
                         <div className="col-lg-4 col-md-6">
                             <div className="card h-100 border-0 shadow-sm service-card">
                                 <div className="card-body text-center p-4">
-                                    <div className="service-icon fs-1 mb-3">💐</div>
                                     <h3 className="h5 fw-bold mb-3">Trang trí hoa</h3>
                                     <p className="text-muted">
                                         Thiết kế và trang trí hoa tươi sang trọng, độc đáo
@@ -78,7 +76,6 @@ const HomePage = () => {
                         <div className="col-lg-4 col-md-6">
                             <div className="card h-100 border-0 shadow-sm service-card">
                                 <div className="card-body text-center p-4">
-                                    <div className="service-icon fs-1 mb-3">🎵</div>
                                     <h3 className="h5 fw-bold mb-3">Âm thanh - Ánh sáng</h3>
                                     <p className="text-muted">
                                         Hệ thống âm thanh, ánh sáng chuyên nghiệp, hiện đại
@@ -90,7 +87,6 @@ const HomePage = () => {
                         <div className="col-lg-4 col-md-6">
                             <div className="card h-100 border-0 shadow-sm service-card">
                                 <div className="card-body text-center p-4">
-                                    <div className="service-icon fs-1 mb-3">🍰</div>
                                     <h3 className="h5 fw-bold mb-3">Bánh cưới</h3>
                                     <p className="text-muted">
                                         Bánh cưới độc quyền với thiết kế sang trọng và tinh tế
@@ -102,7 +98,6 @@ const HomePage = () => {
                         <div className="col-lg-4 col-md-6">
                             <div className="card h-100 border-0 shadow-sm service-card">
                                 <div className="card-body text-center p-4">
-                                    <div className="service-icon fs-1 mb-3">👗</div>
                                     <h3 className="h5 fw-bold mb-3">Trang phục cưới</h3>
                                     <p className="text-muted">
                                         Cho thuê và thiết kế trang phục cưới cao cấp
@@ -173,39 +168,7 @@ const HomePage = () => {
             </section>
 
             {/* Footer */}
-            <footer className="bg-dark text-white py-5">
-                <div className="container">
-                    <div className="row g-4 py-4">
-                        <div className="col-lg-4">
-                            <h3 className="h5 fw-bold mb-3">Wedding Dream</h3>
-                            <p className="text-white-50">
-                                Biến giấc mơ đám cưới của bạn thành hiện thực với dịch vụ chuyên nghiệp và tận tâm.
-                            </p>
-                        </div>
-                        <div className="col-lg-4">
-                            <h4 className="h6 fw-bold mb-3">Liên kết nhanh</h4>
-                            <ul className="list-unstyled">
-                                <li className="mb-2"><Link to="/" className="text-white-50 text-decoration-none">Trang chủ</Link></li>
-                                <li className="mb-2"><Link to="/services" className="text-white-50 text-decoration-none">Dịch vụ</Link></li>
-                                <li className="mb-2"><Link to="/gallery" className="text-white-50 text-decoration-none">Gallery</Link></li>
-                                <li className="mb-2"><Link to="/about" className="text-white-50 text-decoration-none">Về chúng tôi</Link></li>
-                            </ul>
-                        </div>
-                        <div className="col-lg-4">
-                            <h4 className="h6 fw-bold mb-3">Liên hệ</h4>
-                            <ul className="list-unstyled text-white-50">
-                                <li className="mb-2">📞 Hotline: 1900-xxxx</li>
-                                <li className="mb-2">✉️ Email: info@weddingdream.vn</li>
-                                <li className="mb-2">📍 Địa chỉ: TP. Hồ Chí Minh</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <hr className="my-4 border-secondary" />
-                    <div className="text-center text-white-50">
-                        <p className="mb-0">&copy; 2025 Wedding Dream. All rights reserved.</p>
-                    </div>
-                </div>
-            </footer>
+            <Footer />
         </div>
     );
 };

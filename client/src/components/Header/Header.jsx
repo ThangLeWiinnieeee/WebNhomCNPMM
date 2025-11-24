@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../stores/hooks';
+import { useAuth } from '../../stores/hooks/useAuth';
 import { toast } from 'sonner';
 import './Header.css';
 

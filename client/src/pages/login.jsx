@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../stores/Slice/authSlice';
+import { useAuth } from '../stores/hooks/useAuth';
 import { toast } from 'sonner';
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
@@ -27,21 +26,20 @@ const loginSchema = z.object({
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { loading, error } = useSelector((state) => state.auth);
+    const { login, loading } = useAuth();
     
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
 
     const onLoginSubmit = async (data) => {
-        try {
-            const result = await dispatch(loginUser(data)).unwrap();
-            
+        const result = await login(data);
+        
+        if (result.success) {
             toast.success("Đăng nhập thành công!");
             
             // Kiểm tra role và điều hướng
-            const userRole = result.user?.role || result.user?.role_id;
+            const userRole = result.data?.user?.role || result.data?.user?.role_id;
             
             if (userRole === 'user' || userRole === 'member' || userRole === 'customer') {
                 // User thường -> Trang chủ
@@ -53,8 +51,8 @@ const LoginPage = () => {
                 // Mặc định về trang chủ
                 navigate('/', { replace: true });
             }
-        } catch (error) {
-            toast.error(error || "Đăng nhập thất bại!");
+        } else {
+            toast.error(result.error || "Đăng nhập thất bại!");
         }
     }
 
