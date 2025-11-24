@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useAuth } from '../stores/hooks/useAuth';
 import { zodResolver } from "@hookform/resolvers/zod";
 import Divider from "../components/Divider/divider.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
@@ -14,13 +15,14 @@ const loginSchema = z.object({
 });
 
 const ForgotPasswordPage = () => {
+    const { forgotPassword, loading } = useAuth();
 
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
     
     const onForgotPasswordSubmit = async (data) => {
-        // TODO: Implement forgot password logic
+        console.log(data);
     }
 
     return (
@@ -42,8 +44,8 @@ const ForgotPasswordPage = () => {
                     {errors.email && <p className="error-message">{errors.email.message}</p>}
                 </div>
                 
-                <button type="submit" className="btn btn-login" disabled={isSubmitting}>
-                    {isSubmitting ? 'Đang gửi mã OTP...' : 'Gửi mã OTP'}
+                <button type="submit" className="btn btn-login" disabled={isSubmitting || loading}>
+                    {isSubmitting || loading ? 'Đang gửi mã OTP...' : 'Gửi mã OTP'}
                 </button>
                 
                 <Divider />

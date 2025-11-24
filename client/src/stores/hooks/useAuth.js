@@ -1,7 +1,7 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { registerUser, loginUser, logoutUser, verifyToken } from '../thunks/authThunks';
-import { updateUserProfile, changePassword } from '../thunks/userThunks';
+import { registerUserThunk, loginUserThunk, logoutUserThunk, verifyTokenThunk, forgotPasswordThunk } from '../thunks/authThunks';
+import { updateUserProfileThunk } from '../thunks/userThunks';
 import { 
   setCredentials,
   clearCredentials,
@@ -26,7 +26,7 @@ export const useAuth = () => {
    */
   const login = async (credentials) => {
     try {
-      const result = await dispatch(loginUser(credentials)).unwrap();
+      const result = await dispatch(loginUserThunk(credentials)).unwrap();
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error };
@@ -40,7 +40,7 @@ export const useAuth = () => {
    */
   const register = async (userData) => {
     try {
-      const result = await dispatch(registerUser(userData)).unwrap();
+      const result = await dispatch(registerUserThunk(userData)).unwrap();
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error };
@@ -52,7 +52,7 @@ export const useAuth = () => {
    */
   const logout = async () => {
     try {
-      await dispatch(logoutUser()).unwrap();
+      await dispatch(logoutUserThunk()).unwrap();
       return { success: true };
     } catch (error) {
       // Vẫn trả về success true vì đã xóa token local
@@ -65,7 +65,7 @@ export const useAuth = () => {
    */
   const verify = async () => {
     try {
-      const result = await dispatch(verifyToken()).unwrap();
+      const result = await dispatch(verifyTokenThunk()).unwrap();
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error };
@@ -78,20 +78,16 @@ export const useAuth = () => {
    */
   const updateProfile = async (userData) => {
     try {
-      const result = await dispatch(updateUserProfile(userData)).unwrap();
+      const result = await dispatch(updateUserProfileThunk(userData)).unwrap();
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error };
     }
   };
 
-  /**
-   * Đổi mật khẩu
-   * @param {Object} passwordData - {oldPassword, newPassword}
-   */
-  const updatePassword = async (passwordData) => {
+  const forgotPassword = async (emailData) => {
     try {
-      const result = await dispatch(changePassword(passwordData)).unwrap();
+      const result = await dispatch(forgotPasswordThunk(emailData)).unwrap();
       return { success: true, data: result };
     } catch (error) {
       return { success: false, error };
@@ -153,7 +149,7 @@ export const useAuth = () => {
     logout,
     verify,
     updateProfile,
-    updatePassword,
+    forgotPassword,
     setAuth,
     clearAuth,
     clearAuthError,

@@ -3,7 +3,11 @@ import jwt from 'jsonwebtoken';
 import cookie from 'cookie-parser';
 import userModel from '../models/user.model.js';
 import sessionModel from '../models/session.model.js';
+import forgotPasswordModel from '../models/forgot-password.model.js';
 import crypto from 'crypto';
+import user from '../models/user.model.js';
+import randomNumber from '../helpers/generate.helper.js';
+import sendMail from '../helpers/mail.helper.js';
 
 const registerPost = async (req, res) => {
     try {
@@ -132,6 +136,56 @@ const loginPost = async (req, res) => {
     }
 }
 
+const forgotPasswordPost = async (req, res) => {
+    try {
+        const { email } = req.body;
+        console.log(email);
+        const existEmail = await userModel.findOne({ email: email });
+        if (!existEmail) {
+            return res.status(404).json({ 
+                code: 'error',
+                message: 'Email không tồn tại trong hệ thống' 
+            });
+        }
+
+        const existEmailInForgotPassword = await forgotPasswordModel.findOne({ email: email });
+        if (existEmailInForgotPassword) {
+            return res.status(409).json({
+                code: 'error',
+                message: 'Vui lòng gửi yêu cầu sau 5 phút!'
+            })
+        }
+
+        //Tạo mã OTP
+        const otp = randomNumber(6);
+
+        //Lưu mã OTP vào cơ sở dữ liệu
+        await forgotPasswordModel.create({
+            email: email,
+            otp: otp,
+            expiresAt: new Date(Date.now() + 5*60*1000) // 5 phút
+        });
+
+        //Gửi mã OTP qua email
+        const title = `Mã OTP để lấy mật khẩu`
+        const content = `Mã OTP của bạn là <b style="font-size: 20px;">${otp}</b>. 
+        Mã của bạn có hiệu lực trong 5 phút, vui lòng không cung cấp cho bất kỳ ai. `
+        mailHelper.sendMail(email, title, content);
+        
+        res.json({
+            code: "SUCCESS",
+            message: "Đã gửi mã OTP qua email!"
+        })
+
+    } catch (error) {
+        console.error("Lỗi khi gửi mã OTP", error);
+        return res.status(500).json({ 
+            code: 'error',
+            message: 'Lỗi máy chủ'
+        });
+    }
+}
+
 const logoutPost = async (req, res) => {
     try {
         // Lấy refresh token từ cookie
@@ -159,4 +213,4 @@ const logoutPost = async (req, res) => {
     }
 }
 
-export default { registerPost, loginPost, logoutPost };
+export default { registerPost, loginPost, forgotPasswordPost , logoutPost };

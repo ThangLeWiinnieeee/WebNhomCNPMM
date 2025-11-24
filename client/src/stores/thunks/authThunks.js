@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api/axiosConfig';
 
 // Thunk để đăng ký
-export const registerUser = createAsyncThunk(
+export const registerUserThunk = createAsyncThunk(
   'auth/registerUser',
   async (payload, { rejectWithValue }) => {
     try {
@@ -22,7 +22,7 @@ export const registerUser = createAsyncThunk(
 );
 
 // Thunk để đăng nhập
-export const loginUser = createAsyncThunk(
+export const loginUserThunk = createAsyncThunk(
   'auth/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
@@ -64,7 +64,7 @@ export const loginUser = createAsyncThunk(
 );
 
 // Thunk để đăng xuất
-export const logoutUser = createAsyncThunk(
+export const logoutUserThunk = createAsyncThunk(
   'auth/logoutUser',
   async (_, { rejectWithValue }) => {
     try {
@@ -88,7 +88,7 @@ export const logoutUser = createAsyncThunk(
 );
 
 // Thunk để verify token
-export const verifyToken = createAsyncThunk(
+export const verifyTokenThunk = createAsyncThunk(
   'auth/verifyToken',
   async (_, { rejectWithValue, getState }) => {
     try {
@@ -110,6 +110,20 @@ export const verifyToken = createAsyncThunk(
       localStorage.removeItem('user');
       
       const errorMessage = error?.message || 'Token không hợp lệ';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk để đổi mật khẩu
+export const forgotPasswordThunk = createAsyncThunk(
+  'user/forgotPassword',
+  async (emailData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/user/forgot-password', emailData);
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || 'Lỗi khi gửi otp đến email';
       return rejectWithValue(errorMessage);
     }
   }

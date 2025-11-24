@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { registerUser, loginUser, logoutUser, verifyToken } from '../thunks/authThunks';
-import { updateUserProfile, changePassword } from '../thunks/userThunks';
+import { registerUserThunk, loginUserThunk, logoutUserThunk, verifyTokenThunk, forgotPasswordThunk } from '../thunks/authThunks';
+import { updateUserProfileThunk } from '../thunks/userThunks';
 
 const authSlice = createSlice({
   name: 'auth',
@@ -63,11 +63,11 @@ const authSlice = createSlice({
   extraReducers: (builder) => {
     builder
       // ============ LOGIN USER ============
-      .addCase(loginUser.pending, (state) => {
+      .addCase(loginUserThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(loginUserThunk.fulfilled, (state, action) => {
         state.token = action.payload.token;
         state.user = action.payload.user;
         state.isAuthenticated = true;
@@ -77,7 +77,7 @@ const authSlice = createSlice({
         // Lưu vào localStorage
         localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(loginUserThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.isAuthenticated = false;
@@ -86,31 +86,31 @@ const authSlice = createSlice({
       })
 
       // ============ REGISTER USER ============
-      .addCase(registerUser.pending, (state) => {
+      .addCase(registerUserThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state) => {
+      .addCase(registerUserThunk.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(registerUserThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
       // ============ LOGOUT USER ============
-      .addCase(logoutUser.pending, (state) => {
+      .addCase(logoutUserThunk.pending, (state) => {
         state.loading = true;
       })
-      .addCase(logoutUser.fulfilled, (state) => {
+      .addCase(logoutUserThunk.fulfilled, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
         state.loading = false;
         state.error = null;
       })
-      .addCase(logoutUser.rejected, (state) => {
+      .addCase(logoutUserThunk.rejected, (state) => {
         // Vẫn logout dù có lỗi
         state.user = null;
         state.token = null;
@@ -119,16 +119,16 @@ const authSlice = createSlice({
       })
 
       // ============ VERIFY TOKEN ============
-      .addCase(verifyToken.pending, (state) => {
+      .addCase(verifyTokenThunk.pending, (state) => {
         state.loading = true;
       })
-      .addCase(verifyToken.fulfilled, (state, action) => {
+      .addCase(verifyTokenThunk.fulfilled, (state, action) => {
         state.user = action.payload;
         state.isAuthenticated = true;
         state.loading = false;
         state.error = null;
       })
-      .addCase(verifyToken.rejected, (state) => {
+      .addCase(verifyTokenThunk.rejected, (state) => {
         state.user = null;
         state.token = null;
         state.isAuthenticated = false;
@@ -136,11 +136,11 @@ const authSlice = createSlice({
       })
 
       // ============ UPDATE USER PROFILE ============
-      .addCase(updateUserProfile.pending, (state) => {
+      .addCase(updateUserProfileThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(updateUserProfile.fulfilled, (state, action) => {
+      .addCase(updateUserProfileThunk.fulfilled, (state, action) => {
         state.user = { ...state.user, ...action.payload };
         state.loading = false;
         state.error = null;
@@ -148,21 +148,21 @@ const authSlice = createSlice({
         // Cập nhật localStorage
         localStorage.setItem('user', JSON.stringify(state.user));
       })
-      .addCase(updateUserProfile.rejected, (state, action) => {
+      .addCase(updateUserProfileThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // ============ CHANGE PASSWORD ============
-      .addCase(changePassword.pending, (state) => {
+      // ============ FORGOT PASSWORD ============
+      .addCase(forgotPasswordThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(changePassword.fulfilled, (state) => {
+      .addCase(forgotPasswordThunk.fulfilled, (state) => {
         state.loading = false;
         state.error = null;
       })
-      .addCase(changePassword.rejected, (state, action) => {
+      .addCase(forgotPasswordThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
