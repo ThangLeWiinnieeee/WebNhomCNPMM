@@ -5,9 +5,8 @@ import userModel from '../models/user.model.js';
 import sessionModel from '../models/session.model.js';
 import forgotPasswordModel from '../models/forgot-password.model.js';
 import crypto from 'crypto';
-import user from '../models/user.model.js';
-import randomNumber from '../helpers/generate.helper.js';
-import sendMail from '../helpers/mail.helper.js';
+import {generateRandomNumber} from '../helpers/generate.helper.js';
+import {sendMail} from '../helpers/mail.helper.js';
 
 const registerPost = async (req, res) => {
     try {
@@ -157,7 +156,7 @@ const forgotPasswordPost = async (req, res) => {
         }
 
         //Tạo mã OTP
-        const otp = randomNumber(6);
+        const otp = generateRandomNumber(6);
 
         //Lưu mã OTP vào cơ sở dữ liệu
         await forgotPasswordModel.create({
@@ -167,18 +166,71 @@ const forgotPasswordPost = async (req, res) => {
         });
 
         //Gửi mã OTP qua email
-        const title = `Mã OTP để lấy mật khẩu`
+        const title = `Mã OTP để đổi lấy mật khẩu`
         const content = `Mã OTP của bạn là <b style="font-size: 20px;">${otp}</b>. 
         Mã của bạn có hiệu lực trong 5 phút, vui lòng không cung cấp cho bất kỳ ai. `
-        mailHelper.sendMail(email, title, content);
+        sendMail(email, title, content);
         
         res.json({
-            code: "SUCCESS",
+            code: "success",
             message: "Đã gửi mã OTP qua email!"
         })
 
     } catch (error) {
         console.error("Lỗi khi gửi mã OTP", error);
+        return res.status(500).json({ 
+            code: 'error',
+            message: 'Lỗi máy chủ'
+        });
+    }
+}
+
+const otpPasswordPost = async (req, res) => {
+    try {
+        const { otp, email } = req.body;
+        const existEmail = await forgotPasswordModel.findOne({ email: email });
+        if (!existEmail) {
+            return res.status(404).json({ 
+                code: 'error',
+                message: 'Email không tồn tại trong hệ thống' 
+            });
+        }
+
+        const validOtp = await forgotPasswordModel.findOne({ email: email, otp: otp });
+        if (!validOtp) {
+            return res.status(401).json({ 
+                code: 'error',
+                message: 'Mã OTP không đúng' 
+            });
+        }
+        //Tao token để đổi mật khẩu
+        const accessToken = jwt.sign(
+            { userId: existEmail._id, email: existEmail.email },
+            process.env.ACCESS_TOKEN_SECRET,
+            { expiresIn: '1h' }
+        );
+        
+        return res.status(200).json({
+            code: "success",
+            message: "Xác thực OTP thành công!",
+            accessToken: accessToken
+        });
+
+    } catch (error) {
+        console.error("Lỗi khi gửi mã otp password post", error);
+        return res.status(500).json({ 
+            code: 'error',
+            message: 'Lỗi máy chủ'
+        });
+    }
+}
+
+const resetPasswordPost = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        console.log(email, password)
+    } catch (error) {
+        console.error("Lỗi khi gửi mã reset password post", error);
         return res.status(500).json({ 
             code: 'error',
             message: 'Lỗi máy chủ'
@@ -213,4 +265,4 @@ const logoutPost = async (req, res) => {
     }
 }
 
-export default { registerPost, loginPost, forgotPasswordPost , logoutPost };
+export default { registerPost, loginPost, forgotPasswordPost , otpPasswordPost, resetPasswordPost, logoutPost };

@@ -29,3 +29,21 @@ export const updateUserProfileThunk = createAsyncThunk(
   }
 );
 
+// Thunk để đổi mật khẩu (khi đã đăng nhập)
+export const changePasswordThunk = createAsyncThunk(
+  'auth/changePassword',
+  async (passwordData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/account/change-password', passwordData);
+      
+      if (response.code === "error") {
+        return rejectWithValue(response.message || 'Đổi mật khẩu thất bại');
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi đổi mật khẩu';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);

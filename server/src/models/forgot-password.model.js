@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const schema = new mongoose.Schema({
     email: String,
     otp: String,
-    expireAt: { //Thời gian hết hạn
+    expiresAt: { //Thời gian hết hạn - MongoDB sẽ tự động xóa document
         type: Date,
         expires: 0
     }

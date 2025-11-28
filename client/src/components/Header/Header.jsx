@@ -1,11 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../stores/hooks/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import { logoutUserThunk } from '../../stores/thunks/authThunks';
 import { toast } from 'sonner';
 import './Header.css';
 
 const Header = () => {
-    const { isAuthenticated, user, logout, loading } = useAuth();
+    const dispatch = useDispatch();
+    const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
@@ -24,11 +26,11 @@ const Header = () => {
 
     const handleLogout = async () => {
         setShowDropdown(false);
-        const result = await logout();
-        if (result.success) {
+        try {
+            await dispatch(logoutUserThunk()).unwrap();
             toast.success('Đăng xuất thành công!');
             navigate('/');
-        } else {
+        } catch (error) {
             toast.error('Đăng xuất thất bại!');
             // Vẫn navigate về trang chủ ngay cả khi có lỗi
             navigate('/');
