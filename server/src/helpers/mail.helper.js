@@ -30,4 +30,4 @@ const sendMail = (email, title, content) => {
     })
 }
 
-export default sendMail;
+export { sendMail };

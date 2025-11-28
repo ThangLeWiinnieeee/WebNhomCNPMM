@@ -1,10 +1,13 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { resetPasswordThunk } from "../stores/thunks/authThunks";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Divider from "../components/Divider/divider.jsx";
-import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
 
@@ -24,13 +27,38 @@ const loginSchema = z.object({
 });
 
 const ResetPasswordPage = () => {
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const location = useLocation();
+    const { loading } = useSelector((state) => state.auth);
+    const email = location.state?.email;
+    const otp = location.state?.otp;
+
+    useEffect(() => {
+        if (!email || !otp) {
+            toast.error('Phiên làm việc không hợp lệ. Vui lòng thử lại');
+            navigate('/forgot-password');
+        }
+    }, [email, otp, navigate]);
 
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
 
     const onResetPasswordSubmit = async (data) => {
-        // TODO: Implement reset password logic
+        try {
+            console.log({ email, otp, ...data });
+            await dispatch(resetPasswordThunk({ 
+                email: email,
+                password: data.password,
+                confirmPassword: data.confirmPassword
+            })).unwrap();
+            
+            toast.success('Đổi mật khẩu thành công!');
+            navigate('/login');
+        } catch (error) {
+            toast.error(error?.message || 'Đổi mật khẩu thất bại!');
+        }
     }
 
     return (
@@ -65,8 +93,8 @@ const ResetPasswordPage = () => {
                     {errors.confirmPassword && <p className="error-message">{errors.confirmPassword.message}</p>}
                 </div>
                 
-                <button type="submit" className="btn btn-login" disabled={isSubmitting}>
-                    {isSubmitting ? 'Đang thay đổi...' : 'Thay đổi mật khẩu'}
+                <button type="submit" className="btn btn-login" disabled={loading || isSubmitting}>
+                    {(loading || isSubmitting) ? 'Đang thay đổi...' : 'Thay đổi mật khẩu'}
                 </button>
                 
                 <Divider />

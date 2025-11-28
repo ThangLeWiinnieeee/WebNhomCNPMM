@@ -1,4 +1,4 @@
-module.exports.generateRandomNumber = (length) => {
+const generateRandomNumber = (length) => {
     const characters = "0123456789";
     let result = "";
     for(let i = 0; i < length; i++) {
@@ -6,3 +6,4 @@ module.exports.generateRandomNumber = (length) => {
     }
     return result;
 }
+export { generateRandomNumber };

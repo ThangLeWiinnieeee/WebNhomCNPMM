@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../stores/hooks/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import { verifyTokenThunk } from '../../stores/thunks/authThunks';
 
 /**
  * Component bảo vệ route - yêu cầu đăng nhập
@@ -9,15 +10,16 @@ import { useAuth } from '../../stores/hooks/useAuth';
  * @returns {ReactElement}
  */
 const ProtectedRoute = ({ children, allowedRoles = [] }) => {
-  const { isAuthenticated, loading, user, verify } = useAuth();
+  const dispatch = useDispatch();
+  const { isAuthenticated, loading, user } = useSelector((state) => state.auth);
   const location = useLocation();
 
   useEffect(() => {
     // Verify token khi component mount
     if (isAuthenticated && !user) {
-      verify();
+      dispatch(verifyTokenThunk());
     }
-  }, [isAuthenticated, user, verify]);
+  }, [isAuthenticated, user, dispatch]);
 
   // Đang loading
   if (loading) {

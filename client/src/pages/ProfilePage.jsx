@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useAuth } from '../stores/hooks/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateUserProfileThunk } from '../stores/thunks/userThunks';
 import { toast } from 'sonner';
 import Header from '../components/Header/Header';
 
 const ProfilePage = () => {
-    const { user, updateProfile, loading } = useAuth();
+    const dispatch = useDispatch();
+    const { user, loading } = useSelector((state) => state.auth);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         fullName: user?.fullName || user?.full_name || user?.name || '',
@@ -23,11 +25,11 @@ const ProfilePage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await updateProfile(formData);
+            await dispatch(updateUserProfileThunk(formData)).unwrap();
             toast.success('Cập nhật thông tin thành công!');
             setIsEditing(false);
         } catch (error) {
-            toast.error('Cập nhật thông tin thất bại!');
+            toast.error(error?.message || 'Cập nhật thông tin thất bại!');
         }
     };
 

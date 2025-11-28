@@ -115,15 +115,60 @@ export const verifyTokenThunk = createAsyncThunk(
   }
 );
 
-// Thunk để đổi mật khẩu
+// Thunk để gửi email quên mật khẩu
 export const forgotPasswordThunk = createAsyncThunk(
   'user/forgotPassword',
   async (emailData, { rejectWithValue }) => {
     try {
-      const response = await api.post('/user/forgot-password', emailData);
+      const response = await api.post('/account/forgot-password', emailData);
       return response.data || response;
     } catch (error) {
       const errorMessage = error?.message || 'Lỗi khi gửi otp đến email';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk để xác thực OTP
+export const verifyOtpThunk = createAsyncThunk(
+  'auth/verifyOtp',
+  async (otpData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/account/otp-password', otpData);
+      
+      // Kiểm tra response
+      if (response.code === "error") {
+        return rejectWithValue(response.message || 'Xác thực OTP thất bại');
+      }
+      
+      // Lưu accessToken vào localStorage nếu có
+      const token = response.data?.accessToken || response.accessToken;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi xác thực OTP';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Thunk để reset mật khẩu
+export const resetPasswordThunk = createAsyncThunk(
+  'auth/resetPassword',
+  async (resetData, { rejectWithValue }) => {
+    try {
+      const response = await api.post('/account/reset-password', resetData);
+      
+      if (response.code === "error") {
+        return rejectWithValue(response.message || 'Reset mật khẩu thất bại');
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi reset mật khẩu';
       return rejectWithValue(errorMessage);
     }
   }

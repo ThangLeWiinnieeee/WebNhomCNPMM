@@ -3,10 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from '../stores/hooks/useAuth';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUserThunk } from '../stores/thunks/authThunks';
 import { toast } from 'sonner';
 import Divider from "../components/Divider/divider.jsx";
-import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css";
 
@@ -36,20 +36,20 @@ const registerSchema = z.object({
 
 const RegisterPage = () => {
     const navigate = useNavigate();
-    const { register: registerAuth, loading } = useAuth();
+    const dispatch = useDispatch();
+    const { loading } = useSelector((state) => state.auth);
     
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(registerSchema)
     });
 
     const onRegisterSubmit = async (data) => {
-        const result = await registerAuth(data);
-        
-        if (result.success) {
+        try {
+            await dispatch(registerUserThunk(data)).unwrap();
             toast.success("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
             navigate('/login');
-        } else {
-            toast.error(result.error || "Đăng ký thất bại!");
+        } catch (error) {
+            toast.error(error?.message || "Đăng ký thất bại!");
         }
     }
 
@@ -113,7 +113,6 @@ const RegisterPage = () => {
                 </button>
                 
                 <Divider />
-                <GoogleLoginButton onClick={() => {}} />
                 
                 <p className="signup-text">
                     Bạn đã có tài khoản? <Link to="/login" className="signup-link">Đăng nhập</Link>
