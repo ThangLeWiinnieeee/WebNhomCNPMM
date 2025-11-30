@@ -1,7 +1,7 @@
 const getProfile = async (req, res) => {
     try {
         const user = req.user;
-        return res.status(200).json({ 
+        return res.json({ 
             code: 'success',
             user: {
                 _id: user._id,
@@ -13,7 +13,7 @@ const getProfile = async (req, res) => {
         });
     } catch (error) {
         console.error("Lỗi profile", error);
-        return res.status(500).json({ 
+        return res.json({ 
             code: 'error',
             message: 'Lỗi máy chủ'
         });
