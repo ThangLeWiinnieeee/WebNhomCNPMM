@@ -16,10 +16,22 @@ const MyOrdersPage = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/orders/my-orders');
-            setOrders(response.data || response || []);
+            // Kiểm tra nếu chưa login
+            const token = localStorage.getItem('token');
+            if (!token) {
+                toast.error('Vui lòng đăng nhập để xem đơn hàng');
+                setOrders([]);
+                return;
+            }
+            
+            // Gọi endpoint đúng: GET /api/orders
+            const response = await api.get('/orders');
+            // Response có thể là { success: true, orders: [...] } hoặc { orders: [...] }
+            const ordersData = response.orders || response.data?.orders || response || [];
+            setOrders(Array.isArray(ordersData) ? ordersData : []);
         } catch (error) {
-            toast.error('Không thể tải danh sách đơn hàng');
+            console.error('Fetch orders error:', error);
+            toast.error(error?.message || 'Không thể tải danh sách đơn hàng');
             setOrders([]);
         } finally {
             setLoading(false);

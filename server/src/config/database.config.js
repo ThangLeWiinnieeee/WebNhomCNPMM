@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-module.exports.connectDatabase = async () => {
+const connectDatabase = async () => {
     try {
         await mongoose.connect(process.env.DATABASE_URL);
         console.log("Kết nối database thành công");
@@ -8,3 +8,5 @@ module.exports.connectDatabase = async () => {
         console.log("Kết nối database thất bại");
     }
 }
+
+export default { connectDatabase };

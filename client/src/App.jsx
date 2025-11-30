@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import HomePage from './pages/homePage';
 import LoginPage from "./pages/login";
@@ -7,8 +8,15 @@ import OTPPasswordPage from './pages/otpPassword.jsx';
 import ResetPasswordPage from './pages/resetPassword.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
 import MyOrdersPage from './pages/MyOrdersPage.jsx';
+import CartPage from './pages/CartPage.jsx';
+import CheckoutPage from './pages/CheckoutPage.jsx';
+import OrderDetailPage from './pages/OrderDetailPage.jsx';
+import { useAuthInit } from './stores/hooks/useAuthInit.js';
 
 function App() {
+  // Khôi phục auth state từ localStorage khi ứng dụng khởi động
+  useAuthInit();
+
   return (
     <>
       <Routes>
@@ -20,6 +28,9 @@ function App() {
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/order-detail/:orderId" element={<OrderDetailPage />} />
       </Routes>
     </>
   );

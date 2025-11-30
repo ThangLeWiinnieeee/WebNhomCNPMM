@@ -6,7 +6,7 @@ import sessionModel from '../models/session.model.js';
 import forgotPasswordModel from '../models/forgot-password.model.js';
 import crypto from 'crypto';
 import user from '../models/user.model.js';
-import randomNumber from '../helpers/generate.helper.js';
+import { generateRandomNumber } from '../helpers/generate.helper.js';
 import sendMail from '../helpers/mail.helper.js';
 
 const registerPost = async (req, res) => {
@@ -157,7 +157,7 @@ const forgotPasswordPost = async (req, res) => {
         }
 
         //Tạo mã OTP
-        const otp = randomNumber(6);
+        const otp = generateRandomNumber(6);
 
         //Lưu mã OTP vào cơ sở dữ liệu
         await forgotPasswordModel.create({
