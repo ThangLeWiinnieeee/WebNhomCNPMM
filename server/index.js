@@ -10,7 +10,23 @@ const PORT = process.env.PORT;
 
 //Cấu hình CORS
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: function (origin, callback) {
+        // Cho phép localhost với bất kỳ port nào trong phát triển
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
+            'http://127.0.0.1:5173',
+            'http://127.0.0.1:5174',
+            'http://127.0.0.1:5175'
+        ];
+        
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
 }))
 
@@ -25,7 +41,7 @@ app.use('/', routes);
 databaseConfig.connectDatabase().then(() => {
     app.listen(PORT, () => {
         console.log(`Server đang chạy tại http://localhost:${PORT}`);
-        console.log("Frontend: http://localhost:5173");
+        console.log("Frontend: http://localhost:5173, 5174, hoặc 5175");
     });
 }).catch((error) => {
     console.error("Lỗi kết nối database:", error);
