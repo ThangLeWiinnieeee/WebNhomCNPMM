@@ -1,0 +1,195 @@
+/* ============================================
+   SONNER TOAST CUSTOM STYLES
+   ============================================ */
+
+/* Container */
+[data-sonner-toaster] {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* All Toast Base Styles */
+[data-sonner-toast] {
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+    border: none !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    min-height: 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+/* Success Toast - Màu xanh lá */
+[data-sonner-toast][data-type="success"] {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border-left: 5px solid #047857 !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-icon] {
+    color: white !important;
+    font-size: 20px !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-content] {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-button] {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-sonner-toast][data-type="success"] [data-button]:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Error Toast - Màu đỏ */
+[data-sonner-toast][data-type="error"] {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-left: 5px solid #b91c1c !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-icon] {
+    color: white !important;
+    font-size: 20px !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-content] {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-button] {
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-button]:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Warning Toast - Màu vàng cam */
+[data-sonner-toast][data-type="warning"] {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: white !important;
+    border-left: 5px solid #b45309 !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-icon] {
+    color: white !important;
+    font-size: 20px !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-content] {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Info Toast - Màu xanh dương */
+[data-sonner-toast][data-type="info"] {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: white !important;
+    border-left: 5px solid #1d4ed8 !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-icon] {
+    color: white !important;
+    font-size: 20px !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-content] {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Loading Toast */
+[data-sonner-toast][data-type="loading"] {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    color: white !important;
+    border-left: 5px solid #374151 !important;
+}
+
+[data-sonner-toast][data-type="loading"] [data-icon] {
+    color: white !important;
+}
+
+[data-sonner-toast][data-type="loading"] [data-content] {
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* Close Button */
+[data-sonner-toast] [data-close-button] {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    border-radius: 6px !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-sonner-toast] [data-close-button]:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.1) !important;
+}
+
+/* Animation */
+[data-sonner-toast] {
+    animation: slideIn 0.3s ease-out !important;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Progress Bar */
+[data-sonner-toast] [data-progress] {
+    background: rgba(255, 255, 255, 0.3) !important;
+    height: 4px !important;
+    border-radius: 2px !important;
+}
+
+/* Rich Colors Enhancement */
+[data-rich-colors="true"] [data-sonner-toast][data-type="success"] {
+    box-shadow: 0 10px 40px rgba(16, 185, 129, 0.4) !important;
+}
+
+[data-rich-colors="true"] [data-sonner-toast][data-type="error"] {
+    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4) !important;
+}
+
+[data-rich-colors="true"] [data-sonner-toast][data-type="warning"] {
+    box-shadow: 0 10px 40px rgba(245, 158, 11, 0.4) !important;
+}
+
+[data-rich-colors="true"] [data-sonner-toast][data-type="info"] {
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    [data-sonner-toast] {
+        border-radius: 10px !important;
+        padding: 14px 16px !important;
+        font-size: 14px !important;
+        min-height: 55px !important;
+    }
+}

@@ -1,0 +1,91 @@
+/* Tiêu đề */
+.login-title {
+    color: #2d3436;
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+.login-subtitle {
+    color: #636e72;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* Form */
+.form-label {
+    color: #2d3436;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.form-control {
+    background-color: #e8f0f2;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+.form-control:focus {
+    background-color: #e8f0f2;
+    box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+    border: none;
+}
+
+/* Nút bấm */
+.btn-login {
+    background: linear-gradient(135deg, #ec4899 0%, #e91e63 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+    margin-top: 5px;
+    transition: all 0.3s;
+}
+.btn-login:hover {
+    background: linear-gradient(135deg, #db2777 0%, #d81b60 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(236, 72, 153, 0.3);
+}
+
+/* Các link */
+.forgot-password {
+    color: #ec4899;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.forgot-password:hover {
+    color: #db2777;
+    text-decoration: underline;
+}
+
+.signup-text {
+    text-align: center;
+    margin-top: 25px;
+    color: #636e72;
+    font-size: 14px;
+}
+
+.signup-link {
+    color: #ec4899;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.signup-link:hover {
+    color: #db2777;
+    text-decoration: underline;
+}
+
+.error-message {
+    color: #e74c3c;
+    font-size: 12px;
+}

@@ -1,0 +1,162 @@
+/* Custom Header Styles with Bootstrap */
+.header {
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(236, 72, 153, 0.1) !important;
+}
+
+/* Logo Gradient Text */
+.logo-text {
+    background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: opacity 0.3s ease;
+}
+
+.logo-text:hover {
+    opacity: 0.8;
+}
+
+/* Navigation Links Hover Effect */
+.nav-link {
+    position: relative;
+    color: #2d3436 !important;
+    transition: color 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #ec4899, #f97316);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #ec4899 !important;
+}
+
+.nav-link:hover::after {
+    width: 80%;
+}
+
+/* Custom Button Styles */
+.btn-outline-pink {
+    color: #ec4899;
+    border: 2px solid #ec4899;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 6px;
+    padding: 6px 16px;
+    min-width: 100px;
+}
+
+.btn-outline-pink:hover {
+    background: linear-gradient(135deg, #ec4899, #f97316);
+    color: white;
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+}
+
+.btn-gradient-pink {
+    background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+    color: white;
+    border: 2px solid transparent;
+    font-weight: 600;
+    font-size: 13px;
+    border-radius: 6px;
+    padding: 6px 16px;
+    min-width: 100px;
+}
+
+.btn-gradient-pink:hover {
+    background: linear-gradient(135deg, #db2777 0%, #ea580c 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+}
+
+/* User Info Wrapper */
+.user-info-wrapper {
+    background: linear-gradient(135deg, #fef2f8 0%, #fff7ed 100%);
+    border: 2px solid rgba(236, 72, 153, 0.2);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-info-wrapper:hover {
+    background: linear-gradient(135deg, #fce7f3 0%, #ffedd5 100%);
+    border-color: rgba(236, 72, 153, 0.3);
+    transform: translateY(-1px);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
+    box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
+    font-size: 18px;
+}
+
+/* Dropdown Menu Custom */
+.dropdown-menu-custom {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(236, 72, 153, 0.2);
+    min-width: 250px;
+    z-index: 1000;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.dropdown-header-custom {
+    background: linear-gradient(135deg, #fef2f8 0%, #fff7ed 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.dropdown-item-custom {
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    transition: all 0.2s ease;
+    color: #2d3436;
+    font-size: 14px;
+}
+
+.dropdown-item-custom:hover {
+    background: rgba(236, 72, 153, 0.1);
+    color: #ec4899;
+}
+
+.dropdown-item-custom i {
+    width: 20px;
+    font-size: 14px;
+}
+
+.dropdown-divider {
+    border-top: 1px solid rgba(236, 72, 153, 0.1);
+}
+
+.transition-transform {
+    transition: transform 0.3s ease;
+}
+
+.rotate-180 {
+    transform: rotate(180deg);
+}
