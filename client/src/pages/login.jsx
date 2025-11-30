@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUserThunk } from '../stores/thunks/authThunks';
+import { loginUserThunk, googleLoginThunk } from '../stores/thunks/authThunks';
 import { toast } from 'sonner';
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
@@ -54,8 +54,35 @@ const LoginPage = () => {
                 navigate('/', { replace: true });
             }
         } catch (error) {
-            toast.error(error?.message || "Đăng nhập thất bại!");
+            // error đã là string message từ backend
+            toast.error(error || "Đăng nhập thất bại!");
         }
+    }
+
+    const handleGoogleLoginSuccess = async (accessToken) => {
+        try {
+            const result = await dispatch(googleLoginThunk(accessToken)).unwrap();
+            
+            toast.success("Đăng nhập Google thành công!");
+            
+            // Kiểm tra role và điều hướng
+            const userRole = result?.user?.role || result?.user?.role_id;
+            
+            if (userRole === 'user' || userRole === 'member' || userRole === 'customer') {
+                navigate('/', { replace: true });
+            } else if (userRole === 'admin' || userRole === 'administrator') {
+                navigate('/admin/dashboard', { replace: true });
+            } else {
+                navigate('/', { replace: true });
+            }
+        } catch (error) {
+            toast.error(error || "Đăng nhập Google thất bại!");
+        }
+    }
+
+    const handleGoogleLoginError = (error) => {
+        console.error('Google login error:', error);
+        toast.error("Không thể đăng nhập bằng Google. Vui lòng thử lại!");
     }
 
     return (
@@ -105,7 +132,10 @@ const LoginPage = () => {
                 </button>
                 
                 <Divider />
-                <GoogleLoginButton onClick={() => {}} />
+                <GoogleLoginButton 
+                    onSuccess={handleGoogleLoginSuccess}
+                    onError={handleGoogleLoginError}
+                />
                 
                 <p className="signup-text">
                     Bạn chưa có tài khoản? <Link to="/register" className="signup-link">Tạo tài khoản</Link>

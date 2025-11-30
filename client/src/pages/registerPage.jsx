@@ -49,7 +49,7 @@ const RegisterPage = () => {
             toast.success("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
             navigate('/login');
         } catch (error) {
-            toast.error(error?.message || "Đăng ký thất bại!");
+            toast.error(error || "Đăng ký thất bại!");
         }
     }
 

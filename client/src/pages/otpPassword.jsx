@@ -52,7 +52,7 @@ const OtpPasswordPage = () => {
             
         } catch (error) {
             // Hiển thị lỗi từ backend
-            toast.error(error?.message || 'Xác thực OTP thất bại');
+            toast.error(error || 'Xác thực OTP thất bại');
         }
     }
 

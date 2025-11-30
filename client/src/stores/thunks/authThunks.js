@@ -7,16 +7,10 @@ export const registerUserThunk = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/register', payload);
-      
-      // Kiểm tra response
-      if (response.code === "error") {
-        return rejectWithValue(response.message || 'Đăng ký thất bại');
-      }
-      
-      return response.data || response;
+      return response;
     } catch (error) {
-      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi đăng ký';
-      return rejectWithValue(errorMessage);
+      // Error đã được xử lý từ axiosConfig, trả về message từ backend
+      return rejectWithValue(error?.message || 'Đăng ký thất bại');
     }
   }
 );
@@ -27,62 +21,45 @@ export const loginUserThunk = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/login', credentials);
-      
-      // Kiểm tra response structure
-      if (response.code === "error") {
-        return rejectWithValue(response.message || 'Đăng nhập thất bại');
-      }
+      console.log('Login response:', response);
 
       // Lưu token vào localStorage
-      const token = response.data?.accessToken || response.accessToken;
+      const token = response.accessToken;
       if (token) {
         localStorage.setItem('token', token);
       }
 
       // Lấy thông tin user từ response
-      let userData = response.data?.user || response.user;
-      
-      // Nếu không có user data trong response, gọi API profile
-      if (!userData && token) {
-        try {
-          const profileRes = await api.get('/user/profile', {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          userData = profileRes.data?.user || profileRes.user || profileRes.data || profileRes;
-        } catch (profileError) {
-          // Sử dụng email từ credentials nếu không lấy được profile
-          userData = { email: credentials.email };
-        }
-      }
+      const userData = response.user;
 
       return { token, user: userData };
     } catch (error) {
-      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi đăng nhập';
-      return rejectWithValue(errorMessage);
+      // Error đã được xử lý từ axiosConfig, trả về message từ backend
+      return rejectWithValue(error?.message || 'Lỗi khi đăng nhập');
     }
   }
 );
 
-// Thunk để đăng xuất
-export const logoutUserThunk = createAsyncThunk(
-  'auth/logoutUser',
-  async (_, { rejectWithValue }) => {
+// Thunk để đăng nhập bằng Google
+export const googleLoginThunk = createAsyncThunk(
+  'auth/googleLogin',
+  async (credential, { rejectWithValue }) => {
     try {
-      // Gọi API logout
-      await api.post('/account/logout');
+      console.log('Google credential:', credential);  
+      const response = await api.post('/account/google-login', { credential });
       
-      // Xóa token khỏi localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      
-      return true;
+      // Lưu token vào localStorage
+      const token = response.accessToken;
+      if (token) {
+        localStorage.setItem('token', token);
+      }
+
+      // Lấy thông tin user từ response
+      const userData = response.user;
+
+      return { token, user: userData };
     } catch (error) {
-      // Dù có lỗi vẫn xóa token local
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      
-      const errorMessage = error?.message || 'Lỗi khi đăng xuất';
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error?.message || 'Lỗi khi đăng nhập bằng Google');
     }
   }
 );
@@ -103,14 +80,13 @@ export const verifyTokenThunk = createAsyncThunk(
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      return response.data?.user || response.user || response.data || response;
+      return response.user || response;
     } catch (error) {
       // Xóa token nếu không hợp lệ
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      const errorMessage = error?.message || 'Token không hợp lệ';
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error?.message || 'Token không hợp lệ');
     }
   }
 );
@@ -121,10 +97,9 @@ export const forgotPasswordThunk = createAsyncThunk(
   async (emailData, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/forgot-password', emailData);
-      return response.data || response;
+      return response;
     } catch (error) {
-      const errorMessage = error?.message || 'Lỗi khi gửi otp đến email';
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error?.message || 'Lỗi khi gửi OTP đến email');
     }
   }
 );
@@ -136,21 +111,15 @@ export const verifyOtpThunk = createAsyncThunk(
     try {
       const response = await api.post('/account/otp-password', otpData);
       
-      // Kiểm tra response
-      if (response.code === "error") {
-        return rejectWithValue(response.message || 'Xác thực OTP thất bại');
-      }
-      
       // Lưu accessToken vào localStorage nếu có
-      const token = response.data?.accessToken || response.accessToken;
+      const token = response.accessToken;
       if (token) {
         localStorage.setItem('token', token);
       }
       
-      return response.data || response;
+      return response;
     } catch (error) {
-      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi xác thực OTP';
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error?.message || 'Lỗi khi xác thực OTP');
     }
   }
 );
@@ -161,15 +130,31 @@ export const resetPasswordThunk = createAsyncThunk(
   async (resetData, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/reset-password', resetData);
-      
-      if (response.code === "error") {
-        return rejectWithValue(response.message || 'Reset mật khẩu thất bại');
-      }
-      
-      return response.data || response;
+      return response;
     } catch (error) {
-      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi reset mật khẩu';
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(error?.message || 'Lỗi khi reset mật khẩu');
+    }
+  }
+);
+
+// Thunk để đăng xuất
+export const logoutUserThunk = createAsyncThunk(
+  'auth/logoutUser',
+  async (_, { rejectWithValue }) => {
+    try {
+      await api.post('/account/logout');
+      
+      // Xóa token khỏi localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      return true;
+    } catch (error) {
+      // Dù có lỗi vẫn xóa token local
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      
+      return rejectWithValue(error?.message || 'Lỗi khi đăng xuất');
     }
   }
 );
