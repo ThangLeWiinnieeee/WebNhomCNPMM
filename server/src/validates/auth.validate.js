@@ -159,6 +159,13 @@ const otpPasswordValidate = async (req, res, next) => {
 
 const resetPasswordValidate = async (req, res, next) => {
     const schema = Joi.object({
+        email: Joi.string()
+            .email()
+            .required()
+            .messages({
+                "string.empty" : "Vui lòng nhập email!",
+                "string.email" : "Email không đúng định dạng!",
+            }),
         password: Joi.string()
             .min(8)
             .custom((value, helpers) => {
@@ -184,6 +191,13 @@ const resetPasswordValidate = async (req, res, next) => {
                 "password.lowercase" : "Mật khẩu phải có ít nhất một chữ cái viết thường!",
                 "password.number" : "Mật khẩu phải có ít nhất một chữ số!",
                 "password.special" : "Mật khẩu phải có ít nhất một ký tự đặc biệt! (~!@#$%^&*)",
+            }),
+        confirmPassword: Joi.string()
+            .valid(Joi.ref('password'))
+            .required()
+            .messages({
+                "string.empty" : "Vui lòng nhập lại mật khẩu!",
+                "any.only" : "Mật khẩu xác nhận không khớp!",
             }),
     })
 

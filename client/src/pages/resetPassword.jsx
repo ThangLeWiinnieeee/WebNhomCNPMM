@@ -57,7 +57,7 @@ const ResetPasswordPage = () => {
             toast.success('Đổi mật khẩu thành công!');
             navigate('/login');
         } catch (error) {
-            toast.error(error?.message || 'Đổi mật khẩu thất bại!');
+            toast.error(error || 'Đổi mật khẩu thất bại!');
         }
     }
 
