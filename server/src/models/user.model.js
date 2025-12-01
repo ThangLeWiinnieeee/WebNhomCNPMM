@@ -24,6 +24,11 @@ const schema = new mongoose.Schema({
   phone: { 
     type: String,
     sparse: true //Cho phép trường này có thể null nhưng vẫn giữ tính unique
+  },
+  type: {
+    type: String,
+    required: true,
+    enum: ['login', 'loginGoogle']
   }
 },{
     timestamps: true //Tự động tạo ra 2 trường CreateAt và UpdateAt

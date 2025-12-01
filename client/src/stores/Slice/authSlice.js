@@ -74,8 +74,13 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = null;
         
-        // Lưu vào localStorage
-        localStorage.setItem('user', JSON.stringify(action.payload.user));
+        // Lưu vào localStorage - đảm bảo token được lưu
+        if (action.payload.token) {
+          localStorage.setItem('token', action.payload.token);
+        }
+        if (action.payload.user) {
+          localStorage.setItem('user', JSON.stringify(action.payload.user));
+        }
       })
       .addCase(loginUserThunk.rejected, (state, action) => {
         state.loading = false;

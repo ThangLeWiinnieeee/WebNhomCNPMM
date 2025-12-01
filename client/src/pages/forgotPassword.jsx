@@ -31,7 +31,7 @@ const ForgotPasswordPage = () => {
             toast.success("Mã OTP đã được gửi đến email của bạn!");
             navigate('/otp-password', { state: { email: data.email } });
         } catch (error) {
-            toast.error(error?.message || "Gửi mã OTP thất bại!");
+            toast.error(error || "Gửi mã OTP thất bại!");
         }
     }
 

@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import userModel from '../models/user.model.js'
+import userModel from '../models/user.model.js';
 
 // Middleware xác minh user là ai 
 const verifyToken = async (req, res, next) => {

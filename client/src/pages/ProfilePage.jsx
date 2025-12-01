@@ -29,7 +29,7 @@ const ProfilePage = () => {
             toast.success('Cập nhật thông tin thành công!');
             setIsEditing(false);
         } catch (error) {
-            toast.error(error?.message || 'Cập nhật thông tin thất bại!');
+            toast.error(error || 'Cập nhật thông tin thất bại!');
         }
     };
 
