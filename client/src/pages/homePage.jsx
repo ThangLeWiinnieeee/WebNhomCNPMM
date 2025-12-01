@@ -1,10 +1,34 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
+import ProductCard from '../components/ProductCard/ProductCard';
+import {
+  fetchNewestProductsThunk,
+  fetchBestSellingProductsThunk,
+  fetchMostViewedProductsThunk,
+  fetchPromotionProductsThunk,
+} from '../stores/thunks/productThunks';
 import '../assets/css/homePage.css';
 
 const HomePage = () => {
+    const dispatch = useDispatch();
+    const {
+        newestProducts,
+        bestSellingProducts,
+        mostViewedProducts,
+        promotionProducts,
+        loading,
+    } = useSelector((state) => state.product);
+
+    useEffect(() => {
+        dispatch(fetchNewestProductsThunk());
+        dispatch(fetchBestSellingProductsThunk());
+        dispatch(fetchMostViewedProductsThunk());
+        dispatch(fetchPromotionProductsThunk());
+    }, [dispatch]);
+
     return (
         <div className="home-page">
             {/* Header */}
@@ -155,6 +179,91 @@ const HomePage = () => {
                     </div>
                 </div>
             </section>
+
+            {/* Products Sections */}
+            {/* Sản phẩm mới nhất */}
+            {newestProducts && newestProducts.length > 0 && (
+                <section className="py-5 bg-light">
+                    <div className="container py-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h2 className="display-6 fw-bold mb-0">Sản Phẩm Mới Nhất</h2>
+                            <Link to="/services?filter=newest" className="btn btn-outline-primary">
+                                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                            </Link>
+                        </div>
+                        <div className="row g-4">
+                            {newestProducts.slice(0, 8).map((product) => (
+                                <div key={product._id} className="col-lg-3 col-md-4 col-sm-6">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Sản phẩm bán chạy */}
+            {bestSellingProducts && bestSellingProducts.length > 0 && (
+                <section className="py-5">
+                    <div className="container py-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h2 className="display-6 fw-bold mb-0">Sản Phẩm Bán Chạy</h2>
+                            <Link to="/services?filter=best-selling" className="btn btn-outline-primary">
+                                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                            </Link>
+                        </div>
+                        <div className="row g-4">
+                            {bestSellingProducts.slice(0, 6).map((product) => (
+                                <div key={product._id} className="col-lg-4 col-md-6 col-sm-6">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Sản phẩm xem nhiều */}
+            {mostViewedProducts && mostViewedProducts.length > 0 && (
+                <section className="py-5 bg-light">
+                    <div className="container py-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h2 className="display-6 fw-bold mb-0">Sản Phẩm Xem Nhiều</h2>
+                            <Link to="/services?filter=most-viewed" className="btn btn-outline-primary">
+                                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                            </Link>
+                        </div>
+                        <div className="row g-4">
+                            {mostViewedProducts.slice(0, 8).map((product) => (
+                                <div key={product._id} className="col-lg-3 col-md-4 col-sm-6">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* Sản phẩm khuyến mãi */}
+            {promotionProducts && promotionProducts.length > 0 && (
+                <section className="py-5">
+                    <div className="container py-4">
+                        <div className="d-flex justify-content-between align-items-center mb-4">
+                            <h2 className="display-6 fw-bold mb-0">Sản Phẩm Khuyến Mãi</h2>
+                            <Link to="/services?filter=promotion" className="btn btn-outline-primary">
+                                Xem tất cả <i className="fas fa-arrow-right ms-2"></i>
+                            </Link>
+                        </div>
+                        <div className="row g-4">
+                            {promotionProducts.slice(0, 4).map((product) => (
+                                <div key={product._id} className="col-lg-3 col-md-6 col-sm-6">
+                                    <ProductCard product={product} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* CTA Section */}
             <section className="cta-section py-5 text-center text-white position-relative">

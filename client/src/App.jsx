@@ -12,6 +12,8 @@ import CartPage from './pages/CartPage.jsx';
 import CheckoutPage from './pages/CheckoutPage.jsx';
 import OrderDetailPage from './pages/OrderDetailPage.jsx';
 import { useAuthInit } from './stores/hooks/useAuthInit.js';
+import ProductsPage from './pages/ProductsPage.jsx';
+import ProductDetailPage from './pages/ProductDetailPage.jsx';
 
 function App() {
   // Khôi phục auth state từ localStorage khi ứng dụng khởi động
@@ -31,6 +33,8 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order-detail/:orderId" element={<OrderDetailPage />} />
+        <Route path="/services" element={<ProductsPage />} />
+        <Route path="/services/:id" element={<ProductDetailPage />} />
       </Routes>
     </>
   );

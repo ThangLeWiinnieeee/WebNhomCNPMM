@@ -51,7 +51,7 @@ const Header = () => {
     const firstLetter = displayName.charAt(0).toUpperCase();
 
     return (
-        <header className="header sticky-top bg-white shadow-sm border-bottom">
+        <header className="header bg-white shadow-sm border-bottom">
             <div className="container">
                 <nav className="navbar navbar-expand-lg navbar-light py-3">
                     {/* Logo */}
