@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { getCartThunk } from '../stores/thunks/cartThunks.js';
 import CartItem from './CartItem.jsx';
 import CartSummary from './CartSummary.jsx';
-import './Cart.css';
+import '../assets/css/Cart.css';
 
 export default function CartPage() {
   const dispatch = useDispatch();

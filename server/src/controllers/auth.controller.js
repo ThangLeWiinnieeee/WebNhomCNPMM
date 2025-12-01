@@ -6,16 +6,10 @@ import userModel from '../models/user.model.js';
 import sessionModel from '../models/session.model.js';
 import forgotPasswordModel from '../models/forgot-password.model.js';
 import crypto from 'crypto';
-<<<<<<< HEAD
 import {generateRandomNumber} from '../helpers/generate.helper.js';
 import {sendMail} from '../helpers/mail.helper.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
-=======
-import user from '../models/user.model.js';
-import { generateRandomNumber } from '../helpers/generate.helper.js';
-import sendMail from '../helpers/mail.helper.js';
->>>>>>> 32d886ad0875d9dcd52815c46263627081678a94
 
 const registerPost = async (req, res) => {
     try {
