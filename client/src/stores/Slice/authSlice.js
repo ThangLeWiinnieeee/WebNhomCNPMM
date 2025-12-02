@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { registerUserThunk, loginUserThunk, logoutUserThunk, verifyTokenThunk, forgotPasswordThunk } from '../thunks/authThunks';
+import { registerUserThunk, loginUserThunk, googleLoginThunk, logoutUserThunk, verifyTokenThunk, forgotPasswordThunk } from '../thunks/authThunks';
 import { updateUserProfileThunk } from '../thunks/userThunks';
 
 const authSlice = createSlice({
@@ -102,6 +102,34 @@ const authSlice = createSlice({
       .addCase(registerUserThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+
+      // ============ GOOGLE LOGIN ============
+      .addCase(googleLoginThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(googleLoginThunk.fulfilled, (state, action) => {
+        state.token = action.payload.token;
+        state.user = action.payload.user;
+        state.isAuthenticated = true;
+        state.loading = false;
+        state.error = null;
+        
+        // Lưu vào localStorage
+        if (action.payload.token) {
+          localStorage.setItem('token', action.payload.token);
+        }
+        if (action.payload.user) {
+          localStorage.setItem('user', JSON.stringify(action.payload.user));
+        }
+      })
+      .addCase(googleLoginThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
       })
 
       // ============ LOGOUT USER ============
