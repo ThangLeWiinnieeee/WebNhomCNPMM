@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { createOrderThunk } from '../stores/thunks/orderThunks.js';
-import './CheckoutPage.css';
+import '../assets/css/CheckoutPage.css';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();

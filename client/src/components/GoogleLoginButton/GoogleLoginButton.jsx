@@ -5,10 +5,26 @@ import GoogleIcon from "../GoogleLoginButton/GoogleIcon";
 
 const GoogleLoginButton = ({ onSuccess, onError }) => {
     const googleLogin = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
-            // tokenResponse chứa access_token từ Google
-            if (onSuccess) {
-                onSuccess(tokenResponse.access_token);
+        onSuccess: async (tokenResponse) => {
+            try {
+                // Lấy ID Token từ Google bằng access token
+                const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo`, {
+                    headers: {
+                        'Authorization': `Bearer ${tokenResponse.access_token}`
+                    }
+                });
+                
+                const userInfo = await response.json();
+                
+                // Gửi thông tin user về backend để xác thực
+                if (onSuccess) {
+                    onSuccess(userInfo);
+                }
+            } catch (error) {
+                console.error('Error getting user info:', error);
+                if (onError) {
+                    onError(error);
+                }
             }
         },
         onError: (error) => {
@@ -17,7 +33,6 @@ const GoogleLoginButton = ({ onSuccess, onError }) => {
                 onError(error);
             }
         },
-        flow: 'implicit', // Sử dụng implicit flow để lấy access token trực tiếp
     });
 
     return (

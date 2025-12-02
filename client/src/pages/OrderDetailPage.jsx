@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getOrderDetailThunk, confirmCODPaymentThunk } from '../stores/thunks/orderThunks.js';
-import './OrderDetailPage.css';
+import '../assets/css/OrderDetailPage.css';
 
 export default function OrderDetailPage() {
   const { orderId } = useParams();

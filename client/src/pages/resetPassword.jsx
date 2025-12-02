@@ -1,12 +1,11 @@
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { resetPasswordThunk } from "../stores/thunks/authThunks";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from '../stores/hooks/useAuth';
 import Divider from "../components/Divider/divider.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
@@ -28,9 +27,8 @@ const loginSchema = z.object({
 
 const ResetPasswordPage = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
     const location = useLocation();
-    const { loading } = useSelector((state) => state.auth);
+    const { resetPassword, loading } = useAuth();
     const email = location.state?.email;
     const otp = location.state?.otp;
 
@@ -46,19 +44,11 @@ const ResetPasswordPage = () => {
     });
 
     const onResetPasswordSubmit = async (data) => {
-        try {
-            console.log({ email, otp, ...data });
-            await dispatch(resetPasswordThunk({ 
-                email: email,
-                password: data.password,
-                confirmPassword: data.confirmPassword
-            })).unwrap();
-            
-            toast.success('Đổi mật khẩu thành công!');
-            navigate('/login');
-        } catch (error) {
-            toast.error(error || 'Đổi mật khẩu thất bại!');
-        }
+        await resetPassword({ 
+            email: email,
+            password: data.password,
+            confirmPassword: data.confirmPassword
+        });
     }
 
     return (
