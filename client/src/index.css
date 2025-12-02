@@ -1,5 +1,311 @@
+/* ============================================
+   WEDDING/LUXURY THEME - GLOBAL STYLES
+   ============================================ */
+
+/* ========== GOOGLE FONTS IMPORT ========== */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ========== CSS VARIABLES (DESIGN TOKENS) ========== */
+:root {
+  /* Primary Colors */
+  --primary: #D4AF37; /* Gold/Champagne */
+  --primary-dark: #B8941F;
+  --primary-light: #E5C866;
+  
+  /* Text Colors */
+  --text-main: #2C3E50; /* Dark Blue/Grey */
+  --text-secondary: #7F8C8D;
+  --text-light: #BDC3C7;
+  
+  /* Background Colors */
+  --bg-body: #F9F7F2; /* Warm Cream */
+  --bg-white: #FFFFFF;
+  --bg-light: #FAF8F3;
+  
+  /* Accent Colors */
+  --accent: #C0392B; /* Muted Red */
+  --accent-light: #E74C3C;
+  
+  /* Typography */
+  --font-heading: 'Playfair Display', serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  
+  /* Shadows */
+  --shadow-soft: 0 2px 15px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.1);
+  --shadow-strong: 0 8px 30px rgba(0, 0, 0, 0.15);
+  
+  /* Transitions */
+  --transition-base: all 0.3s ease;
+  --transition-slow: all 0.5s ease;
+}
+
+/* ========== GLOBAL RESET & BASE STYLES ========== */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-    background: linear-gradient(135deg, #f5d5e0 0%, #e8c5d5 100%);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== TYPOGRAPHY ========== */
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+h1, .h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+h2, .h2 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+h3, .h3 {
+  font-size: 1.75rem;
+}
+
+h4, .h4 {
+  font-size: 1.5rem;
+}
+
+h5, .h5 {
+  font-size: 1.25rem;
+}
+
+h6, .h6 {
+  font-size: 1.125rem;
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--text-main);
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  transition: var(--transition-base);
+}
+
+a:hover {
+  color: var(--primary-dark);
+  text-decoration: underline;
+}
+
+/* ========== BOOTSTRAP OVERRIDES ========== */
+
+/* Container - Wider Max Width */
+.container {
+  max-width: 1200px !important;
+}
+
+.container-fluid {
+  max-width: 1400px;
+}
+
+/* Primary Button - Gold Theme with Pill Shape */
+.btn-primary {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #FFFFFF !important;
+  border-radius: 50px !important;
+  font-weight: 500;
+  padding: 0.625rem 1.5rem;
+  transition: var(--transition-base);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  color: #FFFFFF !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background-color: var(--text-light) !important;
+  border-color: var(--text-light) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Secondary Buttons */
+.btn-outline-primary {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  border-radius: 50px !important;
+  background-color: transparent;
+  transition: var(--transition-base);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #FFFFFF !important;
+  text-decoration: none !important;
+}
+
+/* Accent Button for Prices/Sale */
+.btn-danger {
+  background-color: var(--accent) !important;
+  border-color: var(--accent) !important;
+  border-radius: 50px !important;
+}
+
+.btn-danger:hover {
+  background-color: var(--accent-light) !important;
+  border-color: var(--accent-light) !important;
+}
+
+/* Card Overrides */
+.card {
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition-base);
+  background-color: var(--bg-white);
+}
+
+.card-body {
+  padding: 1.5rem;
+}
+
+/* Form Controls */
+.form-control {
+  border-radius: 8px;
+  border: 1px solid rgba(44, 62, 80, 0.2);
+  transition: var(--transition-base);
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.25);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+/* Badge Overrides */
+.badge {
+  border-radius: 6px;
+  padding: 0.375rem 0.75rem;
+  font-weight: 500;
+}
+
+.badge.bg-primary {
+  background-color: var(--primary) !important;
+}
+
+.badge.bg-danger {
+  background-color: var(--accent) !important;
+}
+
+/* ========== UTILITY CLASSES ========== */
+
+/* Soft Shadow Utility */
+.shadow-soft {
+  box-shadow: var(--shadow-soft) !important;
+}
+
+/* Card Hover Effect - Lift on Hover */
+.card-hover {
+  transition: var(--transition-base);
+  cursor: pointer;
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Additional Luxury Utilities */
+.text-gold {
+  color: var(--primary) !important;
+}
+
+.bg-cream {
+  background-color: var(--bg-body) !important;
+}
+
+.bg-gold {
+  background-color: var(--primary) !important;
+}
+
+.bg-gold-light {
+  background-color: var(--primary-light) !important;
+}
+
+.border-gold {
+  border-color: var(--primary) !important;
+}
+
+/* Text Utilities */
+.font-heading {
+  font-family: var(--font-heading) !important;
+}
+
+.font-body {
+  font-family: var(--font-body) !important;
+}
+
+/* ========== RESPONSIVE TYPOGRAPHY ========== */
+@media (max-width: 768px) {
+  h1, .h1 {
+    font-size: 2rem;
+  }
+  
+  h2, .h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3, .h3 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  h1, .h1 {
+    font-size: 1.75rem;
+  }
+  
+  h2, .h2 {
+    font-size: 1.5rem;
+  }
+  
+  body {
+    font-size: 15px;
+  }
 }

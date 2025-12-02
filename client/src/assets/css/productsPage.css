@@ -1,0 +1,135 @@
+.products-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #F9F7F2;
+}
+
+.products-page .container {
+  margin-top: 2rem !important;
+  margin-bottom: 2rem !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure layout 2 columns don't overlap */
+.products-page .container .row {
+  margin-left: -0.75rem;
+  margin-right: -0.75rem;
+}
+
+.products-page .container .row > [class*='col-'] {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+/* Ensure sidebar and grid don't overlap */
+.products-page .col-lg-3,
+.products-page .col-lg-9 {
+  position: relative;
+  z-index: 1;
+}
+
+.products-page-header {
+  text-align: center;
+  padding: 2rem 0 1rem;
+}
+
+.products-grid {
+  margin-bottom: 2rem;
+}
+
+/* ========== MOBILE TOOLBAR ========== */
+.products-page-mobile-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.mobile-filter-btn {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* ========== MOBILE OFFCANVAS ========== */
+.offcanvas-header {
+  padding: 1.25rem 1.5rem;
+}
+
+.offcanvas-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-main, #2C3E50);
+}
+
+.offcanvas-body {
+  padding: 0;
+  overflow-y: auto;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 576px) {
+  .products-page-header {
+    padding: 1.5rem 0;
+  }
+
+  .products-page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .products-page-mobile-toolbar {
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+  }
+
+  .mobile-filter-btn,
+  .mobile-sort-dropdown .btn {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+/* Pagination Styles */
+.pagination {
+  gap: 0.25rem;
+}
+
+.page-link {
+  color: #6f42c1;
+  border: 1px solid #e0e0e0;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.page-link:hover {
+  background: #6f42c1;
+  color: white;
+  border-color: #6f42c1;
+}
+
+.page-item.active .page-link {
+  background: #6f42c1;
+  border-color: #6f42c1;
+  color: white;
+}
+
+.page-item.disabled .page-link {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-item.disabled .page-link:hover {
+  background: transparent;
+  color: #6f42c1;
+  border-color: #e0e0e0;
+}
+
