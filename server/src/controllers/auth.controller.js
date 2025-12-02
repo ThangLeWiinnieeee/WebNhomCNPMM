@@ -39,6 +39,7 @@ const registerPost = async (req, res) => {
             fullname: fullName,
             email: email,
             password: hashedPassword,
+            type: 'login'
         });
         console.log(req.body)
 
@@ -293,51 +294,84 @@ const logoutPost = async (req, res) => {
 
 const googleLoginPost = async (req, res) => {
     try {
-        const { credential } = req.body;
+        const { email, name, picture, sub } = req.body;
         
-        if (!credential) {
+        if (!email || !sub) {
             return res.json({ 
                 code: 'error',
-                message: 'Không tìm thấy thông tin đăng nhập Google' 
+                message: 'Thông tin Google không hợp lệ' 
             });
         }
 
-        // Lấy thông tin user từ Google access token
-        const response = await fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${credential}`);
-        const googleUser = await response.json();
+        // Kiểm tra email đã tồn tại chưa
+        const existingUser = await userModel.findOne({ email: email });
         
-        if (!googleUser || !googleUser.email) {
-            return res.json({ 
-                code: 'error',
-                message: 'Không thể lấy thông tin từ Google' 
-            });
-        }
+        if (existingUser) {
+            // Nếu user đã tồn tại và là tài khoản đăng ký thường
+            if (existingUser.type === 'login') {
+                return res.json({ 
+                    code: 'error',
+                    message: 'Email này đã được đăng ký bằng tài khoản thường. Vui lòng đăng nhập bằng email và mật khẩu' 
+                });
+            }
+            
+            // Nếu đã là tài khoản Google, cho đăng nhập
+            if (existingUser.type === 'loginGoogle') {
+                // Tạo access token
+                const accessToken = jwt.sign(
+                    { userId: existingUser._id, email: existingUser.email },
+                    process.env.ACCESS_TOKEN_SECRET,
+                    { expiresIn: '1h' }
+                );
 
-        // Kiểm tra user đã tồn tại chưa
-        let user = await userModel.findOne({ email: googleUser.email });
-        
-        if (!user) {
-            // Tạo user mới nếu chưa tồn tại
-            user = await userModel.create({
-                fullname: googleUser.name,
-                email: googleUser.email,
-                avatar: googleUser.picture,
-                password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10), // Random password
-                googleId: googleUser.sub,
-                isGoogleAccount: true
-            });
-        } else {
-            // Cập nhật thông tin nếu đã tồn tại
-            if (!user.googleId) {
-                user.googleId = googleUser.sub;
-                user.isGoogleAccount = true;
-                await user.save();
+                // Tạo refresh token
+                const refreshToken = crypto.randomBytes(64).toString('hex');
+
+                // Lưu refresh token vào database
+                await sessionModel.create({
+                    userID: existingUser._id,
+                    refreshToken: refreshToken,
+                    expiresAt: new Date(Date.now() + 15*24*60*60*1000) // 15 ngày
+                });
+
+                // Trả refresh token qua cookie
+                res.cookie('refreshToken', refreshToken, {
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production' ? true : false,
+                    sameSite: 'none',
+                    maxAge: 15*24*60*60*1000 // 15 ngày
+                });
+
+                // Trả về thông tin user
+                return res.json({
+                    code: "success",
+                    message: "Đăng nhập Google thành công!",
+                    accessToken: accessToken,
+                    user: {
+                        _id: existingUser._id,
+                        fullname: existingUser.fullname,
+                        email: existingUser.email,
+                        avatar: existingUser.avatar,
+                        phone: existingUser.phone,
+                        bio: existingUser.bio
+                    }
+                });
             }
         }
 
+        // Tạo user mới với tài khoản Google
+        const newUser = await userModel.create({
+            fullname: name,
+            email: email,
+            avatar: picture,
+            password: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10), // Random password
+            type: 'loginGoogle',
+            googleId: sub
+        });
+
         // Tạo access token
         const accessToken = jwt.sign(
-            { userId: user._id, email: user.email },
+            { userId: newUser._id, email: newUser.email },
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: '1h' }
         );
@@ -347,7 +381,7 @@ const googleLoginPost = async (req, res) => {
 
         // Lưu refresh token vào database
         await sessionModel.create({
-            userID: user._id,
+            userID: newUser._id,
             refreshToken: refreshToken,
             expiresAt: new Date(Date.now() + 15*24*60*60*1000) // 15 ngày
         });
@@ -363,15 +397,15 @@ const googleLoginPost = async (req, res) => {
         // Trả về thông tin user
         return res.json({
             code: "success",
-            message: "Đăng nhập Google thành công!",
+            message: "Đăng ký và đăng nhập Google thành công!",
             accessToken: accessToken,
             user: {
-                _id: user._id,
-                fullname: user.fullname,
-                email: user.email,
-                avatar: user.avatar,
-                phone: user.phone,
-                bio: user.bio
+                _id: newUser._id,
+                fullname: newUser.fullname,
+                email: newUser.email,
+                avatar: newUser.avatar,
+                phone: newUser.phone,
+                bio: newUser.bio
             }
         });
 

@@ -1,11 +1,9 @@
-import React, {useState} from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector } from 'react-redux';
-import { loginUserThunk, googleLoginThunk } from '../stores/thunks/authThunks';
-import { toast } from 'sonner';
+import { useAuth } from '../stores/hooks/useAuth';
 import Divider from "../components/Divider/divider.jsx";
 import GoogleLoginButton from "../components/GoogleLoginButton/GoogleLoginButton.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
@@ -26,63 +24,22 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { loading } = useSelector((state) => state.auth);
+    const { login, loginWithGoogle, loading } = useAuth();
     
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
 
     const onLoginSubmit = async (data) => {
-        try {
-            const result = await dispatch(loginUserThunk(data)).unwrap();
-            
-            toast.success("Đăng nhập thành công!");
-            
-            // Kiểm tra role và điều hướng
-            const userRole = result?.user?.role || result?.user?.role_id;
-            
-            if (userRole === 'user' || userRole === 'member' || userRole === 'customer') {
-                // User thường -> Trang chủ
-                navigate('/', { replace: true });
-            } else if (userRole === 'admin' || userRole === 'administrator') {
-                // Admin -> Dashboard
-                navigate('/admin/dashboard', { replace: true });
-            } else {
-                // Mặc định về trang chủ
-                navigate('/', { replace: true });
-            }
-        } catch (error) {
-            // error đã là string message từ backend
-            toast.error(error || "Đăng nhập thất bại!");
-        }
+        await login(data);
     }
 
-    const handleGoogleLoginSuccess = async (accessToken) => {
-        try {
-            const result = await dispatch(googleLoginThunk(accessToken)).unwrap();
-            
-            toast.success("Đăng nhập Google thành công!");
-            
-            // Kiểm tra role và điều hướng
-            const userRole = result?.user?.role || result?.user?.role_id;
-            
-            if (userRole === 'user' || userRole === 'member' || userRole === 'customer') {
-                navigate('/', { replace: true });
-            } else if (userRole === 'admin' || userRole === 'administrator') {
-                navigate('/admin/dashboard', { replace: true });
-            } else {
-                navigate('/', { replace: true });
-            }
-        } catch (error) {
-            toast.error(error || "Đăng nhập Google thất bại!");
-        }
+    const handleGoogleLoginSuccess = async (googleUserInfo) => {
+        await loginWithGoogle(googleUserInfo);
     }
 
     const handleGoogleLoginError = (error) => {
         console.error('Google login error:', error);
-        toast.error("Không thể đăng nhập bằng Google. Vui lòng thử lại!");
     }
 
     return (

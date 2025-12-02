@@ -1,13 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logoutUserThunk } from '../../stores/thunks/authThunks';
-import { toast } from 'sonner';
+import { useAuth } from '../../stores/hooks/useAuth';
 import './Header.css';
 
 const Header = () => {
-    const dispatch = useDispatch();
-    const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
+    const { isAuthenticated, user, loading, logout } = useAuth();
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
     const dropdownRef = useRef(null);
@@ -26,15 +23,7 @@ const Header = () => {
 
     const handleLogout = async () => {
         setShowDropdown(false);
-        try {
-            await dispatch(logoutUserThunk()).unwrap();
-            toast.success('Đăng xuất thành công!');
-            navigate('/');
-        } catch (error) {
-            toast.error('Đăng xuất thất bại!');
-            // Vẫn navigate về trang chủ ngay cả khi có lỗi
-            navigate('/');
-        }
+        await logout();
     };
 
     const toggleDropdown = () => {
@@ -49,6 +38,7 @@ const Header = () => {
     // Lấy tên hiển thị
     const displayName = user?.fullname || user?.fullName || user?.full_name || user?.name || user?.email?.split('@')[0] || 'User';
     const firstLetter = displayName.charAt(0).toUpperCase();
+    const userAvatar = user?.avatar || null;
 
     return (
         <header className="header bg-white shadow-sm border-bottom">
@@ -91,9 +81,18 @@ const Header = () => {
                                         onClick={toggleDropdown}
                                         type="button"
                                     >
-                                        <div className="user-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold text-white">
-                                            {firstLetter}
-                                        </div>
+                                        {userAvatar ? (
+                                            <img 
+                                                src={userAvatar} 
+                                                alt={displayName}
+                                                className="user-avatar rounded-circle"
+                                                style={{ objectFit: 'cover' }}
+                                            />
+                                        ) : (
+                                            <div className="user-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold text-white">
+                                                {firstLetter}
+                                            </div>
+                                        )}
                                         <span className="fw-semibold small d-none d-lg-inline">{displayName}</span>
                                         <i className={`fas fa-chevron-down small transition-transform ${showDropdown ? 'rotate-180' : ''}`}></i>
                                     </button>

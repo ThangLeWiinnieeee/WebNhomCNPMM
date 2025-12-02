@@ -2,10 +2,8 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { toast } from 'sonner';
-import { useDispatch, useSelector } from 'react-redux';
-import { forgotPasswordThunk } from '../stores/thunks/authThunks';
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from '../stores/hooks/useAuth';
 import Divider from "../components/Divider/divider.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
@@ -17,22 +15,16 @@ const loginSchema = z.object({
 });
 
 const ForgotPasswordPage = () => {
-    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const { loading } = useSelector((state) => state.auth);
+    const { forgotPassword, loading } = useAuth();
 
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(loginSchema)
     });
     
     const onForgotPasswordSubmit = async (data) => {
-        try {
-            await dispatch(forgotPasswordThunk(data)).unwrap();
-            toast.success("Mã OTP đã được gửi đến email của bạn!");
-            navigate('/otp-password', { state: { email: data.email } });
-        } catch (error) {
-            toast.error(error || "Gửi mã OTP thất bại!");
-        }
+        await forgotPassword(data);
+        navigate('/otp-password', { state: { email: data.email } });
     }
 
     return (

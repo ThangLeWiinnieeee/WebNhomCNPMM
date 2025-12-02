@@ -2,11 +2,10 @@ import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { verifyOtpThunk } from '../stores/thunks/authThunks';
+import { useAuth } from '../stores/hooks/useAuth';
 import Divider from "../components/Divider/divider.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css"
@@ -19,8 +18,7 @@ const otpSchema = z.object({
 const OtpPasswordPage = () => {
     const location = useLocation();
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { loading } = useSelector((state) => state.auth);
+    const { verifyOtp, loading } = useAuth();
     const email = location.state?.email;
 
     useEffect(() => {
@@ -35,25 +33,13 @@ const OtpPasswordPage = () => {
     });
     
     const onOTPPasswordSubmit = async (data) => {
-        try {
-            // Gửi OTP và email về backend
-            await dispatch(verifyOtpThunk({ email: email, otp: data.otp })).unwrap();
-            
-            // Xác thực thành công
-            toast.success('Xác thực OTP thành công!');
-            
-            // Chuyển đến trang reset password với email và OTP
-            navigate('/reset-password', { 
-                state: { 
-                    email: email,
-                    otp: data.otp 
-                } 
-            });
-            
-        } catch (error) {
-            // Hiển thị lỗi từ backend
-            toast.error(error || 'Xác thực OTP thất bại');
-        }
+        await verifyOtp({ email: email, otp: data.otp });
+        navigate('/reset-password', { 
+            state: { 
+                email: email,
+                otp: data.otp 
+            } 
+        });
     }
 
     return (
