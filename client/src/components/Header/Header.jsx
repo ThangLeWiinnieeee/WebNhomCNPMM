@@ -38,8 +38,9 @@ const Header = () => {
     // Lấy tên hiển thị
     const displayName = user?.fullname || user?.fullName || user?.full_name || user?.name || user?.email?.split('@')[0] || 'User';
     const firstLetter = displayName.charAt(0).toUpperCase();
+    // Lấy avatar từ user object (có thể từ Google hoặc upload từ database)
     const userAvatar = user?.avatar || null;
-
+    
     return (
         <header className="header bg-white shadow-sm border-bottom">
             <div className="container">
@@ -86,7 +87,6 @@ const Header = () => {
                                                 src={userAvatar} 
                                                 alt={displayName}
                                                 className="user-avatar rounded-circle"
-                                                style={{ objectFit: 'cover' }}
                                             />
                                         ) : (
                                             <div className="user-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold text-white">

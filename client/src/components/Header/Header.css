@@ -10,6 +10,15 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* Remove underline from navbar brand link */
+.navbar-brand {
+    text-decoration: none !important;
+}
+
+.navbar-brand:hover {
+    text-decoration: none !important;
+}
+
 /* Logo Gradient Text */
 .logo-text {
     background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
@@ -17,10 +26,12 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
     transition: opacity 0.3s ease;
+    text-decoration: none !important;
 }
 
 .logo-text:hover {
     opacity: 0.8;
+    text-decoration: none !important;
 }
 
 /* Navigation Links Hover Effect */
@@ -61,6 +72,7 @@
     border-radius: 6px;
     padding: 6px 16px;
     min-width: 100px;
+    text-decoration: none !important;
 }
 
 .btn-outline-pink:hover {
@@ -69,6 +81,7 @@
     border-color: transparent;
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+    text-decoration: none !important;
 }
 
 .btn-gradient-pink {
@@ -80,6 +93,7 @@
     border-radius: 6px;
     padding: 6px 16px;
     min-width: 100px;
+    text-decoration: none !important;
 }
 
 .btn-gradient-pink:hover {
@@ -87,6 +101,7 @@
     color: white;
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+    text-decoration: none !important;
 }
 
 /* User Info Wrapper */
@@ -109,6 +124,14 @@
     background: linear-gradient(135deg, #ec4899 0%, #f97316 100%);
     box-shadow: 0 2px 8px rgba(236, 72, 153, 0.3);
     font-size: 18px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 /* Dropdown Menu Custom */
