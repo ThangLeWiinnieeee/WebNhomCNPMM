@@ -1,15 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../stores/hooks/useAuth';
 import './Header.css';
 
 const Header = () => {
+    const dispatch = useDispatch();
     const { isAuthenticated, user, loading, logout } = useAuth();
+    const { categories } = useSelector((state) => state.product);
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
     const dropdownRef = useRef(null);
+    const categoriesDropdownRef = useRef(null);
 
-    // Đóng dropdown khi click bên ngoài
+    // Fetch categories on mount
+    useEffect(() => {
+        dispatch(fetchAllCategoriesThunk());
+    }, [dispatch]);
+
+    // Đóng dropdown khi click bên ngoài (chỉ cho user dropdown)
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -62,8 +72,39 @@ const Header = () => {
                             <li className="nav-item">
                                 <Link to="/" className="nav-link fw-semibold px-3">Trang chủ</Link>
                             </li>
-                            <li className="nav-item">
-                                <Link to="/services" className="nav-link fw-semibold px-3">Dịch vụ</Link>
+                            <li 
+                                className="nav-item" 
+                                ref={categoriesDropdownRef}
+                                onMouseEnter={() => setShowCategoriesDropdown(true)}
+                                onMouseLeave={() => setShowCategoriesDropdown(false)}
+                            >
+                                <button
+                                    className="nav-link fw-semibold px-3 dropdown-toggle border-0 bg-transparent d-flex align-items-center gap-1"
+                                    type="button"
+                                >
+                                    <span>Dịch vụ</span>
+                                    <i className="fas fa-chevron-down small"></i>
+                                </button>
+                                {showCategoriesDropdown && Array.isArray(categories) && categories.length > 0 && (
+                                    <div className="dropdown-menu show position-absolute shadow-lg">
+                                        {categories.map((category) => (
+                                            <Link
+                                                key={category._id}
+                                                to={`/services?categoryId=${category._id}`}
+                                                className="dropdown-item"
+                                            >
+                                                {category.name}
+                                            </Link>
+                                        ))}
+                                        <div className="dropdown-divider"></div>
+                                        <Link
+                                            to="/services"
+                                            className="dropdown-item"
+                                        >
+                                            Xem tất cả dịch vụ
+                                        </Link>
+                                    </div>
+                                )}
                             </li>
                             <li className="nav-item">
                                 <Link to="/gallery" className="nav-link fw-semibold px-3">Gallery</Link>
