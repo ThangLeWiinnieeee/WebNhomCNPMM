@@ -19,7 +19,6 @@ const ProductsPage = () => {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
   const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || searchParams.get('sortBy') || 'newest');
-  const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [priceRange, setPriceRange] = useState({
     min: searchParams.get('minPrice') || '',
     max: searchParams.get('maxPrice') || '',
@@ -87,7 +86,7 @@ const ProductsPage = () => {
     if (!allProducts || allProducts.length === 0) return [];
 
     const sorted = [...allProducts];
-    
+
     switch (currentSort) {
       case 'price-asc':
         return sorted.sort((a, b) => {
@@ -121,8 +120,6 @@ const ProductsPage = () => {
     }
     newParams.set('page', '1');
     setSearchParams(newParams);
-    // Close mobile filter after selection
-    setShowMobileFilter(false);
   };
 
   const handleSearchChange = (search) => {
@@ -194,7 +191,18 @@ const ProductsPage = () => {
     <div className="products-page">
       <Header />
 
-      <div className="container my-5">
+      <div className="container-fluid my-5">
+        <SidebarFilter
+          currentFilter={currentFilter}
+          searchQuery={searchQuery}
+          categoryId={categoryId}
+          currentSort={currentSort}
+          priceRange={priceRange}
+          onFilterChange={handleFilterChange}
+          onSearchChange={handleSearchChange}
+          onPriceRangeChange={handlePriceRangeChange}
+          onSortChange={handleSortChange}
+        />
         {/* Flash Sale Section */}
         <FlashSaleSection products={promotionProducts || []} />
 
@@ -205,40 +213,13 @@ const ProductsPage = () => {
           </p>
         </div>
 
-        {/* Mobile Filter & Sort Bar */}
-        <div className="products-page-mobile-toolbar d-lg-none mb-4">
-          <button
-            className="btn btn-outline-primary mobile-filter-btn"
-            type="button"
-            data-bs-toggle="offcanvas"
-            data-bs-target="#mobileFilterOffcanvas"
-            onClick={() => setShowMobileFilter(true)}
-          >
-            <i className="fas fa-filter me-2"></i>
-            Bộ lọc
-          </button>
-        
-        </div>
+        {/* Horizontal Filter - Top of Page */}
+
 
         {/* Main Content Layout */}
         <div className="row g-4">
-          {/* Left Sidebar - Desktop Only */}
-          <div className="col-lg-3 d-none d-lg-block">
-            <SidebarFilter
-              currentFilter={currentFilter}
-              searchQuery={searchQuery}
-              categoryId={categoryId}
-              currentSort={currentSort}
-              priceRange={priceRange}
-              onFilterChange={handleFilterChange}
-              onSearchChange={handleSearchChange}
-              onPriceRangeChange={handlePriceRangeChange}
-              onSortChange={handleSortChange}
-            />
-          </div>
-
-          {/* Right Content - Product Grid */}
-          <div className="col-lg-9">
+          {/* Product Grid - Full Width */}
+          <div className="col-12">
             {loading ? (
               <div className="text-center py-5">
                 <div className="spinner-border text-primary" role="status">
@@ -258,39 +239,6 @@ const ProductsPage = () => {
         </div>
       </div>
 
-      {/* Mobile Filter Offcanvas */}
-      <div
-        className="offcanvas offcanvas-start"
-        tabIndex="-1"
-        id="mobileFilterOffcanvas"
-        aria-labelledby="mobileFilterOffcanvasLabel"
-      >
-        <div className="offcanvas-header border-bottom">
-          <h5 className="offcanvas-title font-heading" id="mobileFilterOffcanvasLabel">
-            Bộ lọc
-          </h5>
-          <button
-            type="button"
-            className="btn-close"
-            data-bs-dismiss="offcanvas"
-            aria-label="Close"
-            onClick={() => setShowMobileFilter(false)}
-          ></button>
-        </div>
-        <div className="offcanvas-body">
-          <SidebarFilter
-            currentFilter={currentFilter}
-            searchQuery={searchQuery}
-            categoryId={categoryId}
-            currentSort={currentSort}
-            priceRange={priceRange}
-            onFilterChange={handleFilterChange}
-            onSearchChange={handleSearchChange}
-            onPriceRangeChange={handlePriceRangeChange}
-            onSortChange={handleSortChange}
-          />
-        </div>
-      </div>
 
       <Footer />
     </div>
