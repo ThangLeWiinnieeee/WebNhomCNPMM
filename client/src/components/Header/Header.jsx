@@ -86,23 +86,27 @@ const Header = () => {
                                     <i className="fas fa-chevron-down small"></i>
                                 </button>
                                 {showCategoriesDropdown && Array.isArray(categories) && categories.length > 0 && (
-                                    <div className="dropdown-menu show position-absolute shadow-lg">
-                                        {categories.map((category) => (
+                                    <div className="categories-dropdown-menu show position-absolute shadow-lg">
+                                        <div className="categories-dropdown-content">
+                                            {categories.map((category) => (
+                                                <Link
+                                                    key={category._id}
+                                                    to={`/services?categoryId=${category._id}`}
+                                                    className="categories-dropdown-item"
+                                                >
+                                                    <i className="fas fa-chevron-right categories-dropdown-icon"></i>
+                                                    <span>{category.name}</span>
+                                                </Link>
+                                            ))}
+                                            <div className="categories-dropdown-divider"></div>
                                             <Link
-                                                key={category._id}
-                                                to={`/services?categoryId=${category._id}`}
-                                                className="dropdown-item"
+                                                to="/services"
+                                                className="categories-dropdown-item categories-dropdown-item-all"
                                             >
-                                                {category.name}
+                                                <i className="fas fa-th-large categories-dropdown-icon"></i>
+                                                <span>Xem tất cả dịch vụ</span>
                                             </Link>
-                                        ))}
-                                        <div className="dropdown-divider"></div>
-                                        <Link
-                                            to="/services"
-                                            className="dropdown-item"
-                                        >
-                                            Xem tất cả dịch vụ
-                                        </Link>
+                                        </div>
                                     </div>
                                 )}
                             </li>
