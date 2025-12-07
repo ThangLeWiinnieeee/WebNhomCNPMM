@@ -32,16 +32,8 @@
 
 }
 
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #ec4899, #f97316);
-    transition: width 0.3s ease;
+.nav-link::after{
+    display: none;
 }
 
 .nav-link:hover {
@@ -167,4 +159,72 @@
 
 .rotate-180 {
     transform: rotate(180deg);
+}
+
+/* Categories Dropdown Menu */
+.categories-dropdown-menu {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    min-width: 280px;
+    z-index: 1000;
+    animation: fadeInDown 0.3s ease;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.categories-dropdown-content {
+    padding: 0.75rem 0;
+}
+
+.categories-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.25rem;
+    color: #2d3436;
+    text-decoration: none;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+}
+
+.categories-dropdown-item:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(212, 175, 55, 0.05) 100%);
+    color: #D4AF37;
+    padding-left: 1.5rem;
+}
+
+.categories-dropdown-item-all {
+    font-weight: 600;
+    color: #D4AF37;
+}
+
+.categories-dropdown-item-all:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0.1) 100%);
+    color: #B8941F;
+}
+
+.categories-dropdown-icon {
+    font-size: 0.75rem;
+    color: rgba(212, 175, 55, 0.6);
+    transition: all 0.2s ease;
+    width: 16px;
+    text-align: center;
+}
+
+.categories-dropdown-item:hover .categories-dropdown-icon {
+    color: #D4AF37;
+    transform: translateX(4px);
+}
+
+.categories-dropdown-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
+    margin: 0.5rem 1.25rem;
 }
