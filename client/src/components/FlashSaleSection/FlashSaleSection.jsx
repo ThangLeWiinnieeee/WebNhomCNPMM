@@ -8,6 +8,7 @@ import useCountdown from '../../stores/hooks/useCountdown';
 import ProductCard from '../ProductCard/ProductCard';
 import './FlashSaleSection.css';
 
+
 const FlashSaleSection = ({ products = [] }) => {
   // Tính toán target date (30 ngày từ hôm nay)
   const targetDate = React.useMemo(() => {
@@ -83,9 +84,9 @@ const FlashSaleSection = ({ products = [] }) => {
   return (
     <section className="flash-sale-section">
       <div className="container">
-        <div className="row align-items-center g-4">
+        <div className="row align-items-center g-4 flex-column">
           {/* Left Column - Info & Timer */}
-          <div className="col-12 col-lg-3">
+          <div className="col-12">
             <div className="flash-sale-content">
               <h2 className="flash-sale-title">Ưu đãi Giờ Vàng</h2>
               <p className="flash-sale-description">
@@ -139,12 +140,12 @@ const FlashSaleSection = ({ products = [] }) => {
           </div>
 
           {/* Right Column - Product Carousel */}
-          <div className="col-12 col-lg-9">
+          <div className="col-12">
             <div className="flash-sale-carousel">
               <Swiper
                 modules={[Autoplay]}
-                spaceBetween={30}
-                slidesPerView={1.5}
+                spaceBetween={20}
+                slidesPerView={1}
                 centeredSlides={false}
                 grabCursor={true}
                 autoplay={{
@@ -153,15 +154,15 @@ const FlashSaleSection = ({ products = [] }) => {
                 }}
                 breakpoints={{
                   576: {
-                    slidesPerView: 1.5,
+                    slidesPerView: 2,
                     spaceBetween: 20,
                   },
                   768: {
-                    slidesPerView: 1.5,
+                    slidesPerView: 3,
                     spaceBetween: 25,
                   },
                   1024: {
-                    slidesPerView: 2.5,
+                    slidesPerView: 4,
                     spaceBetween: 30,
                   },
                 }}
