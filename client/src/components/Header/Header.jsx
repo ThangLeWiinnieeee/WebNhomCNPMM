@@ -50,8 +50,9 @@ const Header = () => {
     // Lấy tên hiển thị
     const displayName = user?.fullname || user?.fullName || user?.full_name || user?.name || user?.email?.split('@')[0] || 'User';
     const firstLetter = displayName.charAt(0).toUpperCase();
+    // Lấy avatar từ user object (có thể từ Google hoặc upload từ database)
     const userAvatar = user?.avatar || null;
-
+    
     return (
         <header className="header bg-white shadow-sm border-bottom">
             <div className="container">
@@ -74,7 +75,7 @@ const Header = () => {
                                 <Link to="/" className="nav-link fw-semibold px-3">Trang chủ</Link>
                             </li>
                             <li 
-                                className="nav-item" 
+                                className="nav-item position-relative" 
                                 ref={categoriesDropdownRef}
                                 onMouseEnter={() => setShowCategoriesDropdown(true)}
                                 onMouseLeave={() => setShowCategoriesDropdown(false)}
@@ -87,7 +88,7 @@ const Header = () => {
                                     <i className="fas fa-chevron-down small"></i>
                                 </button>
                                 {showCategoriesDropdown && Array.isArray(categories) && categories.length > 0 && (
-                                    <div className="categories-dropdown-menu show position-absolute shadow-lg">
+                                    <div className="categories-dropdown-menu show shadow-lg">
                                         <div className="categories-dropdown-content">
                                             {categories.map((category) => (
                                                 <Link
@@ -133,7 +134,6 @@ const Header = () => {
                                                 src={userAvatar} 
                                                 alt={displayName}
                                                 className="user-avatar rounded-circle"
-                                                style={{ objectFit: 'cover' }}
                                             />
                                         ) : (
                                             <div className="user-avatar rounded-circle d-flex align-items-center justify-content-center fw-bold text-white">

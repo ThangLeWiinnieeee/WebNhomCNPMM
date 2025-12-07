@@ -21,7 +21,15 @@ export const updateUserProfileThunk = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const response = await api.put('/user/profile', userData);
-      return response.data?.user || response.user || response.data || response;
+      
+      console.log('Update profile response:', response);
+      
+      // Backend trả về { code: 'success', message: '...', user: {...} }
+      if (response.code === 'error') {
+        return rejectWithValue(response.message || 'Lỗi khi cập nhật thông tin');
+      }
+      
+      return response.user || response.data?.user || response;
     } catch (error) {
       const errorMessage = error?.message || 'Lỗi khi cập nhật thông tin';
       return rejectWithValue(errorMessage);

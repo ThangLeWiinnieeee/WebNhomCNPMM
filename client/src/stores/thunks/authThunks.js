@@ -21,7 +21,6 @@ export const loginUserThunk = createAsyncThunk(
   async (credentials, { rejectWithValue }) => {
     try {
       const response = await api.post('/account/login', credentials);
-      console.log('Login response:', response);
 
       // Lưu token vào localStorage
       const token = response.accessToken;
