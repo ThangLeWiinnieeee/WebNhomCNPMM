@@ -25,16 +25,22 @@ const schema = new mongoose.Schema({
   },
   // URL ảnh đại diện (lưu trên Cloudinary)
   avatar: { 
-    type: String 
+    type: String,
+    default: null
   },
   // Public ID của ảnh trên Cloudinary (dùng để xóa ảnh)
   avatarID: {
-    type: String
+    type: String,
+    default: null
   },
   // Số điện thoại (unique, nhưng cho phép null)
   phone: { 
     type: String,
     sparse: true //Cho phép trường này có thể null nhưng vẫn giữ tính unique
+  },
+  // Địa chỉ
+  address: {
+    type: String
   },
   type: {
     type: String,

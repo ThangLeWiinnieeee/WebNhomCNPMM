@@ -39,7 +39,9 @@ const registerPost = async (req, res) => {
             fullname: fullName,
             email: email,
             password: hashedPassword,
-            type: 'login'
+            type: 'login',
+            avatar: null,
+            avatarID: null
         });
         console.log(req.body)
 
@@ -127,7 +129,8 @@ const loginPost = async (req, res) => {
                 email: findEmail.email,
                 avatar: findEmail.avatar,
                 phone: findEmail.phone,
-                bio: findEmail.bio
+                bio: findEmail.bio,
+                type: findEmail.type
             }
         });
 
@@ -353,7 +356,8 @@ const googleLoginPost = async (req, res) => {
                         email: existingUser.email,
                         avatar: existingUser.avatar,
                         phone: existingUser.phone,
-                        bio: existingUser.bio
+                        bio: existingUser.bio,
+                        type: existingUser.type
                     }
                 });
             }
@@ -405,7 +409,8 @@ const googleLoginPost = async (req, res) => {
                 email: newUser.email,
                 avatar: newUser.avatar,
                 phone: newUser.phone,
-                bio: newUser.bio
+                bio: newUser.bio,
+                type: newUser.type
             }
         });
 

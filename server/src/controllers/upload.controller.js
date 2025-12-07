@@ -1,12 +1,6 @@
 import upload from '../middlewares/upload.middleware.js';
+import userModel from '../models/user.model.js';
 
-/**
- * Upload một ảnh lên Cloudinary
- * File được xử lý bởi multer middleware trước khi đến controller
- * @route POST /upload/image
- * @param {File} req.file - File ảnh đã được upload (từ multer middleware)
- * @returns {Object} URL và publicId của ảnh đã upload
- */
 const uploadImage = async (req, res) => {
   try {
     // Kiểm tra file đã được upload chưa (multer middleware xử lý trước)
@@ -17,12 +11,50 @@ const uploadImage = async (req, res) => {
       });
     }
 
+    // Lấy thông tin ảnh đã upload lên Cloudinary
+    const imageUrl = req.file.path;
+    const publicId = req.file.filename;
+
+    // Nếu có user (đã đăng nhập), tự động lưu avatar vào database
+    if (req.user && req.user._id) {
+      const updatedUser = await userModel.findByIdAndUpdate(
+        req.user._id,
+        { 
+          avatar: imageUrl,
+          avatarID: publicId 
+        },
+        { new: true, runValidators: true }
+      );
+
+      console.log('Avatar updated for user:', updatedUser.email);
+
+      return res.status(200).json({
+        code: 'success',
+        message: 'Upload và cập nhật avatar thành công!',
+        data: {
+          url: imageUrl,
+          publicId: publicId,
+        },
+        user: {
+          _id: updatedUser._id,
+          fullname: updatedUser.fullname,
+          email: updatedUser.email,
+          avatar: updatedUser.avatar,
+          avatarID: updatedUser.avatarID,
+          phone: updatedUser.phone,
+          address: updatedUser.address,
+          type: updatedUser.type
+        }
+      });
+    }
+
+    // Nếu không có user (chưa đăng nhập), chỉ trả về URL
     return res.status(200).json({
       code: 'success',
       message: 'Upload ảnh thành công!',
       data: {
-        url: req.file.path,
-        publicId: req.file.filename,
+        url: imageUrl,
+        publicId: publicId,
       },
     });
   } catch (error) {
@@ -34,13 +66,6 @@ const uploadImage = async (req, res) => {
   }
 };
 
-/**
- * Upload nhiều ảnh lên Cloudinary cùng lúc
- * File được xử lý bởi multer middleware trước khi đến controller
- * @route POST /upload/images
- * @param {Array<File>} req.files - Danh sách file ảnh đã được upload (từ multer middleware)
- * @returns {Object} Danh sách URL và publicId của các ảnh đã upload
- */
 const uploadMultipleImages = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
