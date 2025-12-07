@@ -186,6 +186,9 @@
 
 /* Categories Dropdown Menu */
 .categories-dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
     background: white;
     border-radius: 12px;
     border: 1px solid rgba(212, 175, 55, 0.2);
@@ -193,7 +196,8 @@
     z-index: 1000;
     animation: fadeInDown 0.3s ease;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-    margin-top: 8px;
+    margin-top: 0;
+    padding-top: 8px;
     overflow: hidden;
 }
 

@@ -73,7 +73,7 @@ const Header = () => {
                                 <Link to="/" className="nav-link fw-semibold px-3">Trang chủ</Link>
                             </li>
                             <li 
-                                className="nav-item" 
+                                className="nav-item position-relative" 
                                 ref={categoriesDropdownRef}
                                 onMouseEnter={() => setShowCategoriesDropdown(true)}
                                 onMouseLeave={() => setShowCategoriesDropdown(false)}
@@ -86,7 +86,7 @@ const Header = () => {
                                     <i className="fas fa-chevron-down small"></i>
                                 </button>
                                 {showCategoriesDropdown && Array.isArray(categories) && categories.length > 0 && (
-                                    <div className="categories-dropdown-menu show position-absolute shadow-lg">
+                                    <div className="categories-dropdown-menu show shadow-lg">
                                         <div className="categories-dropdown-content">
                                             {categories.map((category) => (
                                                 <Link
