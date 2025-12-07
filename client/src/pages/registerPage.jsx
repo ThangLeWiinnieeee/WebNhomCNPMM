@@ -1,11 +1,9 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDispatch, useSelector } from 'react-redux';
-import { registerUserThunk } from '../stores/thunks/authThunks';
-import { toast } from 'sonner';
+import { useAuth } from '../stores/hooks/useAuth';
 import Divider from "../components/Divider/divider.jsx";
 import AuthLayout from "../components/authLayout/authLayout.jsx";
 import "../assets/css/authForm.css";
@@ -35,22 +33,14 @@ const registerSchema = z.object({
 });
 
 const RegisterPage = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { loading } = useSelector((state) => state.auth);
+    const { register: registerUser, loading } = useAuth();
     
     const { register, handleSubmit, formState: { errors, isSubmitting }} = useForm({
         resolver: zodResolver(registerSchema)
     });
 
     const onRegisterSubmit = async (data) => {
-        try {
-            await dispatch(registerUserThunk(data)).unwrap();
-            toast.success("Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.");
-            navigate('/login');
-        } catch (error) {
-            toast.error(error || "Đăng ký thất bại!");
-        }
+        await registerUser(data);
     }
 
     return (

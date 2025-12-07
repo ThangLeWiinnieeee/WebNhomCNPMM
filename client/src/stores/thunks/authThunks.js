@@ -43,10 +43,15 @@ export const loginUserThunk = createAsyncThunk(
 // Thunk để đăng nhập bằng Google
 export const googleLoginThunk = createAsyncThunk(
   'auth/googleLogin',
-  async (credential, { rejectWithValue }) => {
+  async (googleUserInfo, { rejectWithValue }) => {
     try {
-      console.log('Google credential:', credential);  
-      const response = await api.post('/account/google-login', { credential });
+      console.log('Google user info:', googleUserInfo);  
+      const response = await api.post('/account/google-login', { 
+        email: googleUserInfo.email,
+        name: googleUserInfo.name,
+        picture: googleUserInfo.picture,
+        sub: googleUserInfo.sub
+      });
       
       // Lưu token vào localStorage
       const token = response.accessToken;
