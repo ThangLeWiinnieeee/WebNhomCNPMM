@@ -1,16 +1,18 @@
 import express from 'express';
 import uploadController from '../controllers/upload.controller.js';
 import upload from '../middlewares/upload.middleware.js';
+import { verifyToken } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 
 /**
- * Upload một ảnh lên Cloudinary
+ * Upload một ảnh lên Cloudinary và tự động cập nhật avatar vào database
  * Sử dụng multer middleware để xử lý file upload
+ * Yêu cầu authentication để lưu vào database
  * @route POST /upload/image
  * @param {File} req.file - File ảnh (field name: 'image')
  */
-router.post('/image', upload.single('image'), uploadController.uploadImage);
+router.post('/image', verifyToken, upload.single('image'), uploadController.uploadImage);
 
 /**
  * Upload nhiều ảnh lên Cloudinary cùng lúc
