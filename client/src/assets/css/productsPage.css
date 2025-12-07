@@ -6,10 +6,23 @@
 }
 
 .products-page .container {
-  margin-top: 2rem !important;
-  margin-bottom: 2rem !important;
+  /* margin-top: 2rem !important; */
+  /* margin-bottom: 2rem !important; */
   position: relative;
   z-index: 1;
+  max-width: 1400px; /* Tăng từ 1320px (Bootstrap xl) lên 1400px */
+}
+
+@media (min-width: 1200px) {
+  .products-page .container {
+    max-width: 1400px;
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .products-page .container {
+    max-width: 1200px; /* Tăng từ 1140px (Bootstrap lg) lên 1200px */
+  }
 }
 
 /* Ensure layout 2 columns don't overlap */

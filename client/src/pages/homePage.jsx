@@ -9,6 +9,7 @@ import {
   fetchBestSellingProductsThunk,
   fetchMostViewedProductsThunk,
   fetchPromotionProductsThunk,
+  fetchAllCategoriesThunk,
 } from '../stores/thunks/productThunks';
 import '../assets/css/homePage.css';
 
@@ -19,6 +20,7 @@ const HomePage = () => {
         bestSellingProducts,
         mostViewedProducts,
         promotionProducts,
+        categories,
         loading,
     } = useSelector((state) => state.product);
 
@@ -27,6 +29,7 @@ const HomePage = () => {
         dispatch(fetchBestSellingProductsThunk());
         dispatch(fetchMostViewedProductsThunk());
         dispatch(fetchPromotionProductsThunk());
+        dispatch(fetchAllCategoriesThunk());
     }, [dispatch]);
 
     return (
@@ -64,71 +67,29 @@ const HomePage = () => {
                     </div>
                     
                     <div className="row g-4">
-                        <div className="col-lg-4 col-md-6">
-                            <div className="card h-100 border-0 shadow-sm service-card">
-                                <div className="card-body text-center p-4">
-                                    <h3 className="h5 fw-bold mb-3">Tổ chức tiệc cưới</h3>
-                                    <p className="text-muted">
-                                        Lên kế hoạch và tổ chức tiệc cưới hoàn hảo theo phong cách của bạn
-                                    </p>
+                        {Array.isArray(categories) && categories.length > 0 ? (
+                            categories.map((category) => (
+                                <div key={category._id} className="col-lg-4 col-md-6">
+                                    <Link 
+                                        to={`/services?categoryId=${category._id}`}
+                                        className="text-decoration-none"
+                                    >
+                                        <div className="card h-100 border-0 shadow-sm service-card">
+                                            <div className="card-body text-center p-4">
+                                                <h3 className="h5 fw-bold mb-3">{category.name}</h3>
+                                                <p className="text-muted">
+                                                    {category.description || 'Dịch vụ chuyên nghiệp cho ngày trọng đại của bạn'}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Link>
                                 </div>
+                            ))
+                        ) : (
+                            <div className="col-12 text-center">
+                                <p className="text-muted">Đang tải danh sách dịch vụ...</p>
                             </div>
-                        </div>
-
-                        <div className="col-lg-4 col-md-6">
-                            <div className="card h-100 border-0 shadow-sm service-card">
-                                <div className="card-body text-center p-4">
-                                    <h3 className="h5 fw-bold mb-3">Chụp ảnh cưới</h3>
-                                    <p className="text-muted">
-                                        Lưu giữ những khoảnh khắc đẹp nhất của ngày trọng đại
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="col-lg-4 col-md-6">
-                            <div className="card h-100 border-0 shadow-sm service-card">
-                                <div className="card-body text-center p-4">
-                                    <h3 className="h5 fw-bold mb-3">Trang trí hoa</h3>
-                                    <p className="text-muted">
-                                        Thiết kế và trang trí hoa tươi sang trọng, độc đáo
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="col-lg-4 col-md-6">
-                            <div className="card h-100 border-0 shadow-sm service-card">
-                                <div className="card-body text-center p-4">
-                                    <h3 className="h5 fw-bold mb-3">Âm thanh - Ánh sáng</h3>
-                                    <p className="text-muted">
-                                        Hệ thống âm thanh, ánh sáng chuyên nghiệp, hiện đại
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="col-lg-4 col-md-6">
-                            <div className="card h-100 border-0 shadow-sm service-card">
-                                <div className="card-body text-center p-4">
-                                    <h3 className="h5 fw-bold mb-3">Bánh cưới</h3>
-                                    <p className="text-muted">
-                                        Bánh cưới độc quyền với thiết kế sang trọng và tinh tế
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="col-lg-4 col-md-6">
-                            <div className="card h-100 border-0 shadow-sm service-card">
-                                <div className="card-body text-center p-4">
-                                    <h3 className="h5 fw-bold mb-3">Trang phục cưới</h3>
-                                    <p className="text-muted">
-                                        Cho thuê và thiết kế trang phục cưới cao cấp
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </section>
@@ -182,7 +143,7 @@ const HomePage = () => {
 
             {/* Products Sections */}
             {/* Sản phẩm mới nhất */}
-            {newestProducts && newestProducts.length > 0 && (
+            {Array.isArray(newestProducts) && newestProducts.length > 0 && (
                 <section className="py-5 bg-light">
                     <div className="container py-4">
                         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -203,7 +164,7 @@ const HomePage = () => {
             )}
 
             {/* Sản phẩm bán chạy */}
-            {bestSellingProducts && bestSellingProducts.length > 0 && (
+            {Array.isArray(bestSellingProducts) && bestSellingProducts.length > 0 && (
                 <section className="py-5">
                     <div className="container py-4">
                         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -224,7 +185,7 @@ const HomePage = () => {
             )}
 
             {/* Sản phẩm xem nhiều */}
-            {mostViewedProducts && mostViewedProducts.length > 0 && (
+            {Array.isArray(mostViewedProducts) && mostViewedProducts.length > 0 && (
                 <section className="py-5 bg-light">
                     <div className="container py-4">
                         <div className="d-flex justify-content-between align-items-center mb-4">
@@ -245,7 +206,7 @@ const HomePage = () => {
             )}
 
             {/* Sản phẩm khuyến mãi */}
-            {promotionProducts && promotionProducts.length > 0 && (
+            {Array.isArray(promotionProducts) && promotionProducts.length > 0 && (
                 <section className="py-5">
                     <div className="container py-4">
                         <div className="d-flex justify-content-between align-items-center mb-4">

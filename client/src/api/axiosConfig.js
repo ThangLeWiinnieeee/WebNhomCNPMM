@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_BACKEND_URL, // URL backend của bạn
+  baseURL: import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001', // URL backend của bạn
   withCredentials: true, // Gửi cookie cùng với request
   headers: {
     'Content-Type': 'application/json',

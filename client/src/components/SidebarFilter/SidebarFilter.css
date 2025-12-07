@@ -1,7 +1,19 @@
 /* ============================================
-   SIDEBAR FILTER - LUXURY WEDDING THEME
+   HORIZONTAL FILTER - LUXURY WEDDING THEME
    ============================================ */
 
+.horizontal-filter {
+  background: #FFFFFF;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft, 0 2px 15px rgba(0, 0, 0, 0.06));
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Legacy sidebar-filter class for backward compatibility */
 .sidebar-filter {
   background: #FFFFFF;
   border-radius: 12px;
@@ -241,8 +253,213 @@
   padding: 0.5rem 0;
 }
 
+/* ========== HORIZONTAL FILTER STYLES ========== */
+.horizontal-filter-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.horizontal-filter-label {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main, #2C3E50);
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.horizontal-filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.horizontal-filter-btn {
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1px solid rgba(44, 62, 80, 0.15);
+  border-radius: 50px;
+  color: var(--text-secondary, #7F8C8D);
+  font-size: 0.875rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: var(--transition-base, all 0.3s ease);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  white-space: nowrap;
+}
+
+.horizontal-filter-btn:hover {
+  background: rgba(212, 175, 55, 0.05);
+  border-color: var(--primary, #D4AF37);
+  color: var(--text-main, #2C3E50);
+}
+
+.horizontal-filter-btn.active {
+  background: var(--primary, #D4AF37);
+  border-color: var(--primary, #D4AF37);
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+/* Search Section */
+.horizontal-search-section {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.horizontal-search-form {
+  width: 100%;
+  max-width: 400px;
+}
+
+.horizontal-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.horizontal-search-icon {
+  position: absolute;
+  left: 1rem;
+  color: var(--text-secondary, #7F8C8D);
+  font-size: 0.9375rem;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.horizontal-search-input {
+  width: 100%;
+  padding: 0.625rem 1rem 0.625rem 2.75rem;
+  border: 1px solid rgba(44, 62, 80, 0.15);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  transition: var(--transition-base, all 0.3s ease);
+  background-color: var(--bg-white, #FFFFFF);
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+.horizontal-search-input:focus {
+  outline: none;
+  border-color: var(--primary, #D4AF37);
+  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.15);
+}
+
+.horizontal-search-input::placeholder {
+  color: var(--text-light, #BDC3C7);
+}
+
+/* Price Range Horizontal */
+.horizontal-price-range {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.horizontal-price-range .price-input-wrapper {
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+}
+
+.horizontal-price-range .price-input {
+  width: 120px;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(44, 62, 80, 0.15);
+  border-radius: 50px;
+  font-size: 0.875rem;
+  transition: var(--transition-base, all 0.3s ease);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  background-color: #FFFFFF;
+}
+
+.horizontal-price-range .price-input:focus {
+  outline: none;
+  border-color: var(--primary, #D4AF37);
+  box-shadow: 0 0 0 0.2rem rgba(212, 175, 55, 0.15);
+}
+
+.horizontal-price-range .price-input::placeholder {
+  color: var(--text-light, #BDC3C7);
+  font-size: 0.875rem;
+}
+
+.price-separator {
+  color: var(--text-secondary, #7F8C8D);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.horizontal-price-range .price-apply-btn {
+  padding: 0.5rem 1.25rem;
+  background: var(--primary, #D4AF37);
+  border: none;
+  border-radius: 50px;
+  color: #FFFFFF;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-base, all 0.3s ease);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3);
+  white-space: nowrap;
+}
+
+.horizontal-price-range .price-apply-btn:hover:not(:disabled) {
+  background: var(--primary-dark, #B8941F);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+}
+
+.horizontal-price-range .price-apply-btn:disabled {
+  background: var(--text-light, #BDC3C7);
+  cursor: not-allowed;
+  opacity: 0.6;
+  box-shadow: none;
+}
+
 /* ========== RESPONSIVE ========== */
 @media (max-width: 991px) {
+  .horizontal-filter {
+    padding: 1rem;
+  }
+
+  .horizontal-filter-section {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .horizontal-filter-label {
+    font-size: 0.9375rem;
+  }
+
+  .horizontal-filter-options {
+    width: 100%;
+  }
+
+  .horizontal-search-form {
+    max-width: 100%;
+  }
+
+  .horizontal-price-range {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .horizontal-price-range .price-input {
+    width: 100%;
+  }
+
+  .price-separator {
+    display: none;
+  }
+
+  /* Legacy sidebar styles */
   .sidebar-filter {
     position: static;
     max-height: none;
@@ -262,6 +479,11 @@
 }
 
 @media (max-width: 576px) {
+  .horizontal-filter-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
   .sidebar-filter-link {
     padding: 0.625rem 0.875rem;
     font-size: 0.875rem;

@@ -117,15 +117,15 @@ const SidebarFilter = ({
   };
 
   return (
-    <div className="sidebar-filter">
+    <div className="horizontal-filter">
       {/* Search Box */}
-      <div className="sidebar-filter-section sidebar-search-section">
-        <form onSubmit={handleSearchSubmit} className="sidebar-search-form">
-          <div className="sidebar-search-input-wrapper">
-            <i className="fas fa-search sidebar-search-icon"></i>
+      <div className="horizontal-filter-section horizontal-search-section">
+        <form onSubmit={handleSearchSubmit} className="horizontal-search-form">
+          <div className="horizontal-search-input-wrapper">
+            <i className="fas fa-search horizontal-search-icon"></i>
             <input
               type="text"
-              className="sidebar-search-input"
+              className="horizontal-search-input"
               placeholder="Tìm dịch vụ..."
               value={searchInput}
               onChange={handleSearchChange}
@@ -135,53 +135,50 @@ const SidebarFilter = ({
       </div>
 
       {/* Categories */}
-      <div className="sidebar-filter-section">
-        <h3 className="sidebar-filter-title font-heading">Danh mục</h3>
-        <ul className="sidebar-filter-list">
+      <div className="horizontal-filter-section">
+        <div className="horizontal-filter-label">Danh mục:</div>
+        <div className="horizontal-filter-options">
           {filterOptions.map((option) => (
-            <li key={option.id} className="sidebar-filter-item">
-              <button
-                className={`sidebar-filter-link ${isActiveCategory(option) ? 'active' : ''}`}
-                onClick={() => {
-                  if (option.categoryId) {
-                    handleCategoryClick(option.categoryId);
-                  } else if (option.id === 'all') {
-                    // Clear all filters
-                    onFilterChange('all', null);
-                  } else {
-                    // Special filters (promotion, best-selling)
-                    onFilterChange(option.filter, null);
-                  }
-                }}
-              >
-                <span className="sidebar-filter-link-text">{option.name}</span>
-                <i className="fas fa-chevron-right sidebar-filter-link-icon"></i>
-              </button>
-            </li>
+            <button
+              key={option.id}
+              className={`horizontal-filter-btn ${isActiveCategory(option) ? 'active' : ''}`}
+              onClick={() => {
+                if (option.categoryId) {
+                  handleCategoryClick(option.categoryId);
+                } else if (option.id === 'all') {
+                  // Clear all filters
+                  onFilterChange('all', null);
+                } else {
+                  // Special filters (promotion, best-selling)
+                  onFilterChange(option.filter, null);
+                }
+              }}
+            >
+              {option.name}
+            </button>
           ))}
-        </ul>
+        </div>
       </div>
 
       {/* Price Range */}
-      <div className="sidebar-filter-section">
-        <h3 className="sidebar-filter-title font-heading">Mức giá</h3>
-        <div className="sidebar-price-range">
+      <div className="horizontal-filter-section">
+        <div className="horizontal-filter-label">Mức giá:</div>
+        <div className="horizontal-price-range">
           <div className="price-input-wrapper">
-            <label className="price-label">Từ</label>
             <input
               type="number"
               className="price-input"
-              placeholder="0đ"
+              placeholder="Từ"
               value={priceRange.min}
               onChange={(e) => handlePriceRangeChange('min', e.target.value)}
             />
           </div>
+          <span className="price-separator">-</span>
           <div className="price-input-wrapper">
-            <label className="price-label">Đến</label>
             <input
               type="number"
               className="price-input"
-              placeholder="10tr"
+              placeholder="Đến"
               value={priceRange.max}
               onChange={(e) => handlePriceRangeChange('max', e.target.value)}
             />
@@ -197,23 +194,19 @@ const SidebarFilter = ({
       </div>
 
       {/* Sort By */}
-      <div className="sidebar-filter-section">
-        <h3 className="sidebar-filter-title font-heading">Sắp xếp</h3>
-        <ul className="sidebar-filter-list sidebar-sort-list">
+      <div className="horizontal-filter-section">
+        <div className="horizontal-filter-label">Sắp xếp:</div>
+        <div className="horizontal-filter-options">
           {sortOptions.map((option) => (
-            <li key={option.value} className="sidebar-filter-item">
-              <button
-                className={`sidebar-filter-link ${currentSort === option.value ? 'active' : ''}`}
-                onClick={() => handleSortChange(option.value)}
-              >
-                <span className="sidebar-filter-link-text">{option.label}</span>
-                {currentSort === option.value && (
-                  <i className="fas fa-check sidebar-filter-link-icon"></i>
-                )}
-              </button>
-            </li>
+            <button
+              key={option.value}
+              className={`horizontal-filter-btn ${currentSort === option.value ? 'active' : ''}`}
+              onClick={() => handleSortChange(option.value)}
+            >
+              {option.label}
+            </button>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );
