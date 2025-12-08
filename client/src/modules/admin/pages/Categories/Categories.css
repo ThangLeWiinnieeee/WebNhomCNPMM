@@ -1,0 +1,24 @@
+/* Categories page custom styles */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table th {
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.table td {
+  vertical-align: middle;
+}
+
+.modal.show {
+  display: block;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

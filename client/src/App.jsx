@@ -1,21 +1,25 @@
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import HomePage from './pages/homePage';
-import AboutPage from './pages/AboutPage.jsx';
-import LoginPage from "./pages/login";
-import RegisterPage from "./pages/registerPage";
-import ForgotPasswordPage from './pages/forgotPassword.jsx';
-import OTPPasswordPage from './pages/otpPassword.jsx';
-import ResetPasswordPage from './pages/resetPassword.jsx';
-import ProfilePage from './pages/ProfilePage.jsx';
-import ChangePasswordPage from './pages/ChangePasswordPage.jsx';
-import MyOrdersPage from './pages/MyOrdersPage.jsx';
-import CartPage from './pages/CartPage.jsx';
-import CheckoutPage from './pages/CheckoutPage.jsx';
-import OrderDetailPage from './pages/OrderDetailPage.jsx';
+import HomePage from './modules/user/pages/homePage';
+import AboutPage from './modules/user/pages/AboutPage.jsx';
+import LoginPage from './modules/user/pages/login';
+import RegisterPage from './modules/user/pages/registerPage';
+import ForgotPasswordPage from './modules/user/pages/forgotPassword.jsx';
+import OTPPasswordPage from './modules/user/pages/otpPassword.jsx';
+import ResetPasswordPage from './modules/user/pages/resetPassword.jsx';
+import ProfilePage from './modules/user/pages/ProfilePage.jsx';
+import ChangePasswordPage from './modules/user/pages/ChangePasswordPage.jsx';
+import MyOrdersPage from './modules/user/pages/MyOrdersPage.jsx';
+import CartPage from './modules/user/pages/CartPage.jsx';
+import CheckoutPage from './modules/user/pages/CheckoutPage.jsx';
+import OrderDetailPage from './modules/user/pages/OrderDetailPage.jsx';
+import ProductsPage from './modules/user/pages/ProductsPage.jsx';
+import ProductDetailPage from './modules/user/pages/ProductDetailPage.jsx';
+import AdminLayout from './modules/admin/layouts/AdminLayout';
+import Dashboard from './modules/admin/pages/Dashboard/Dashboard';
+import Categories from './modules/admin/pages/Categories/Categories';
+import AdminRoute from './modules/admin/components/AdminRoute/AdminRoute';
 import { useAuthInit } from './stores/hooks/useAuthInit.js';
-import ProductsPage from './pages/ProductsPage.jsx';
-import ProductDetailPage from './pages/ProductDetailPage.jsx';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -35,6 +39,7 @@ function App() {
     <>
       <ScrollToTop />
       <Routes>
+        {/* User Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -50,6 +55,15 @@ function App() {
         <Route path="/services" element={<ProductsPage />} />
         <Route path="/services/:id" element={<ProductDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Admin Routes - Protected */}
+        <Route path="/admin" element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="categories" element={<Categories />} />
+          </Route>
+        </Route>
       </Routes>
     </>
   );
