@@ -8,8 +8,8 @@ import { store, persistor } from './stores/store.js'
 import { Toaster } from 'sonner';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
-import './assets/css/global.css';
-import './assets/css/sonner-custom.css';
+import './modules/user/assets/css/global.css';
+import './modules/user/assets/css/sonner-custom.css';
 
 import App from './App.jsx'
 import './index.css'

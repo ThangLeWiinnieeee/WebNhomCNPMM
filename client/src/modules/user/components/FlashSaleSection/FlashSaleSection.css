@@ -1,0 +1,479 @@
+/* ============================================
+   FLASH SALE SECTION - WEDDING LUXURY STYLE
+   ============================================ */
+
+.flash-sale-section {
+  background: linear-gradient(135deg, #FDFbf7 0%, #f3e6d5 100%);
+  padding: 5rem 0;
+  margin-bottom: 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.flash-sale-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="floral" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="rgba(212,175,55,0.05)"/></pattern></defs><rect width="100" height="100" fill="url(%23floral)"/></svg>');
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ========== CONTENT SECTION ========== */
+.flash-sale-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
+.flash-sale-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-main, #2C3E50);
+  margin-bottom: 1rem;
+  line-height: 1.1;
+}
+
+.flash-sale-description {
+  font-size: 0.9375rem;
+  color: #95A5A6;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 90%;
+}
+
+/* ========== COUNTDOWN TIMER - MINIMALIST TYPOGRAPHY ========== */
+.flash-sale-countdown {
+  margin-bottom: 2rem;
+}
+
+.countdown-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: #95A5A6;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+.countdown-timer {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
+.countdown-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  min-width: auto;
+  width: auto;
+  box-shadow: none;
+  transition: none;
+}
+
+.countdown-item:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.countdown-number {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #D4AF37;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  letter-spacing: 0;
+}
+
+.countdown-unit {
+  font-size: 0.75rem;
+  color: #7F8C8D;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 400;
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+.countdown-separator {
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: #BDC3C7;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.5;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  align-self: center;
+  margin: 0;
+}
+
+/* ========== CALL TO ACTION BUTTON ========== */
+.flash-sale-cta {
+  margin-top: 2rem;
+}
+
+.btn-flash-sale {
+  background: linear-gradient(135deg, #D4AF37 0%, #C9A227 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0.875rem 2.5rem;
+  border-radius: 50px;
+  border: none;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  transition: var(--transition-base, all 0.3s ease);
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1rem;
+}
+
+.btn-flash-sale:hover {
+  background: linear-gradient(135deg, #C9A227 0%, #B8941F 100%);
+  color: #FFFFFF;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(212, 175, 55, 0.4);
+  text-decoration: none;
+}
+
+.btn-flash-sale:active {
+  transform: translateY(0);
+}
+
+/* ========== CAROUSEL SECTION ========== */
+.flash-sale-carousel {
+  position: relative;
+  z-index: 1;
+  padding: 20px 15px;
+  margin: 0 -15px;
+  overflow: hidden;
+}
+
+.flash-sale-swiper {
+  padding-bottom: 2rem;
+  padding-top: 20px;
+  overflow: visible;
+}
+
+.flash-sale-swiper .swiper-wrapper {
+  overflow: visible;
+}
+
+.flash-sale-card-wrapper {
+  height: 100%;
+  padding: 0.5rem;
+}
+
+/* ========== FLASH SALE CARD - LUXURY WEDDING STYLE ========== */
+.flash-sale-card-wrapper .product-card {
+  background: #FFFFFF;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  height: 100%;
+  transition: var(--transition-base, all 0.3s ease);
+}
+
+.flash-sale-card-wrapper .product-card:hover {
+  box-shadow: 0 15px 50px -10px rgba(0, 0, 0, 0.12);
+  transform: translateY(-5px);
+}
+
+/* Card Body - Padding rộng hơn */
+.flash-sale-card-wrapper .product-card-body {
+  padding: 1.5rem;
+}
+
+/* Category - Chữ nhỏ, in hoa, letter-spacing rộng */
+.flash-sale-card-wrapper .product-card-category {
+  font-size: 0.6875rem;
+  color: #BDC3C7;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 500;
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+/* Title - Font Serif, size to hơn */
+.flash-sale-card-wrapper .product-card-title {
+  font-family: var(--font-heading, 'Playfair Display', serif);
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-main, #2C3E50);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 3.375em;
+}
+
+/* Price - Màu đỏ trầm, giá sale bôi đậm */
+.flash-sale-card-wrapper .product-card-price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.flash-sale-card-wrapper .product-card-price-current {
+  color: #C0392B;
+  font-size: 1.375rem;
+  font-weight: 700;
+  font-family: var(--font-body, 'Inter', sans-serif);
+  line-height: 1;
+}
+
+.flash-sale-card-wrapper .product-card-price-original {
+  font-size: 0.875rem;
+  color: #BDC3C7;
+  text-decoration: line-through;
+  font-weight: 400;
+  font-family: var(--font-body, 'Inter', sans-serif);
+}
+
+/* Discount Badge - Pill shape, nhỏ, lơ lửng */
+.flash-sale-card-wrapper .product-card-discount-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(192, 57, 43, 0.9);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(192, 57, 43, 0.25);
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  backdrop-filter: blur(4px);
+}
+
+/* Image hover effect mềm mại hơn */
+.flash-sale-card-wrapper .product-card:hover .product-card-image {
+  transform: scale(1.03);
+  transition: transform 0.5s ease;
+}
+
+/* Desktop Image Height */
+.flash-sale-card-wrapper .product-card-image-wrapper {
+  aspect-ratio: 3/4;
+  max-height: 200px;
+}
+
+.flash-sale-card-wrapper .product-card-image {
+  width: 100%;
+  height: 100%;
+  max-height: 200px;
+  object-fit: cover;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 1023px) {
+  .flash-sale-section {
+    padding: 4rem 0;
+  }
+
+  .flash-sale-title {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .flash-sale-description {
+    text-align: center;
+    max-width: 100%;
+    margin-bottom: 1.5rem;
+  }
+
+  .flash-sale-content {
+    text-align: center;
+    margin-bottom: 2rem;
+    height: auto;
+  }
+
+  .flash-sale-countdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .countdown-timer {
+    justify-content: center;
+  }
+
+  .flash-sale-cta {
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  /* 1. Giảm padding của section cho đỡ phí đất */
+  .flash-sale-section {
+    padding: 2rem 0 !important;
+  }
+
+  /* 2. Font chữ tiêu đề nhỏ lại */
+  .flash-sale-title {
+    font-size: 1.75rem;
+    line-height: 1.1;
+  }
+
+  .flash-sale-description {
+    font-size: 0.9375rem;
+  }
+
+  /* Countdown Layout - Minimalist trên mobile */
+  .countdown-timer {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .countdown-separator {
+    display: none;
+  }
+
+  .countdown-item {
+    align-items: center;
+  }
+
+  .countdown-number {
+    font-size: 2.5rem;
+  }
+
+  .countdown-unit {
+    font-size: 0.6875rem;
+  }
+
+  .btn-flash-sale {
+    padding: 0.75rem 2rem;
+    font-size: 0.9375rem;
+  }
+
+  /* 1. Giảm chiều cao ảnh cưỡng bức cho mobile */
+  .flash-sale-card-wrapper .product-card-image-wrapper {
+    aspect-ratio: 3/4 !important;
+    height: 200px !important;
+    max-height: 200px !important;
+  }
+
+  .flash-sale-card-wrapper .product-card-image,
+  .product-card-img {
+    height: 200px !important;
+    object-fit: cover;
+    width: 100%;
+  }
+
+  /* Card Body Padding - Giảm trên mobile */
+  .flash-sale-card-wrapper .product-card-body {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .flash-sale-section {
+    padding: 2rem 0;
+    margin-bottom: 3rem;
+  }
+
+  .flash-sale-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.1;
+  }
+
+  .flash-sale-description {
+    font-size: 0.875rem;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Countdown Layout - Minimalist trên mobile nhỏ */
+  .countdown-timer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .countdown-separator {
+    display: none;
+  }
+
+  .countdown-item {
+    align-items: center;
+  }
+
+  .countdown-number {
+    font-size: 2rem;
+  }
+
+  .countdown-unit {
+    font-size: 0.625rem;
+    letter-spacing: 1.5px;
+  }
+
+  .countdown-unit {
+    font-size: 0.6875rem;
+  }
+
+  .btn-flash-sale {
+    padding: 0.625rem 1.75rem;
+    font-size: 0.875rem;
+  }
+
+  .flash-sale-card-wrapper {
+    padding: 0.25rem;
+  }
+
+  /* Mobile Image Height Limit - Nhỏ hơn trên mobile nhỏ */
+  .flash-sale-card-wrapper .product-card-image-wrapper {
+    height: 200px;
+    max-height: 200px;
+  }
+
+  /* Flash Sale Card Mobile Styles */
+  .flash-sale-card-wrapper .product-card-body {
+    padding: 1rem;
+  }
+
+  .flash-sale-card-wrapper .product-card-title {
+    font-size: 0.9375rem;
+    min-height: 2.8125em;
+    margin-bottom: 0.75rem;
+  }
+
+  .flash-sale-card-wrapper .product-card-price-current {
+    font-size: 1.125rem;
+  }
+
+  .flash-sale-card-wrapper .product-card-discount-badge {
+    top: 10px;
+    right: 10px;
+    padding: 3px 8px;
+    font-size: 0.625rem;
+  }
+}
+

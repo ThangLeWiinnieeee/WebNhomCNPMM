@@ -1,19 +1,34 @@
 import express from 'express';
-import userRoutes from './user.route.js';
-import authRoutes from './auth.route.js';
-import cartRoutes from './cart.route.js';
-import orderRoutes from './order.route.js';
-import productRoutes from './product.route.js';
-import categoryRoutes from './category.route.js';
+// User routes
+import userRoutes from './user/user.route.js';
+import authRoutes from './user/auth.route.js';
+import cartRoutes from './user/cart.route.js';
+import publicCategoryRoutes from './user/category.route.js';
+import publicProductRoutes from './user/product.route.js';
+import userOrderRoutes from './user/order.route.js';
+// Admin routes
+import adminOrderRoutes from './admin/order.route.js';
+import adminProductRoutes from './admin/product.route.js';
+import adminCategoryRoutes from './admin/category.route.js';
+// Shared routes
 import uploadRoutes from './upload.route.js';
+
 const router = express.Router();
 
+// User routes
 router.use('/user', userRoutes);
 router.use('/account', authRoutes);
 router.use('/cart', cartRoutes);
-router.use('/orders', orderRoutes);
-router.use('/products', productRoutes);
-router.use('/categories', categoryRoutes);
+router.use('/categories', publicCategoryRoutes); // Public category routes
+router.use('/products', publicProductRoutes); // Public product routes
+router.use('/orders', userOrderRoutes); // User order routes
+
+// Admin routes
+router.use('/admin/orders', adminOrderRoutes);
+router.use('/admin/products', adminProductRoutes);
+router.use('/admin/categories', adminCategoryRoutes);
+
+// Shared routes
 router.use('/upload', uploadRoutes);
 
 export default router;
