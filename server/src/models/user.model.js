@@ -42,6 +42,13 @@ const schema = new mongoose.Schema({
   address: {
     type: String
   },
+  // Role của user: 'user' hoặc 'admin'
+  role: {
+    type: String,
+    required: true,
+    enum: ['user', 'admin'],
+    default: 'user'
+  },
   type: {
     type: String,
     required: true,

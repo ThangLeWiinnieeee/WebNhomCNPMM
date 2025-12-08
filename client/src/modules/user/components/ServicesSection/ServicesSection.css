@@ -1,0 +1,108 @@
+/* Services Section Styles */
+.services-section {
+  position: relative;
+}
+
+/* Service Card */
+.service-card {
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
+}
+
+.service-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Card Image */
+.card-img-container {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.service-card:hover .card-img-top {
+  transform: scale(1.1);
+}
+
+/* Service Title - Phóng to chữ */
+.service-title {
+  font-size: 1.5rem;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.service-card:hover .service-title {
+  color: #ec4899;
+}
+
+/* Service Description */
+.service-description {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Layout cho 4 items (2-2) */
+.row .col-lg-6.col-md-6 .service-card {
+  min-height: 280px;
+}
+
+.row .col-lg-6.col-md-6 .service-title {
+  font-size: 1.75rem; /* Lớn hơn cho layout 2-2 */
+}
+
+.row .col-lg-6.col-md-6 .service-description {
+  font-size: 1.1rem;
+}
+
+/* Layout cho 5 items - Hàng dưới (2 items cuối) */
+.row .col-lg-6.col-md-6:nth-child(n+4) .service-card {
+  min-height: 280px;
+}
+
+.row .col-lg-6.col-md-6:nth-child(n+4) .service-title {
+  font-size: 1.75rem; /* Lớn hơn cho 2 items dưới */
+}
+
+.row .col-lg-6.col-md-6:nth-child(n+4) .service-description {
+  font-size: 1.1rem;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .service-title {
+    font-size: 1.35rem;
+  }
+  
+  .row .col-lg-6.col-md-6 .service-title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .card-img-container {
+    height: 180px;
+  }
+
+  .service-title {
+    font-size: 1.25rem;
+  }
+  
+  .row .col-lg-6.col-md-6 .service-title {
+    font-size: 1.35rem;
+  }
+
+  .service-description {
+    font-size: 0.95rem;
+  }
+}
