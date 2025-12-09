@@ -66,6 +66,38 @@ const uploadImage = async (req, res) => {
   }
 };
 
+const uploadImageOnly = async (req, res) => {
+  try {
+    // Kiểm tra file đã được upload chưa (multer middleware xử lý trước)
+    if (!req.file) {
+      return res.status(400).json({
+        code: 'error',
+        message: 'Vui lòng chọn file ảnh!',
+      });
+    }
+
+    // Lấy thông tin ảnh đã upload lên Cloudinary
+    const imageUrl = req.file.path;
+    const publicId = req.file.filename;
+
+    // Chỉ trả về URL, không lưu vào database
+    return res.status(200).json({
+      code: 'success',
+      message: 'Upload ảnh thành công!',
+      data: {
+        url: imageUrl,
+        publicId: publicId,
+      },
+    });
+  } catch (error) {
+    console.error('Lỗi upload ảnh:', error);
+    return res.status(500).json({
+      code: 'error',
+      message: 'Lỗi upload ảnh!',
+    });
+  }
+};
+
 const uploadMultipleImages = async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
@@ -95,5 +127,5 @@ const uploadMultipleImages = async (req, res) => {
   }
 };
 
-export default { uploadImage, uploadMultipleImages };
+export default { uploadImage, uploadImageOnly, uploadMultipleImages };
 

@@ -21,7 +21,9 @@ const categorySchema = z.object({
     .trim(),
   image: z.string()
     .min(1, 'Ảnh không được để trống')
-    .url('URL ảnh không hợp lệ'),
+    .refine((val) => val === 'pending-upload' || val.startsWith('http'), {
+      message: 'Vui lòng chọn ảnh'
+    }),
   isActive: z.boolean()
 });
 
@@ -121,62 +123,54 @@ const Categories = () => {
     const reader = new FileReader();
     reader.onloadend = () => {
       setPreviewUrl(reader.result);
+      // Set giá trị tạm để pass validation (sẽ được thay bằng URL thật khi submit)
+      setValue('image', 'pending-upload', { shouldValidate: true });
     };
     reader.readAsDataURL(file);
   };
 
-  // Upload image to server
-  const handleImageUpload = async () => {
-    if (!previewUrl || previewUrl.startsWith('http')) {
-      return; // Already uploaded or no image selected
-    }
-
-    try {
-      setUploading(true);
-
-      // Get file from input
-      const fileInput = document.getElementById('imageUpload');
-      const file = fileInput?.files?.[0];
-      
-      if (!file) {
-        toast.error('Vui lòng chọn file ảnh');
-        return;
-      }
-
-      // Create FormData
-      const formData = new FormData();
-      formData.append('image', file);
-
-      // Upload to server
-      const response = await api.post('/upload/image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      const uploadedUrl = response.url;
-      setValue('image', uploadedUrl);
-      setPreviewUrl(uploadedUrl);
-      toast.success('Tải ảnh lên thành công!');
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error(error.message || 'Lỗi khi tải ảnh lên');
-    } finally {
-      setUploading(false);
-    }
-  };
-
   // Handle submit (create or update)
   const onSubmit = async (data) => {
-    let success = false;
-    if (editingCategory) {
-      success = await updateCategory(editingCategory._id, data);
-    } else {
-      success = await createCategory(data);
-    }
-    
-    if (success) {
-      closeModal();
+    try {
+      // Nếu có preview nhưng chưa upload (không phải URL), upload trước
+      if (previewUrl && !previewUrl.startsWith('http')) {
+        setUploading(true);
+        
+        const fileInput = document.getElementById('imageUpload');
+        const file = fileInput?.files?.[0];
+        
+        if (file) {
+          const formData = new FormData();
+          formData.append('image', file);
+
+          const response = await api.post('/upload/image-only', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          });
+
+          // Cập nhật URL từ Cloudinary vào data
+          data.image = response.data.url;
+        }
+        
+        setUploading(false);
+      }
+
+      // Tiếp tục tạo/cập nhật category
+      let success = false;
+      if (editingCategory) {
+        success = await updateCategory(editingCategory._id, data);
+      } else {
+        success = await createCategory(data);
+      }
+      
+      if (success) {
+        closeModal();
+      }
+    } catch (error) {
+      setUploading(false);
+      console.error('Submit error:', error);
+      toast.error(error.message || 'Có lỗi xảy ra');
     }
   };
 
@@ -376,29 +370,6 @@ const Categories = () => {
                       
                       {errors.image && (
                         <p className="error-message">{errors.image.message}</p>
-                      )}
-                      
-                      {previewUrl && !previewUrl.startsWith('http') && (
-                        <div className="mt-2">
-                          <button
-                            type="button"
-                            className="btn btn-primary btn-sm w-100"
-                            onClick={handleImageUpload}
-                            disabled={uploading}
-                          >
-                            {uploading ? (
-                              <>
-                                <span className="spinner-border spinner-border-sm me-2"></span>
-                                Đang tải lên...
-                              </>
-                            ) : (
-                              <>
-                                <i className="fas fa-cloud-upload-alt me-2"></i>
-                                Tải ảnh lên
-                              </>
-                            )}
-                          </button>
-                        </div>
                       )}
                     </div>
                   </div>
