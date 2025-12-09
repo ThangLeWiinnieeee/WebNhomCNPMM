@@ -18,6 +18,7 @@ import ProductDetailPage from './modules/user/pages/ProductDetailPage.jsx';
 import AdminLayout from './modules/admin/layouts/AdminLayout';
 import Dashboard from './modules/admin/pages/Dashboard/Dashboard';
 import Categories from './modules/admin/pages/Categories/Categories';
+import Products from './modules/admin/pages/Products/Products';
 import AdminRoute from './modules/admin/components/AdminRoute/AdminRoute';
 import { useAuthInit } from './stores/hooks/useAuthInit.js';
 
@@ -62,6 +63,7 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="categories" element={<Categories />} />
+            <Route path="products" element={<Products />} />
           </Route>
         </Route>
       </Routes>
