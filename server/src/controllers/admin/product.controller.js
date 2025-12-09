@@ -581,6 +581,13 @@ const updateProduct = async (req, res) => {
     if (req.files && req.files.length > 0) {
       productData.images = req.files.map((file) => file.path);
     }
+    // Nếu không có file upload nhưng có images trong body (array string URLs)
+    else if (req.body.images) {
+      // Giữ nguyên images từ body (có thể là array hoặc string JSON)
+      productData.images = Array.isArray(req.body.images) 
+        ? req.body.images 
+        : JSON.parse(req.body.images);
+    }
 
     const product = await productModel.findByIdAndUpdate(id, productData, {
       new: true,
