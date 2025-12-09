@@ -93,10 +93,10 @@ const changePassword = async (req, res) => {
         }
 
         // Kiểm tra độ dài mật khẩu mới
-        if (newPassword.length < 6) {
+        if (newPassword.length < 8) {
             return res.json({
                 code: 'error',
-                message: 'Mật khẩu mới phải có ít nhất 6 ký tự'
+                message: 'Mật khẩu mới phải có ít nhất 8 ký tự'
             });
         }
 

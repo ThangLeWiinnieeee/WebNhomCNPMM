@@ -2,6 +2,7 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logoutUserThunk } from '../../../../stores/thunks/authThunks';
+import NotificationDropdown from '../NotificationDropdown/NotificationDropdown';
 import './AdminHeader.css';
 
 const AdminHeader = () => {
@@ -28,13 +29,8 @@ const AdminHeader = () => {
 
         {/* Right side */}
         <div className="d-flex align-items-center gap-3">
-          {/* Notification Button */}
-          <button className="btn btn-light position-relative rounded-circle p-2" style={{ width: '40px', height: '40px' }}>
-            <i className="fas fa-bell"></i>
-            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.625rem' }}>
-              3
-            </span>
-          </button>
+          {/* Notification Dropdown */}
+          <NotificationDropdown />
 
           {/* User Info */}
           <div className="d-flex align-items-center gap-2 px-3 py-2 bg-light rounded-3 border">
