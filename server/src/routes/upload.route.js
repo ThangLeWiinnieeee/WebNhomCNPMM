@@ -15,6 +15,14 @@ const router = express.Router();
 router.post('/image', verifyToken, upload.single('image'), uploadController.uploadImage);
 
 /**
+ * Upload ảnh lên Cloudinary, chỉ trả về URL (không lưu database)
+ * Dùng cho category, product images, etc.
+ * @route POST /upload/image-only
+ * @param {File} req.file - File ảnh (field name: 'image')
+ */
+router.post('/image-only', verifyToken, upload.single('image'), uploadController.uploadImageOnly);
+
+/**
  * Upload nhiều ảnh lên Cloudinary cùng lúc
  * Tối đa 10 ảnh mỗi lần upload
  * @route POST /upload/images
