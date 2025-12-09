@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
-import useCountdown from '../../../../stores/hooks/useCountdown.js';
+import { useCountdown } from '../../../../stores/hooks';
 import ProductCard from '../ProductCard/ProductCard';
 import './FlashSaleSection.css';
 
