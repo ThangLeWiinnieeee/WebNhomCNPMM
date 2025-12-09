@@ -111,11 +111,17 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist }) => {
 
           {/* Price */}
           <div className="product-card-price">
-            <span className="product-card-price-current">
-              {displayPrice.toLocaleString('vi-VN')}₫
-            </span>
-            {hasDiscount && (
-              <span className="product-card-price-original">
+            {hasDiscount ? (
+              <>
+                <span className="product-card-price-current">
+                  {discountPrice.toLocaleString('vi-VN')}₫
+                </span>
+                <span className="product-card-price-original">
+                  {price.toLocaleString('vi-VN')}₫
+                </span>
+              </>
+            ) : (
+              <span className="product-card-price-current">
                 {price.toLocaleString('vi-VN')}₫
               </span>
             )}

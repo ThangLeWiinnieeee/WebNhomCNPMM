@@ -258,27 +258,52 @@ const getAllProducts = async (req, res) => {
       } else if (filter === 'promotion') {
         sortOption = { discountPercent: -1 };
       } else {
-        // Mặc định sắp xếp theo ngày tạo mới nhất
-        sortOption = { createdAt: -1 };
+        // Mặc định: sẽ sort trong JavaScript sau khi fetch
+        sortOption = { createdAt: -1 }; // Tạm thời sort theo ngày tạo
       }
     }
 
-    const [products, total] = await Promise.all([
+    // Fetch tất cả sản phẩm (không pagination ngay)
+    const [productsRaw, total] = await Promise.all([
       productModel
         .find(query)
         .populate('category', 'name slug')
-        .sort(sortOption)
-        .skip(skip)
-        .limit(limit),
+        .sort(sortOption),
       productModel.countDocuments(query),
     ]);
 
+    // Sort theo giá trong JavaScript cho mọi trường hợp cần thiết
+    let products = productsRaw;
+    
+    // Luôn sort theo giá tăng dần cho filter='all' (kể cả khi sortBy='newest')
+    if (filter === 'all' && sortBy !== 'price-desc' && sortBy !== 'name-asc') {
+      products = [...productsRaw].sort((a, b) => {
+        const priceA = a.discountPrice || a.price || 0;
+        const priceB = b.discountPrice || b.price || 0;
+        return priceA - priceB;
+      });
+    } else if (sortBy === 'price-asc') {
+      products = [...productsRaw].sort((a, b) => {
+        const priceA = a.discountPrice || a.price || 0;
+        const priceB = b.discountPrice || b.price || 0;
+        return priceA - priceB;
+      });
+    } else if (sortBy === 'price-desc') {
+      products = [...productsRaw].sort((a, b) => {
+        const priceA = a.discountPrice || a.price || 0;
+        const priceB = b.discountPrice || b.price || 0;
+        return priceB - priceA;
+      });
+    }
+
+    // Áp dụng pagination sau khi sort
+    const paginatedProducts = products.slice(skip, skip + limit);
     const totalPages = Math.ceil(total / limit);
 
     return res.status(200).json({
       code: 'success',
       message: 'Lấy danh sách sản phẩm thành công!',
-      data: products,
+      data: paginatedProducts,
       pagination: {
         page,
         limit,
@@ -615,6 +640,41 @@ const deleteProduct = async (req, res) => {
   }
 };
 
+/**
+ * Lấy khoảng giá min/max của tất cả sản phẩm
+ * @route GET /product/price-range
+ * @returns {Object} Min và max price
+ */
+const getPriceRange = async (req, res) => {
+  try {
+    const products = await productModel.find({ isActive: true });
+    
+    if (!products || products.length === 0) {
+      return res.status(200).json({
+        code: 'success',
+        message: 'Không có sản phẩm nào',
+        data: { minPrice: 0, maxPrice: 0 },
+      });
+    }
+
+    const prices = products.map(p => p.price || 0);
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    return res.status(200).json({
+      code: 'success',
+      message: 'Lấy khoảng giá thành công!',
+      data: { minPrice, maxPrice },
+    });
+  } catch (error) {
+    console.error('Lỗi trong getPriceRange:', error);
+    return res.status(500).json({
+      code: 'error',
+      message: 'Lỗi máy chủ',
+    });
+  }
+};
+
 export default {
   getNewestProducts,
   getBestSellingProducts,
@@ -625,6 +685,7 @@ export default {
   getRelatedProducts,
   searchProducts,
   getProductsByCategory,
+  getPriceRange,
   createProduct,
   updateProduct,
   deleteProduct,

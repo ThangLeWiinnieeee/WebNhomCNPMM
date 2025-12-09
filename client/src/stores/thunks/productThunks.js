@@ -250,3 +250,21 @@ export const fetchAllCategoriesThunk = createAsyncThunk(
   }
 );
 
+// Lấy khoảng giá min/max của sản phẩm
+export const fetchPriceRangeThunk = createAsyncThunk(
+  'product/fetchPriceRange',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/products/price-range');
+      
+      if (response.code === 'error') {
+        return rejectWithValue(response.message || 'Lấy khoảng giá thất bại');
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi lấy khoảng giá';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);

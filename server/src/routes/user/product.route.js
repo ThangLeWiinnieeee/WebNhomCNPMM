@@ -6,6 +6,9 @@ const router = express.Router();
 // ==================== Public Routes ====================
 // Các route công khai cho user xem sản phẩm
 
+// Lấy khoảng giá min/max
+router.get('/price-range', productController.getPriceRange);
+
 // Lấy danh sách sản phẩm theo các tiêu chí
 router.get('/newest', productController.getNewestProducts);
 router.get('/best-selling', productController.getBestSellingProducts);

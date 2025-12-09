@@ -356,18 +356,25 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .horizontal-price-range .price-input-wrapper {
   display: flex;
   flex-direction: row;
   gap: 0;
+  position: relative;
+}
+
+.price-input-group {
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 .horizontal-price-range .price-input {
-  width: 120px;
-  padding: 0.5rem 1rem;
+  width: 140px;
+  padding: 0.5rem 2.5rem 0.5rem 1rem;
   border: 1px solid rgba(44, 62, 80, 0.15);
   border-radius: 50px;
   font-size: 0.875rem;
@@ -387,14 +394,56 @@
   font-size: 0.875rem;
 }
 
+.price-arrows {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: 8px;
+  gap: 2px;
+}
+
+.arrow-btn {
+  background: var(--primary, #D4AF37);
+  border: none;
+  color: white;
+  font-size: 10px;
+  width: 20px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.arrow-btn.arrow-up {
+  border-radius: 4px 4px 0 0;
+}
+
+.arrow-btn.arrow-down {
+  border-radius: 0 0 4px 4px;
+}
+
+.arrow-btn:hover:not(:disabled) {
+  background: var(--primary-dark, #B8941F);
+}
+
+.arrow-btn:disabled {
+  background: #BDC3C7;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .price-separator {
   color: var(--text-secondary, #7F8C8D);
   font-size: 0.875rem;
   font-weight: 500;
+  margin: 0 0.5rem;
 }
 
 .horizontal-price-range .price-apply-btn {
-  padding: 0.5rem 1.25rem;
+  padding: 0.5rem 1rem;
   background: var(--primary, #D4AF37);
   border: none;
   border-radius: 50px;
@@ -458,34 +507,11 @@
   .price-separator {
     display: none;
   }
-
-  /* Legacy sidebar styles */
-  .sidebar-filter {
-    position: static;
-    max-height: none;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 1rem;
-    background: #FFFFFF;
-  }
-
-  .sidebar-filter-section {
-    margin-bottom: 2rem;
-  }
-
-  .sidebar-filter-title {
-    font-size: 1.25rem;
-  }
 }
 
 @media (max-width: 576px) {
   .horizontal-filter-btn {
     padding: 0.5rem 0.875rem;
     font-size: 0.8125rem;
-  }
-
-  .sidebar-filter-link {
-    padding: 0.625rem 0.875rem;
-    font-size: 0.875rem;
   }
 }
