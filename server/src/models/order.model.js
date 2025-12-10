@@ -4,7 +4,7 @@ const orderItemSchema = new mongoose.Schema(
   {
     serviceId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Service',
+      ref: 'Product',
       required: true
     },
     serviceName: String,
@@ -38,7 +38,8 @@ const orderSchema = new mongoose.Schema(
     orderNumber: {
       type: String,
       unique: true,
-      required: true
+      sparse: true,
+      default: null
     },
     // Thông tin khách hàng
     customerInfo: {
@@ -101,7 +102,7 @@ const orderSchema = new mongoose.Schema(
     // Trạng thái đơn hàng
     orderStatus: {
       type: String,
-      enum: ['pending', 'confirmed', 'processing', 'ready', 'completed', 'cancelled'],
+      enum: ['pending', 'confirmed', 'processing', 'completed', 'cancelled'],
       default: 'pending'
     },
     // Thời gian
@@ -123,25 +124,33 @@ const orderSchema = new mongoose.Schema(
 
 // Middleware để tạo orderNumber tự động
 orderSchema.pre('save', async function (next) {
-  if (this.isNew) {
-    const count = await mongoose.model('Order').countDocuments();
-    this.orderNumber = `ORD-${Date.now()}-${count + 1}`;
+  try {
+    if (this.isNew && !this.orderNumber) {
+      const count = await mongoose.model('Order').countDocuments();
+      this.orderNumber = `ORD-${Date.now()}-${count + 1}`;
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
 
-// Middleware tính toán tự động
+// Middleware tính toán tự động (chạy sau orderNumber middleware)
 orderSchema.pre('save', function (next) {
-  // Tính totalPrice từ items
-  this.totalPrice = this.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  
-  // Tính tax (10%)
-  this.tax = this.totalPrice * 0.1;
-  
-  // Tính finalTotal
-  this.finalTotal = this.totalPrice + this.tax - this.discount;
-  
-  next();
+  try {
+    // Tính totalPrice từ items
+    this.totalPrice = this.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    // Tính tax (10%)
+    this.tax = Math.round(this.totalPrice * 0.1 * 100) / 100;
+    
+    // Tính finalTotal
+    this.finalTotal = this.totalPrice + this.tax - (this.discount || 0);
+    
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default mongoose.model('Order', orderSchema);

@@ -1,5 +1,5 @@
 import Cart from '../../models/cart.model.js';
-import Service from '../../models/service.model.js';
+import Product from '../../models/product.model.js';
 
 class CartController {
   // GET /api/cart - Lấy giỏ hàng của user
@@ -8,7 +8,7 @@ class CartController {
       const userId = req.user._id;
 
       const cart = await Cart.findOne({ userId })
-        .populate('items.serviceId', 'name price description image');
+        .populate('items.serviceId', 'name price description images');
 
       if (!cart) {
         return res.json({
@@ -54,7 +54,7 @@ class CartController {
       const { serviceId, quantity = 1, selectedOptions } = req.body;
 
       // Kiểm tra dịch vụ tồn tại
-      const service = await Service.findById(serviceId);
+      const service = await Product.findById(serviceId);
       if (!service) {
         return res.status(404).json({
           success: false,

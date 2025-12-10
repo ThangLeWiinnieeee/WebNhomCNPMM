@@ -7,7 +7,7 @@ export const createOrderThunk = createAsyncThunk(
   async (orderData, { rejectWithValue }) => {
     try {
       const response = await api.post('/orders', orderData);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi tạo đơn hàng');
     }
@@ -20,7 +20,7 @@ export const getUserOrdersThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/orders');
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi lấy danh sách đơn hàng');
     }
@@ -33,7 +33,7 @@ export const getOrderDetailThunk = createAsyncThunk(
   async (orderId, { rejectWithValue }) => {
     try {
       const response = await api.get(`/orders/${orderId}`);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi lấy chi tiết đơn hàng');
     }
@@ -46,7 +46,7 @@ export const confirmCODPaymentThunk = createAsyncThunk(
   async (orderId, { rejectWithValue }) => {
     try {
       const response = await api.put(`/orders/${orderId}/confirm`);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi xác nhận thanh toán');
     }
@@ -59,7 +59,7 @@ export const cancelOrderThunk = createAsyncThunk(
   async (orderId, { rejectWithValue }) => {
     try {
       const response = await api.put(`/orders/${orderId}/cancel`);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi hủy đơn hàng');
     }
@@ -75,7 +75,7 @@ export const updateOrderStatusThunk = createAsyncThunk(
         orderStatus,
         paymentStatus
       });
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi cập nhật trạng thái');
     }

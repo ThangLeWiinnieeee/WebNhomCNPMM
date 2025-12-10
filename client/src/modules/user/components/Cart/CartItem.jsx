@@ -36,9 +36,19 @@ export default function CartItem({ item }) {
   };
 
   const itemTotal = item.price * item.quantity;
+  const imageUrl = item?.serviceId?.image || item?.selectedOptions?.image || null;
 
   return (
     <div className="cart-item">
+      <div className="item-thumb">
+        {imageUrl ? (
+          <img src={imageUrl} alt={item.serviceName} />
+        ) : (
+          <div className="thumb-placeholder">
+            <i className="fas fa-image"></i>
+          </div>
+        )}
+      </div>
       <div className="item-info">
         <div className="item-header">
           <h3>{item.serviceName}</h3>
@@ -104,8 +114,9 @@ export default function CartItem({ item }) {
           <strong>${itemTotal.toLocaleString()}</strong>
         </div>
 
-        <button className="btn-remove" onClick={handleRemove}>
-          🗑️ Xóa
+        <button className="btn-remove-modern" onClick={handleRemove}>
+          <i className="fas fa-trash-alt"></i>
+          <span>Xóa</span>
         </button>
       </div>
     </div>

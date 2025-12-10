@@ -6,6 +6,7 @@ import Footer from '../components/Footer/Footer';
 import ProductHero from '../components/ProductHero/ProductHero';
 import ProductContent from '../components/ProductContent/ProductContent';
 import { fetchProductByIdThunk, fetchRelatedProductsThunk } from '../../../stores/thunks/productThunks';
+import { addToCartThunk } from '../../../stores/thunks/cartThunks.js';
 import { toast } from 'sonner';
 import '../assets/css/productDetailPage.css';
 
@@ -14,6 +15,7 @@ const ProductDetailPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentProduct, loading, relatedProducts } = useSelector((state) => state.product);
+  const { user } = useSelector((state) => state.auth);
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -33,20 +35,38 @@ const ProductDetailPage = () => {
   }, [dispatch, id, navigate]);
 
 
-  const handleAddToCart = (quantityFromHero = 1) => {
+  const handleAddToCart = async (quantityFromHero = 1) => {
     if (!currentProduct) return;
 
-    const { serviceType, unit, name } = currentProduct;
+    // ✅ Kiểm tra user đã đăng nhập chưa
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng');
+      navigate('/login');
+      return;
+    }
+
+    const { serviceType, unit, name, _id: productId, price } = currentProduct;
     const isQuantifiable = serviceType === 'quantifiable';
     
     // Use quantity from ProductHero if provided, otherwise use state quantity
-    const finalQuantity = isQuantifiable ? quantityFromHero : quantity;
+    const finalQuantity = isQuantifiable ? quantityFromHero : 1;
 
-    // TODO: Implement add to cart functionality
-    if (isQuantifiable) {
-      toast.success(`Đã thêm ${finalQuantity} ${unit || 'sản phẩm'} vào giỏ hàng!`);
-    } else {
-      toast.success(`Đã thêm dịch vụ "${name}" vào giỏ hàng!`);
+    try {
+      // Dispatch addToCartThunk to add product to cart
+      await dispatch(addToCartThunk({
+        serviceId: productId,
+        quantity: finalQuantity,
+        selectedOptions: {}
+      })).unwrap();
+
+      if (isQuantifiable) {
+        toast.success(`Đã thêm ${finalQuantity} ${unit || 'sản phẩm'} vào giỏ hàng!`);
+      } else {
+        toast.success(`Đã thêm dịch vụ "${name}" vào giỏ hàng!`);
+      }
+    } catch (error) {
+      toast.error(error?.message || 'Lỗi khi thêm vào giỏ hàng');
+      console.error('Add to cart error:', error);
     }
   };
 
