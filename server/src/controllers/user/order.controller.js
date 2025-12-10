@@ -193,6 +193,12 @@ class OrderController {
         });
       }
 
+      if (order.orderStatus === 'processing') {
+        return res.status(400).json({
+          success: false,
+          message: 'Không thể hủy đơn hàng đang thực hiện'
+        });
+      }
       if (order.orderStatus === 'completed') {
         return res.status(400).json({
           success: false,
@@ -218,41 +224,6 @@ class OrderController {
       });
     }
   }
-
-  // PUT /api/orders/:orderId/status - Cập nhật trạng thái đơn hàng (admin)
-  async updateOrderStatus(req, res) {
-    try {
-      const { orderId } = req.params;
-      const { orderStatus, paymentStatus } = req.body;
-
-      const order = await Order.findByIdAndUpdate(
-        orderId,
-        { orderStatus, paymentStatus, updatedAt: new Date() },
-        { new: true }
-      );
-
-      if (!order) {
-        return res.status(404).json({
-          success: false,
-          message: 'Đơn hàng không tồn tại'
-        });
-      }
-
-      res.json({
-        success: true,
-        message: 'Cập nhật trạng thái đơn hàng thành công',
-        order
-      });
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Lỗi khi cập nhật trạng thái',
-        error: error.message
-      });
-    }
-  }
 }
 
 export default new OrderController();
-

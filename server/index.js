@@ -41,7 +41,7 @@ app.use('/', routes);
 databaseConfig.connectDatabase().then(() => {
     app.listen(PORT, () => {
         console.log(`Server đang chạy tại http://localhost:${PORT}`);
-        console.log("Frontend: http://localhost:5173, 5174, hoặc 5175");
+        console.log("Frontend: http://localhost:5173");
     });
 }).catch((error) => {
     console.error("Lỗi kết nối database:", error);

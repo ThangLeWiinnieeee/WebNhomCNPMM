@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getOrderDetailThunk, confirmCODPaymentThunk } from '../../../stores/thunks/orderThunks.js';
+import { getOrderDetailThunk, confirmCODPaymentThunk, cancelOrderThunk } from '../../../stores/thunks/orderThunks.js';
 import '../assets/css/OrderDetailPage.css';
 
 export default function OrderDetailPage() {
@@ -11,6 +11,7 @@ export default function OrderDetailPage() {
   const dispatch = useDispatch();
   const { currentOrder, status, error } = useSelector(state => state.order);
   const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (orderId) {
@@ -33,6 +34,22 @@ export default function OrderDetailPage() {
       toast.error(err || 'Lỗi xác nhận thanh toán');
     } finally {
       setConfirming(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (window.confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) {
+      setCancelling(true);
+      try {
+        await dispatch(cancelOrderThunk(orderId)).unwrap();
+        toast.success('Hủy đơn hàng thành công!');
+        // Reload data
+        dispatch(getOrderDetailThunk(orderId));
+      } catch (err) {
+        toast.error(err || 'Lỗi hủy đơn hàng');
+      } finally {
+        setCancelling(false);
+      }
     }
   };
 
@@ -188,6 +205,21 @@ export default function OrderDetailPage() {
           {/* Tóm tắt thanh toán */}
           <section className="order-section">
             <h2>💰 Tóm tắt thanh toán</h2>
+            
+            {/* Trạng thái đơn hàng */}
+            <div className="order-status-info" style={{ marginBottom: '20px', padding: '15px', backgroundColor: '#f9fafb', borderRadius: '8px', borderLeft: '4px solid ' + (currentOrder.orderStatus === 'cancelled' ? '#dc2626' : '#22c55e') }}>
+              <div style={{ marginBottom: '10px' }}>
+                <label style={{ fontWeight: '600', color: '#374151' }}>Trạng thái đơn hàng:</label>
+                <p style={{ color: getStatusColor(currentOrder.orderStatus), fontWeight: '600', fontSize: '1.1rem', margin: '5px 0 0 0' }}>
+                  {currentOrder.orderStatus === 'pending' && '⏳ Chờ xác nhận'}
+                  {currentOrder.orderStatus === 'confirmed' && '✓ Đã xác nhận'}
+                  {currentOrder.orderStatus === 'processing' && '⚙️ Đang xử lý'}
+                  {currentOrder.orderStatus === 'completed' && '✓ Hoàn thành'}
+                  {currentOrder.orderStatus === 'cancelled' && '✗ Đã hủy'}
+                </p>
+              </div>
+            </div>
+
             <div className="payment-summary">
               <div className="summary-row">
                 <span>Tạm tính:</span>
@@ -212,7 +244,7 @@ export default function OrderDetailPage() {
                 <div className="payment-method">
                   <label>Phương thức thanh toán:</label>
                   <p>
-                    {currentOrder.paymentMethod === 'cod' && '💵 Thanh toán khi nhận hàng (COD)'}
+                    {currentOrder.paymentMethod === 'cod' && '💵 Thanh toán bằng tiền mặt'}
                     {currentOrder.paymentMethod === 'zalopay' && '🏦 Zalopay'}
                   </p>
                 </div>
@@ -232,13 +264,22 @@ export default function OrderDetailPage() {
           {/* Action Buttons */}
           <section className="order-section">
             <div className="action-buttons">
-              {currentOrder.paymentMethod === 'cod' && currentOrder.paymentStatus === 'pending' && (
+              {currentOrder.orderStatus !== 'cancelled' && currentOrder.orderStatus !== 'completed' && (
                 <button 
-                  className="btn btn-primary"
-                  onClick={handleConfirmCOD}
-                  disabled={confirming}
+                  className="btn btn-danger"
+                  onClick={handleCancelOrder}
+                  disabled={cancelling}
                 >
-                  {confirming ? 'Đang xử lý...' : '✓ Xác nhận thanh toán COD'}
+                  {cancelling ? 'Đang hủy...' : '✗ Hủy đơn hàng'}
+                </button>
+              )}
+              {currentOrder.orderStatus === 'cancelled' && (
+                <button 
+                  className="btn btn-danger"
+                  disabled
+                  style={{ opacity: 0.6, cursor: 'not-allowed' }}
+                >
+                  ✗ Đơn hàng đã hủy
                 </button>
               )}
               <button 
