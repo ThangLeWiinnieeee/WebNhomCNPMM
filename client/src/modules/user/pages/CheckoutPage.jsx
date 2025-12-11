@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
 import { createOrderThunk } from '../../../stores/thunks/orderThunks.js';
+import { createZaloPayPaymentThunk } from '../../../stores/thunks/paymentThunks.js';
 import { getCartThunk } from '../../../stores/thunks/cartThunks.js';
 import '../assets/css/CheckoutPage.css';
 
@@ -94,13 +95,28 @@ export default function CheckoutPage() {
     try {
       const result = await dispatch(createOrderThunk(orderData)).unwrap();
       toast.success('Tạo đơn hàng thành công!');
-      // Làm mới giỏ hàng ở client sau khi server đã xóa
+      
+      // Làm mới giỏ hàng
       dispatch(getCartThunk());
       
-      // Redirect tới trang chi tiết đơn hàng sau 2 giây
-      setTimeout(() => {
-        navigate(`/order/${result.order._id}`);
-      }, 1500);
+      // Nếu là ZaloPay, tạo yêu cầu thanh toán
+      if (paymentMethod === 'zalopay') {
+        const paymentResult = await dispatch(
+          createZaloPayPaymentThunk(result.order._id)
+        ).unwrap();
+        
+        // Redirect to ZaloPay
+        if (paymentResult && paymentResult.returnUrl) {
+          window.location.href = paymentResult.returnUrl;
+        } else {
+          toast.error('Lỗi khi tạo yêu cầu thanh toán');
+        }
+      } else {
+        // COD - redirect to order detail
+        setTimeout(() => {
+          navigate(`/order/${result.order._id}`);
+        }, 1500);
+      }
     } catch (err) {
       toast.error(err || 'Lỗi khi tạo đơn hàng');
     }

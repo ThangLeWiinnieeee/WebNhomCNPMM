@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getOrderDetailThunk, confirmCODPaymentThunk, cancelOrderThunk } from '../../../stores/thunks/orderThunks.js';
+import ConfirmModal from '../components/Modal/ConfirmModal';
 import '../assets/css/OrderDetailPage.css';
 
 export default function OrderDetailPage() {
@@ -12,6 +13,7 @@ export default function OrderDetailPage() {
   const { currentOrder, status, error } = useSelector(state => state.order);
   const [confirming, setConfirming] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
 
   useEffect(() => {
     if (orderId) {
@@ -38,18 +40,21 @@ export default function OrderDetailPage() {
   };
 
   const handleCancelOrder = async () => {
-    if (window.confirm('Bạn chắc chắn muốn hủy đơn hàng này?')) {
-      setCancelling(true);
-      try {
-        await dispatch(cancelOrderThunk(orderId)).unwrap();
-        toast.success('Hủy đơn hàng thành công!');
-        // Reload data
-        dispatch(getOrderDetailThunk(orderId));
-      } catch (err) {
-        toast.error(err || 'Lỗi hủy đơn hàng');
-      } finally {
-        setCancelling(false);
-      }
+    setShowCancelConfirm(true);
+  };
+
+  const confirmCancelOrder = async () => {
+    setCancelling(true);
+    try {
+      await dispatch(cancelOrderThunk(orderId)).unwrap();
+      toast.success('Hủy đơn hàng thành công!');
+      setShowCancelConfirm(false);
+      // Reload data
+      dispatch(getOrderDetailThunk(orderId));
+    } catch (err) {
+      toast.error(err || 'Lỗi hủy đơn hàng');
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -85,11 +90,22 @@ export default function OrderDetailPage() {
 
   return (
     <div className="order-detail-page">
+      <ConfirmModal
+        isOpen={showCancelConfirm}
+        title="❌ Hủy đơn hàng"
+        message="Bạn có chắc muốn hủy đơn hàng này? Hành động này không thể hoàn tác."
+        confirmText="Hủy"
+        cancelText="Giữ lại"
+        type="danger"
+        onConfirm={confirmCancelOrder}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
+
       <div className="order-detail-container">
         <div className="order-header">
           <div className="order-header-content">
             <h1>📋 Chi tiết đơn hàng</h1>
-            <p className="order-number">Mã đơn hàng: <strong>{currentOrder.orderNumber}</strong></p>
+            <p className="order-number">Mã đơn hàng: <strong>{currentOrder.orderID}</strong></p>
           </div>
           <div className="order-status-badge">
             <span style={{ backgroundColor: getStatusColor(currentOrder.orderStatus) }}>

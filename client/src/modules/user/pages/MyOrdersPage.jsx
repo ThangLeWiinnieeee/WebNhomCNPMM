@@ -3,13 +3,17 @@ import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import OrderFilterTabs from '../components/Orders/OrderFilterTabs';
 import OrderList from '../components/Orders/OrderList';
+import ConfirmModal from '../components/Modal/ConfirmModal';
 import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
+import '../assets/css/MyOrdersPage.css';
 
 const MyOrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('all'); // all, pending, completed, cancelled
+    const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+    const [cancelOrderId, setCancelOrderId] = useState(null);
 
     useEffect(() => {
         fetchOrders();
@@ -68,11 +72,16 @@ const MyOrdersPage = () => {
     };
 
     const handleCancelOrder = async (orderId) => {
-        if (!window.confirm('Bạn có chắc muốn hủy đơn hàng này?')) return;
-        
+        setCancelOrderId(orderId);
+        setShowCancelConfirm(true);
+    };
+
+    const confirmCancelOrder = async () => {
         try {
-            await api.put(`/orders/${orderId}/cancel`);
+            await api.put(`/orders/${cancelOrderId}/cancel`);
             toast.success('Hủy đơn hàng thành công');
+            setShowCancelConfirm(false);
+            setCancelOrderId(null);
             fetchOrders(); // Làm mới danh sách
         } catch (error) {
             toast.error(error?.message || 'Lỗi khi hủy đơn hàng');
@@ -80,8 +89,21 @@ const MyOrdersPage = () => {
     };
 
     return (
-        <div>
+        <div className="my-orders-page">
             <Header />
+            <ConfirmModal
+                isOpen={showCancelConfirm}
+                title="❌ Hủy đơn hàng"
+                message="Bạn có chắc muốn hủy đơn hàng này? Hành động này không thể hoàn tác."
+                confirmText="Hủy"
+                cancelText="Giữ lại"
+                type="danger"
+                onConfirm={confirmCancelOrder}
+                onCancel={() => {
+                    setShowCancelConfirm(false);
+                    setCancelOrderId(null);
+                }}
+            />
             <div className="container py-5">
                 <div className="row">
                     <div className="col-12">

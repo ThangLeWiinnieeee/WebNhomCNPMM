@@ -92,6 +92,9 @@ class CartController {
 
       await cart.save();
 
+      // Populate serviceId để lấy đầy đủ thông tin
+      await cart.populate('items.serviceId', 'name images price description');
+
       res.json({
         success: true,
         message: 'Đã thêm dịch vụ vào giỏ hàng',
@@ -149,6 +152,9 @@ class CartController {
 
       await cart.save();
 
+      // Populate serviceId để lấy đầy đủ thông tin
+      await cart.populate('items.serviceId', 'name images price description');
+
       res.json({
         success: true,
         message: 'Cập nhật giỏ hàng thành công',
@@ -186,6 +192,9 @@ class CartController {
 
       cart.items = cart.items.filter(i => i._id.toString() !== itemId);
       await cart.save();
+
+      // Populate serviceId để lấy đầy đủ thông tin
+      await cart.populate('items.serviceId', 'name images price description');
 
       res.json({
         success: true,
@@ -274,6 +283,9 @@ class CartController {
       cart.discount = discountAmount;
       await cart.save();
 
+      // Populate serviceId để lấy đầy đủ thông tin
+      await cart.populate('items.serviceId', 'name images price description');
+
       res.json({
         success: true,
         message: 'Áp dụng mã giảm giá thành công',
@@ -311,6 +323,9 @@ class CartController {
 
       cart.notes = notes;
       await cart.save();
+
+      // Populate serviceId để lấy đầy đủ thông tin
+      await cart.populate('items.serviceId', 'name images price description');
 
       res.json({
         success: true,

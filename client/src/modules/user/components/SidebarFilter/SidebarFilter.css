@@ -256,9 +256,10 @@
 /* ========== HORIZONTAL FILTER STYLES ========== */
 .horizontal-filter-section {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 1rem;
   flex-wrap: wrap;
+  width: 100%;
 }
 
 .horizontal-filter-label {
@@ -275,6 +276,8 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   flex: 1;
+  align-items: flex-start;
+  min-width: 0;
 }
 
 .horizontal-filter-btn {
