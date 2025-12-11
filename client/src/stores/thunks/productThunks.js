@@ -250,3 +250,122 @@ export const fetchAllCategoriesThunk = createAsyncThunk(
   }
 );
 
+// Lấy khoảng giá min/max của sản phẩm
+export const fetchPriceRangeThunk = createAsyncThunk(
+  'product/fetchPriceRange',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.get('/products/price-range');
+      
+      if (response.code === 'error') {
+        return rejectWithValue(response.message || 'Lấy khoảng giá thất bại');
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi lấy khoảng giá';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// ==================== ADMIN PRODUCT OPERATIONS ====================
+
+// Tạo sản phẩm mới (Admin)
+export const createProductThunk = createAsyncThunk(
+  'product/createProduct',
+  async (productData, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      Object.keys(productData).forEach((key) => {
+        if (key === 'images' && Array.isArray(productData.images)) {
+          productData.images.forEach((image) => {
+            if (image instanceof File) {
+              formData.append('images', image);
+            } else {
+              formData.append('images', image);
+            }
+          });
+        } else {
+          formData.append(key, productData[key]);
+        }
+      });
+
+      const response = await api.post('/admin/products', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      if (response.code === 'error') {
+        return rejectWithValue(response.message || 'Tạo sản phẩm thất bại');
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi tạo sản phẩm';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Cập nhật sản phẩm (Admin)
+export const updateProductThunk = createAsyncThunk(
+  'product/updateProduct',
+  async ({ productId, productData }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      
+      // Append all fields to FormData
+      Object.keys(productData).forEach((key) => {
+        if (key === 'images' && Array.isArray(productData.images)) {
+          productData.images.forEach((image) => {
+            if (image instanceof File) {
+              formData.append('images', image);
+            } else {
+              formData.append('images', image);
+            }
+          });
+        } else {
+          formData.append(key, productData[key]);
+        }
+      });
+
+      const response = await api.put(`/admin/products/${productId}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
+      if (response.code === 'error') {
+        return rejectWithValue(response.message || 'Cập nhật sản phẩm thất bại');
+      }
+      
+      return response.data || response;
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi cập nhật sản phẩm';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+// Xóa sản phẩm (Admin)
+export const deleteProductThunk = createAsyncThunk(
+  'product/deleteProduct',
+  async (productId, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`/admin/products/${productId}`);
+      
+      if (response.code === 'error') {
+        return rejectWithValue(response.message || 'Xóa sản phẩm thất bại');
+      }
+      
+      return { productId, message: response.message || 'Xóa sản phẩm thành công' };
+    } catch (error) {
+      const errorMessage = error?.message || error?.response?.data?.message || 'Lỗi khi xóa sản phẩm';
+      return rejectWithValue(errorMessage);
+    }
+  }
+);

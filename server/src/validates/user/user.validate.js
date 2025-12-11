@@ -59,21 +59,20 @@ const changePasswordValidate = async (req, res, next) => {
             .required()
             .messages({
                 "string.empty": "Vui lòng nhập mật khẩu hiện tại!",
+                "any.required": "Vui lòng nhập mật khẩu hiện tại!",
             }),
         newPassword: Joi.string()
-            .min(6)
+            .min(8)
+            .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[~!@#$%^&*]).{8,}$/)
             .required()
             .messages({
                 "string.empty": "Vui lòng nhập mật khẩu mới!",
-                "string.min": "Mật khẩu mới phải có ít nhất 6 ký tự!",
+                "string.min": "Mật khẩu mới phải có ít nhất 8 ký tự!",
+                "string.pattern.base": "Mật khẩu mới phải bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt (~!@#$%^&*)!",
+                "any.required": "Vui lòng nhập mật khẩu mới!",
             }),
-        confirmPassword: Joi.string()
-            .valid(Joi.ref('newPassword'))
-            .required()
-            .messages({
-                "string.empty": "Vui lòng nhập lại mật khẩu mới!",
-                "any.only": "Mật khẩu xác nhận không khớp!",
-            }),
+        // confirmPassword is validated on frontend, no need to send to backend
+        confirmPassword: Joi.string().optional(),
     });
 
     const { error } = schema.validate(req.body);

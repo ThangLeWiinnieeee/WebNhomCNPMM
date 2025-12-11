@@ -10,6 +10,9 @@ import {
   searchProductsThunk,
   fetchProductsByCategoryThunk,
   fetchAllCategoriesThunk,
+  createProductThunk,
+  updateProductThunk,
+  deleteProductThunk,
 } from '../thunks/productThunks';
 
 const productSlice = createSlice({
@@ -195,6 +198,67 @@ const productSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchAllCategoriesThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ============ CREATE PRODUCT (ADMIN) ============
+      .addCase(createProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createProductThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Optionally add new product to allProducts list
+        if (Array.isArray(state.allProducts)) {
+          state.allProducts.unshift(action.payload);
+        }
+      })
+      .addCase(createProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ============ UPDATE PRODUCT (ADMIN) ============
+      .addCase(updateProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProductThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Update product in allProducts list
+        if (Array.isArray(state.allProducts)) {
+          const index = state.allProducts.findIndex(p => p._id === action.payload._id);
+          if (index !== -1) {
+            state.allProducts[index] = action.payload;
+          }
+        }
+        // Update currentProduct if it's the same
+        if (state.currentProduct && state.currentProduct._id === action.payload._id) {
+          state.currentProduct = action.payload;
+        }
+      })
+      .addCase(updateProductThunk.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // ============ DELETE PRODUCT (ADMIN) ============
+      .addCase(deleteProductThunk.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProductThunk.fulfilled, (state, action) => {
+        state.loading = false;
+        state.error = null;
+        // Remove product from allProducts list
+        if (Array.isArray(state.allProducts)) {
+          state.allProducts = state.allProducts.filter(p => p._id !== action.payload.productId);
+        }
+      })
+      .addCase(deleteProductThunk.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });

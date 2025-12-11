@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Header from '../components/Header/Header';
@@ -17,9 +17,13 @@ const ProductDetailPage = () => {
   const { currentProduct, loading, relatedProducts } = useSelector((state) => state.product);
   const { user } = useSelector((state) => state.auth);
   const [quantity, setQuantity] = useState(1);
+  const fetchedProductId = useRef(null);
 
   useEffect(() => {
-    if (id) {
+    // Chỉ gọi API khi id thay đổi và chưa fetch id này
+    if (id && fetchedProductId.current !== id) {
+      fetchedProductId.current = id;
+      
       // Fetch product details
       dispatch(fetchProductByIdThunk(id))
         .unwrap()
@@ -32,7 +36,7 @@ const ProductDetailPage = () => {
           navigate('/services');
         });
     }
-  }, [dispatch, id, navigate]);
+  }, [id]);
 
 
   const handleAddToCart = async (quantityFromHero = 1) => {
@@ -126,4 +130,3 @@ const ProductDetailPage = () => {
 };
 
 export default ProductDetailPage;
-
