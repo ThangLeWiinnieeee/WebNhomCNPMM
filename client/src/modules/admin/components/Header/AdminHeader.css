@@ -1,5 +1,79 @@
-/* Custom gradient for admin avatar placeholder */
-.admin-avatar-gradient {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: 2px solid #667eea;
+/* Admin User Info */
+.admin-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #F8F4EC 0%, #FFFFFF 100%);
+  border-radius: 16px;
+  border: 2px solid #E8E8E8;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
+
+.admin-user-info:hover {
+  border-color: #D4AF37;
+  box-shadow: 0 4px 16px rgba(212, 175, 55, 0.2);
+}
+
+.admin-user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #D4AF37;
+  box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
+}
+
+.admin-user-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #D4AF37 0%, #E5C866 100%);
+  border: 3px solid #D4AF37;
+  color: white;
+  font-weight: 700;
+  font-size: 1.25rem;
+  box-shadow: 0 3px 10px rgba(212, 175, 55, 0.3);
+}
+
+.admin-user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-user-name {
+  font-weight: 700;
+  font-size: 0.938rem;
+  color: #2C3E50;
+}
+
+.admin-user-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #D4AF37;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+@media (max-width: 768px) {
+  .admin-user-details {
+    display: none;
+  }
+
+  .admin-user-info {
+    padding: 8px;
+  }
+
+  .admin-user-avatar,
+  .admin-user-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    font-size: 1.1rem;
+  }
+}
+
