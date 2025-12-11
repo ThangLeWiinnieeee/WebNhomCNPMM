@@ -113,16 +113,27 @@ export default function CartPage() {
           </div>
 
           <div className="col-lg-4">
-            <div className="card border-0 shadow-sm sticky-top" style={{ top: '56px', zIndex: 999 }}>
-              <div className="card-body">
+            <div 
+              className="card border-0 shadow-sm sticky-top" 
+              style={{ 
+                top: '56px', 
+                zIndex: 999,
+                maxHeight: 'calc(100vh - 120px)',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
+              <div className="card-body" style={{ overflowY: 'auto', flex: 1 }}>
                 <CartSummary
                   totalPrice={totalPrice}
                   tax={tax}
                   discount={discount}
                   finalTotal={finalTotal}
                 />
-                {/* Nút thanh toán */}
-                <div className="d-grid gap-2 mt-4">
+              </div>
+              {/* Nút thanh toán - luôn hiển thị ở dưới */}
+              <div className="card-footer border-top bg-white p-3">
+                <div className="d-grid gap-2">
                   <button 
                     className="btn btn-success btn-lg"
                     onClick={() => navigate('/checkout')}

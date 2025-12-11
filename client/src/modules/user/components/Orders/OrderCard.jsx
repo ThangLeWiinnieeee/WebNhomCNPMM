@@ -8,8 +8,8 @@ const OrderCard = ({ order, onCancel, getStatusBadge, formatPrice, formatDate })
         <div className="card-body p-4">
           <div className="d-flex justify-content-between align-items-start mb-3">
             <div>
-              <h6 className="fw-bold mb-1">
-                Đơn hàng #{order.orderNumber || order._id}
+              <h6 className="fw-bold mb-1 order-id">
+                Mã đơn hàng: {order.orderID || order._id}
               </h6>
               <small className="text-muted">
                 {formatDate(order.createdAt)}
@@ -36,7 +36,7 @@ const OrderCard = ({ order, onCancel, getStatusBadge, formatPrice, formatDate })
           {/* Total */}
           <div className="d-flex justify-content-between align-items-center">
             <div className="fw-bold">Tổng cộng:</div>
-            <div className="h5 fw-bold mb-0" style={{color: '#ec4899'}}>
+            <div className="h5 fw-bold mb-0 order-amount">
               {formatPrice(order.finalTotal)}
             </div>
           </div>

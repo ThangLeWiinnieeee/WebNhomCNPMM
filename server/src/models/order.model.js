@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import DailyCounter from './daily-counter.model.js';
 
 const orderItemSchema = new mongoose.Schema(
   {
@@ -35,7 +36,7 @@ const orderSchema = new mongoose.Schema(
       ref: 'User',
       required: true
     },
-    orderNumber: {
+    orderID: {
       type: String,
       unique: true,
       sparse: true,
@@ -99,6 +100,17 @@ const orderSchema = new mongoose.Schema(
       enum: ['pending', 'completed', 'failed', 'cancelled'],
       default: 'pending'
     },
+    // Payment gateway data (for ZaloPay, etc.)
+    paymentData: {
+      transactionId: String,
+      provider: String, // 'zalopay', 'stripe', etc.
+      status: String, // 'pending', 'completed', 'failed'
+      createdAt: Date,
+      completedAt: Date,
+      failedAt: Date,
+      failureReason: String,
+      zaloPayData: Object, // ZaloPay specific data
+    },
     // Trạng thái đơn hàng
     orderStatus: {
       type: String,
@@ -122,12 +134,35 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Middleware để tạo orderNumber tự động
+// Middleware để tạo orderID tự động theo ngày (YYMMDD + sequential number)
+// Sử dụng Atomic Update với DailyCounter để tránh race condition
 orderSchema.pre('save', async function (next) {
   try {
-    if (this.isNew && !this.orderNumber) {
-      const count = await mongoose.model('Order').countDocuments();
-      this.orderNumber = `ORD-${Date.now()}-${count + 1}`;
+    if (this.isNew && !this.orderID) {
+      // Tạo key theo ngày hiện tại dạng YYMMDD (ví dụ: 251211)
+      const now = new Date();
+      const year = String(now.getFullYear()).slice(-2);
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const dateKey = `${year}${month}${day}`;
+      
+      // Sử dụng findOneAndUpdate với $inc để tăng counter một cách atomic
+      // Nếu document chưa tồn tại, nó sẽ được tạo với count = 1
+      const counter = await DailyCounter.findOneAndUpdate(
+        { date: dateKey },
+        { 
+          $inc: { count: 1 },
+          $set: { updatedAt: new Date() }
+        },
+        { 
+          new: true,  // Trả về document sau khi update
+          upsert: true  // Tạo document nếu không tồn tại
+        }
+      );
+      
+      // Tạo orderID với sequential number được formatted (001, 002, ..., 999, 1000, ...)
+      const sequentialNumber = String(counter.count).padStart(3, '0');
+      this.orderID = `${dateKey}${sequentialNumber}`;
     }
     next();
   } catch (error) {
@@ -135,7 +170,7 @@ orderSchema.pre('save', async function (next) {
   }
 });
 
-// Middleware tính toán tự động (chạy sau orderNumber middleware)
+// Middleware tính toán tự động (chạy sau orderID middleware)
 orderSchema.pre('save', function (next) {
   try {
     // Tính totalPrice từ items

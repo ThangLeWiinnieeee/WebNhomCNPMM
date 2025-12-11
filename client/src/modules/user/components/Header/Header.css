@@ -267,3 +267,30 @@
     background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
     margin: 0.5rem 1.25rem;
 }
+
+/* Cart Badge Styles */
+.fa-shopping-cart {
+    position: relative;
+}
+
+.badge {
+    position: absolute !important;
+    top: -4px !important;
+    right: -8px !important;
+    min-width: 20px !important;
+    height: 20px !important;
+    padding: 0 6px !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 20px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.badge.bg-danger {
+    background-color: #ef4444 !important;
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3) !important;
+}
