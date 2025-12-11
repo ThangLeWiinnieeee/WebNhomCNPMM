@@ -36,7 +36,7 @@ const OrderList = ({ orders, loading, activeTab, onCancel, getStatusBadge, forma
     <div className="row g-3">
       {filteredOrders.map((order) => (
         <OrderCard
-          key={order._id}
+          key={order.id || order._id}
           order={order}
           onCancel={onCancel}
           getStatusBadge={getStatusBadge}
