@@ -1,133 +1,154 @@
 import axios from 'axios';
 import crypto from 'crypto';
-
-const ZALOPAY_CONFIG = {
-  APP_ID: process.env.ZALOPAY_APP_ID || '553399', // Demo app ID
-  KEY1: process.env.ZALOPAY_KEY1 || 'PcY4gVRjMmkDXvn0pQ7IB7VGZG7ieidN',
-  KEY2: process.env.ZALOPAY_KEY2 || 'ctv74vvyychqabUz2kWklCl73kDtiyUP',
-  ENDPOINT: process.env.ZALOPAY_ENDPOINT || 'https://sandbox.zalopay.com.vn/api/v2/create',
-  QUERY_ENDPOINT: process.env.ZALOPAY_QUERY_ENDPOINT || 'https://sandbox.zalopay.com.vn/api/v2/query',
-};
+import querystring from 'querystring';
+import ZALOPAY_CONFIG from '../config/zalopay.config.js';
 
 class ZaloPayService {
   /**
-   * Create payment request for ZaloPay
+   * Create payment request for ZaloPay using API v2
    * @param {Object} orderData - Order data
-   * @param {string} orderData.orderId - Order ID from database
+   * @param {string} orderData.orderId - Order ID (orderID - user-facing)
+   * @param {string} orderData.orderObjectId - MongoDB _id (database reference)
    * @param {number} orderData.amount - Amount in VND
    * @param {string} orderData.description - Order description
    * @param {string} orderData.returnUrl - URL to redirect after payment
    * @returns {Promise<Object>} Payment data with payment URL
    */
-  static async createPaymentRequest(orderData) { // <--- THÊM 'async' Ở ĐÂY
-    try {
-      const { orderId, amount, description, returnUrl } = orderData;
-      
-      // Thêm URL Callback (Webhook) để ZaloPay thông báo kết quả
-      const callbackUrl = `${process.env.SERVER_URL || 'http://localhost:5001'}/api/payment/zalopay/callback`; 
+  static async createPaymentRequest(orderData) {
+    try {
+      const { orderId, orderObjectId, amount, description, returnUrl } = orderData;
 
-      // Generate transaction ID (unique)
-      const transactionId = `${Math.floor(Date.now() / 1000)}_${orderId}`;
-
-      // Prepare payment data
-      const paymentData = {
-        app_id: parseInt(ZALOPAY_CONFIG.APP_ID),
-        app_trans_id: transactionId,
-        app_user: 'user123',
-        app_time: Math.floor(Date.now() / 1000),
-        amount: parseInt(amount),
-        item: `[{"itemid":"${orderId}","itemname":"${description}","itemprice":${amount},"itemquantity":1}]`,
-        embed_data: JSON.stringify({
-          orderId: orderId,
-          description: description,
-        }),
-        call_to_action: 'WEB',
-        description: description,
-        bank_code: '',
-        redirect_url: returnUrl || `${process.env.CLIENT_URL || 'http://localhost:5173'}/order-payment-result`,
-        // THÊM CALLBACK URL ĐỂ NHẬN WEBHOOK TỪ ZALOPAY
-        app_user: 'user123', // Đảm bảo trường này tồn tại (đã có ở trên)
-        app_time: Math.floor(Date.now() / 1000), // Đảm bảo trường này tồn tại (đã có ở trên)
-        mac: '', // MAC sẽ được tạo ở bước tiếp theo
-        // ZaloPay v2 sử dụng callback_url, cần kiểm tra tài liệu
-        callback_url: callbackUrl, // <--- THÊM CALLBACK URL WEBHOOK
-      };
-
-      // Create MAC signature
-      const mac = this.createMacSignature(paymentData);
-      paymentData.mac = mac;
+      // 1. Tạo App Trans ID theo format: YYYYMMDD + random + timestamp
+      const now = new Date();
+      const yymmdd =
+        now.getFullYear().toString().slice(-2) +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0');
       
-      // GỌI API ZALOPAY
-      const response = await axios.post(ZALOPAY_CONFIG.ENDPOINT, paymentData);
-      const zaloPayResponse = response.data;
+      const timestamp = Date.now();
+      const appTransId = `${yymmdd}${orderId}${String(timestamp).slice(-6)}`;
 
-      if (zaloPayResponse.return_code === 1) {
-        // Trả về orderurl (URL thanh toán)
-        return {
-          success: true,
-          transactionId,
-          paymentData: {
-                ...paymentData,
-                orderurl: zaloPayResponse.order_url, // URL để redirect người dùng
-                zpResponse: zaloPayResponse
-            },
-        };
-      } else {
-        // Lỗi từ ZaloPay
+      // 2. Chuẩn bị dữ liệu request (v2 format)
+      // ⚠️ QUAN TRỌNG: Trong payload gửi đi, app_id và amount phải là NUMBER
+      // Nhưng trong MAC calculation, chúng phải là STRING
+      const appId = ZALOPAY_CONFIG.APP_ID; // INT: 2553
+      const amountInt = parseInt(amount); // INT: 5500000
+      
+      const requestData = {
+        app_id: appId,  // INT trong payload
+        app_trans_id: appTransId,
+        app_user: orderData.userId || 'user_' + orderData.orderId,  // Dynamic từ order/user
+        app_time: timestamp,
+        amount: amountInt,  // INT trong payload
+        description: description,
+        item: JSON.stringify([
+          {
+            itemid: orderId,
+            itemname: description,
+            itemprice: amountInt,
+            itemquantity: 1,
+          }
+        ]),
+        embed_data: JSON.stringify({
+          redirecturl: returnUrl || `${process.env.CLIENT_URL || 'http://localhost:5173'}/orders`,
+          orderId: orderId,
+          orderObjectId: orderObjectId
+        }),
+        bank_code: 'zalopayapp',
+        callback_url: `${process.env.SERVER_URL || 'http://localhost:5001'}/api/payment/zalopay/callback`
+      };
+
+      // 3. Tính toán MAC (v2 format)
+      // Format: app_id|app_trans_id|app_user|amount|app_time|embed_data|item
+      // ⚠️ QUAN TRỌNG: Trong MAC input, tất cả phải là STRING (chuyển từ giá trị INT)
+const macInput = 
+    String(requestData.app_id) + '|' + 
+    requestData.app_trans_id + '|' + 
+    requestData.app_user + '|' + 
+    String(requestData.amount) + '|' + 
+    String(requestData.app_time) + '|' + 
+    requestData.embed_data + '|' + 
+    requestData.item;
+
+      console.log('📋 MAC Input (v2):', macInput);
+      console.log('🔑 KEY1:', ZALOPAY_CONFIG.KEY1);
+      console.log('📝 Kiểu dữ liệu:', {
+        app_id: appId,
+        app_id_type: typeof appId,
+        app_trans_id: appTransId,
+        amount: amountInt,
+        amount_type: typeof amountInt,
+        timestamp: timestamp,
+        timestamp_type: typeof timestamp
+      });
+      
+      const mac = crypto
+        .createHmac('sha256', ZALOPAY_CONFIG.KEY1)
+        .update(macInput)
+        .digest('hex');
+
+      console.log('✅ Calculated MAC:', mac);
+
+      // 4. Gán MAC vào request data
+      requestData.mac = mac;
+
+      // 5. Gửi request tới ZaloPay v2 API
+      console.log('🚀 Calling ZaloPay v2 API...');
+      console.log('📤 Request Data:', requestData);
+
+      const response = await axios.post(
+        ZALOPAY_CONFIG.ENDPOINT,
+        requestData,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      console.log('📥 ZaloPay Response:', response.data);
+
+      // 6. Xử lý response
+      if (response.data.return_code === 1) {
+        // Success
+        console.log('✅ ZaloPay Request Successful');
         return {
-            success: false,
-            error: zaloPayResponse.return_message || 'Lỗi không xác định từ ZaloPay'
+          success: true,
+          appTransId: appTransId,
+          paymentData: {
+            appTransId: appTransId,
+            orderUrl: response.data.order_url, // v2 returns order_url
+            amount: amount,
+          }
+        };
+      } else {
+        // Error
+        console.warn(`⚠️ ZaloPay Error (${response.data.return_code}):`, response.data.return_message);
+        return {
+          success: false,
+          error: response.data.return_message || `Lỗi ZaloPay (${response.data.return_code})`,
+          details: response.data
         };
       }
-      
-    } catch (error) {
-      console.error('Error creating ZaloPay request:', error.response ? error.response.data : error.message);
-      return {
-        success: false,
-        error: error.response?.data?.return_message || error.message,
-      };
-    }
-  }
 
-  /**
-   * Create MAC signature for ZaloPay
-   * @param {Object} paymentData - Payment data
-   * @returns {string} MAC signature
-   */
-  static createMacSignature(paymentData) {
-    // Order of fields for MAC calculation is specific
-    const data =
-      paymentData.app_id +
-      '|' +
-      paymentData.app_trans_id +
-      '|' +
-      paymentData.app_user +
-      '|' +
-      paymentData.amount +
-      '|' +
-      paymentData.app_time +
-      '|' +
-      paymentData.embed_data +
-      '|' +
-      paymentData.item;
-
-    return crypto
-      .createHmac('sha256', ZALOPAY_CONFIG.KEY1)
-      .update(data)
-      .digest('hex');
+    } catch (error) {
+      console.error('❌ Error creating ZaloPay request:', error.response?.data || error.message);
+      return {
+        success: false,
+        error: error.response?.data?.return_message || error.message || 'Lỗi không xác định',
+      };
+    }
   }
 
   /**
-   * Verify MAC signature from ZaloPay callback
+   * Verify MAC signature from ZaloPay v2 callback
    * @param {Object} callbackData - Data from ZaloPay callback
    * @returns {boolean} Is signature valid
    */
   static verifyMacSignature(callbackData) {
     try {
-      const data =
-        callbackData.data +
-        '|' +
-        ZALOPAY_CONFIG.KEY2;
+      // v2 API format for verification: data|KEY2
+      const data = callbackData.data + '|' + ZALOPAY_CONFIG.KEY2;
 
       const computedMac = crypto
         .createHmac('sha256', ZALOPAY_CONFIG.KEY2)
@@ -142,47 +163,50 @@ class ZaloPayService {
   }
 
   /**
-   * Query payment status from ZaloPay
+   * Parse callback data from ZaloPay
+   * @param {string} dataStr - JSON string of callback data
+   * @returns {Object} Parsed callback data
+   */
+  static parseCallbackData(dataStr) {
+    try {
+      return JSON.parse(dataStr);
+    } catch (error) {
+      console.error('Error parsing callback data:', error);
+      return {};
+    }
+  }
+
+  /**
+   * Query payment status from ZaloPay v2 API
    * @param {string} appTransId - App transaction ID
    * @returns {Promise<Object>} Payment status
    */
   static async queryPaymentStatus(appTransId) {
     try {
       const appId = ZALOPAY_CONFIG.APP_ID;
-      const appTime = Math.floor(Date.now() / 1000);
 
-      const data = appId + '|' + appTransId + '|' + appTime;
-      const mac = crypto
-        .createHmac('sha256', ZALOPAY_CONFIG.KEY1)
-        .update(data)
-        .digest('hex');
+      // v2 API format: app_id|app_trans_id|key1
+      const macInput = `${appId}|${appTransId}|${ZALOPAY_CONFIG.KEY1}`;
+      const mac = crypto.createHmac('sha256', ZALOPAY_CONFIG.KEY1).update(macInput).digest('hex');
 
-      const response = await axios.post(ZALOPAY_CONFIG.QUERY_ENDPOINT, {
-        app_id: parseInt(appId),
-        app_trans_id: appTransId,
-        mac: mac,
-      });
+      const response = await axios.post(
+        ZALOPAY_CONFIG.QUERY_ENDPOINT,
+        {
+          app_id: appId,
+          app_trans_id: appTransId,
+          mac: mac
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
 
       return response.data;
     } catch (error) {
       console.error('Error querying payment status:', error);
       throw error;
-    }
-  }
-
-  /**
-   * Parse ZaloPay callback data
-   * @param {string} dataStr - Encrypted data from callback
-   * @returns {Object} Parsed callback data
-   */
-  static parseCallbackData(dataStr) {
-    try {
-      // In production, you would decrypt this with ZaloPay's public key
-      // For now, parse if it's JSON
-      return typeof dataStr === 'string' ? JSON.parse(dataStr) : dataStr;
-    } catch (error) {
-      console.error('Error parsing callback data:', error);
-      return null;
     }
   }
 }

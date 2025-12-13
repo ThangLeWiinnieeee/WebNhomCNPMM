@@ -13,12 +13,12 @@ import MyOrdersPage from './modules/user/pages/MyOrdersPage.jsx';
 import CartPage from './modules/user/pages/CartPage.jsx';
 import CheckoutPage from './modules/user/pages/CheckoutPage.jsx';
 import OrderDetailPage from './modules/user/pages/OrderDetailPage.jsx';
+import PaymentResultPage from './modules/user/pages/PaymentResultPage.jsx';
 import ProductsPage from './modules/user/pages/ProductsPage.jsx';
 import ProductDetailPage from './modules/user/pages/ProductDetailPage.jsx';
 import AdminLayout from './modules/admin/layouts/AdminLayout';
 import Dashboard from './modules/admin/pages/Dashboard/Dashboard';
 import Categories from './modules/admin/pages/Categories/Categories';
-import Products from './modules/admin/pages/Products/Products';
 import AdminRoute from './modules/admin/components/AdminRoute/AdminRoute';
 import { useAuthInit } from './stores/hooks/useAuthInit.js';
 
@@ -53,6 +53,7 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:orderId" element={<OrderDetailPage />} />
+        <Route path="/order/:orderId/payment-result" element={<PaymentResultPage />} />
         <Route path="/services" element={<ProductsPage />} />
         <Route path="/services/:id" element={<ProductDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
@@ -63,7 +64,6 @@ function App() {
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="categories" element={<Categories />} />
-            <Route path="products" element={<Products />} />
           </Route>
         </Route>
       </Routes>
