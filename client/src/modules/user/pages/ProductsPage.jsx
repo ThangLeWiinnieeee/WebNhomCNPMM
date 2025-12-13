@@ -7,6 +7,7 @@ import ProductGrid from '../components/ProductGrid/ProductGrid';
 import SidebarFilter from '../components/SidebarFilter/SidebarFilter';
 import FlashSaleSection from '../components/FlashSaleSection/FlashSaleSection';
 import { fetchAllProductsThunk, fetchPromotionProductsThunk } from '../../../stores/thunks/productThunks';
+import { addToCartThunk } from '../../../stores/thunks/cartThunks';
 import { toast } from 'sonner';
 import '../assets/css/productsPage.css';
 
@@ -171,10 +172,21 @@ const ProductsPage = () => {
     setSearchParams(newParams);
   };
 
-  const handleAddToCart = (product) => {
-    // TODO: Implement add to cart logic
-    console.log('Add to cart:', product);
-    toast.success('Đã thêm vào giỏ hàng');
+  const handleAddToCart = async (product) => {
+    try {
+      const result = await dispatch(addToCartThunk({
+        serviceId: product._id,
+        quantity: 1,
+        selectedOptions: {}
+      })).unwrap();
+      
+      if (result.success || result.cart) {
+        toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+      }
+    } catch (error) {
+      toast.error(error || 'Không thể thêm sản phẩm vào giỏ hàng');
+      console.error('Add to cart error:', error);
+    }
   };
 
   const handleAddToWishlist = (product) => {

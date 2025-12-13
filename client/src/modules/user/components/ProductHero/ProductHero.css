@@ -87,9 +87,11 @@
     var(--primary-light) 100%
   );
   -webkit-mask: linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
+  linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
-  mask-composite: exclude;
+  mask: linear-gradient(#fff 0 0) content-box,
+   linear-gradient(#fff 0 0);
+    mask-composite: exclude;
   opacity: 0;
   transition: var(--transition-base);
   z-index: 1;
@@ -137,6 +139,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  align-items: flex-start;
+  min-width: 0;
 }
 
 .product-hero-tag {
@@ -148,6 +152,8 @@
   font-weight: 500;
   border: none;
   box-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Title */

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 const cartItemSchema = new mongoose.Schema({
   serviceId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Service',
+    ref: 'Product',
     required: true
   },
   serviceName: String,
@@ -65,18 +65,24 @@ const cartSchema = new mongoose.Schema({
 
 // Pre-save middleware để tính toán tổng tiền
 cartSchema.pre('save', function(next) {
-  // Tính tổng tiền hàng
-  this.totalPrice = this.items.reduce((sum, item) => {
-    return sum + (item.price * item.quantity);
-  }, 0);
+  try {
+    // Tính tổng tiền hàng
+    this.totalPrice = this.items.reduce((sum, item) => {
+      const price = item.price || 0;
+      const quantity = item.quantity || 1;
+      return sum + (price * quantity);
+    }, 0);
 
-  // Tính thuế (10% mặc định)
-  this.tax = this.totalPrice * 0.1;
+    // Tính thuế (10% mặc định)
+    this.tax = Math.round(this.totalPrice * 0.1 * 100) / 100;
 
-  // Tính tổng cuối cùng
-  this.finalTotal = this.totalPrice + this.tax - this.discount;
+    // Tính tổng cuối cùng (giảm giá nếu có)
+    this.finalTotal = Math.round((this.totalPrice + this.tax - (this.discount || 0)) * 100) / 100;
 
-  next();
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default mongoose.model('Cart', cartSchema);

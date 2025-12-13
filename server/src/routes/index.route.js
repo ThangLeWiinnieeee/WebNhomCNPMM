@@ -12,6 +12,7 @@ import adminProductRoutes from './admin/product.route.js';
 import adminCategoryRoutes from './admin/category.route.js';
 // Shared routes
 import uploadRoutes from './upload.route.js';
+import paymentRoutes from './payment.route.js';
 
 const router = express.Router();
 
@@ -27,6 +28,9 @@ router.use('/orders', userOrderRoutes); // User order routes
 router.use('/admin/orders', adminOrderRoutes);
 router.use('/admin/products', adminProductRoutes);
 router.use('/admin/categories', adminCategoryRoutes);
+
+// Payment routes
+router.use('/payment', paymentRoutes);
 
 // Shared routes
 router.use('/upload', uploadRoutes);

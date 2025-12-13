@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutUserThunk } from '../../../../stores/thunks/authThunks.js';
 import { fetchAllCategoriesThunk } from '../../../../stores/thunks/productThunks.js';
+import { getCartThunk } from '../../../../stores/thunks/cartThunks.js';
 import { toast } from 'sonner';
 import './Header.css';
 
@@ -10,6 +11,7 @@ const Header = () => {
     const dispatch = useDispatch();
     const { isAuthenticated, user, loading } = useSelector((state) => state.auth);
     const { categories } = useSelector((state) => state.product);
+    const { cartCount } = useSelector((state) => state.cart);
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
     const [showCategoriesDropdown, setShowCategoriesDropdown] = useState(false);
@@ -20,6 +22,13 @@ const Header = () => {
     useEffect(() => {
         dispatch(fetchAllCategoriesThunk());
     }, [dispatch]);
+
+    // Đồng bộ giỏ hàng khi đã đăng nhập
+    useEffect(() => {
+        if (isAuthenticated) {
+            dispatch(getCartThunk());
+        }
+    }, [dispatch, isAuthenticated]);
 
     // Đóng dropdown khi click bên ngoài (chỉ cho user dropdown)
     useEffect(() => {
@@ -123,6 +132,16 @@ const Header = () => {
 
                         {/* Auth Section */}
                         <div className="d-flex align-items-center gap-2">
+                            {isAuthenticated && (
+                                <Link to="/cart" className="btn btn-light position-relative me-2" title="Giỏ hàng">
+                                    <i className="fas fa-shopping-cart fs-5"></i>
+                                    {cartCount > 0 && (
+                                        <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            )}
                             {isAuthenticated ? (
                                 <div className="position-relative" ref={dropdownRef}>
                                     <button 
