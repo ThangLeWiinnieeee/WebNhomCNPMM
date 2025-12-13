@@ -16,7 +16,7 @@ export const createZaloPayPaymentThunk = createAsyncThunk(
         return rejectWithValue(response.message || 'Lỗi khi tạo thanh toán');
       }
 
-      return response.data;
+      return response; // Return full response with paymentUrl
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message || 'Lỗi khi tạo yêu cầu thanh toán'
