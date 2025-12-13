@@ -6,9 +6,18 @@ export const getCartThunk = createAsyncThunk(
   'cart/getCart',
   async (_, { rejectWithValue }) => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        // Không có token, trả về cart rỗng
+        return { items: [], totalPrice: 0, tax: 0, discount: 0, finalTotal: 0 };
+      }
       const response = await api.get('/cart');
-      return response.data;
+      return response;
     } catch (error) {
+      if (error.response?.status === 401) {
+        // Token hết hạn hoặc không hợp lệ, trả về cart rỗng
+        return { items: [], totalPrice: 0, tax: 0, discount: 0, finalTotal: 0 };
+      }
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy giỏ hàng');
     }
   }
@@ -20,7 +29,7 @@ export const addToCartThunk = createAsyncThunk(
   async (cartData, { rejectWithValue }) => {
     try {
       const response = await api.post('/cart/add', cartData);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi thêm vào giỏ hàng');
     }
@@ -33,9 +42,9 @@ export const updateCartItemThunk = createAsyncThunk(
   async ({ itemId, ...updateData }, { rejectWithValue }) => {
     try {
       const response = await api.put(`/cart/update/${itemId}`, updateData);
-      return response.data;
+      return response;
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật giỏ hàng');
+      return rejectWithValue(error.response?.data?.message || 'Loi khi cap nhat gio hang');
     }
   }
 );
@@ -46,7 +55,7 @@ export const removeFromCartThunk = createAsyncThunk(
   async (itemId, { rejectWithValue }) => {
     try {
       const response = await api.delete(`/cart/remove/${itemId}`);
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi xóa sản phẩm');
     }
@@ -59,7 +68,7 @@ export const clearCartThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.delete('/cart/clear');
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi xóa giỏ hàng');
     }
@@ -72,7 +81,7 @@ export const applyDiscountThunk = createAsyncThunk(
   async (discountAmount, { rejectWithValue }) => {
     try {
       const response = await api.put('/cart/applyDiscount', { discountAmount });
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi áp dụng giảm giá');
     }
@@ -85,7 +94,7 @@ export const updateNotesThunk = createAsyncThunk(
   async (notes, { rejectWithValue }) => {
     try {
       const response = await api.put('/cart/notes', { notes });
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi cập nhật ghi chú');
     }
@@ -98,7 +107,7 @@ export const getCartCountThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.get('/cart/count');
-      return response.data;
+      return response;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Lỗi khi lấy số lượng giỏ hàng');
     }

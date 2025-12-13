@@ -5,6 +5,7 @@ import { PersistGate } from 'redux-persist/integration/react'
 import { BrowserRouter } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { store, persistor } from './stores/store.js'
+import { NotificationProvider } from './contexts/NotificationContext.jsx'
 import { Toaster } from 'sonner';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'font-awesome/css/font-awesome.min.css';
@@ -21,15 +22,17 @@ createRoot(document.getElementById('root')).render(
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <BrowserRouter>
-            <App />
-            <Toaster 
-              position="top-right" 
-              richColors 
-              expand={true}
-              duration={1000}
-            />
-          </BrowserRouter>
+          <NotificationProvider>
+            <BrowserRouter>
+              <App />
+              <Toaster 
+                position="top-right" 
+                richColors 
+                expand={true}
+                duration={1000}
+              />
+            </BrowserRouter>
+          </NotificationProvider>
         </PersistGate>
       </Provider>
     </GoogleOAuthProvider>

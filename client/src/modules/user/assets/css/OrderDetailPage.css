@@ -2,6 +2,7 @@
   min-height: calc(100vh - 100px);
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 40px 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .order-detail-container {
@@ -31,11 +32,13 @@
   color: #999;
   font-size: 0.95rem;
   margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .order-number strong {
-  color: #667eea;
-  font-weight: 600;
+  color: #ef4444;
+  font-weight: 700;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .order-status-badge span {

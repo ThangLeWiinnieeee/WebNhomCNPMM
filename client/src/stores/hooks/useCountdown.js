@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
  * @param {Date|string|number} targetDate - Ngày đích (Date object, ISO string, hoặc timestamp)
  * @returns {Object} - Object chứa days, hours, minutes, seconds
  */
-const useCountdown = (targetDate) => {
+export const useCountdown = (targetDate) => {
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -54,6 +54,3 @@ const useCountdown = (targetDate) => {
 
   return timeLeft;
 };
-
-export default useCountdown;
-

@@ -1,0 +1,34 @@
+/* ============================================
+   MY ORDERS PAGE STYLES
+   ============================================ */
+
+.my-orders-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.my-orders-page h2 {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937;
+}
+
+/* Order Card */
+.order-card {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.order-id {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.order-id strong {
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.order-amount {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+}

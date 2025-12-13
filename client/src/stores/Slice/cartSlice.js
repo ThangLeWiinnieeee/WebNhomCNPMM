@@ -39,7 +39,8 @@ const cartSlice = createSlice({
         state.discount = action.payload.cart.discount;
         state.finalTotal = action.payload.cart.finalTotal;
         state.notes = action.payload.cart.notes || '';
-        state.cartCount = action.payload.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        // Hiển thị số dịch vụ (distinct items)
+        state.cartCount = action.payload.cart.items.length;
         state.error = null;
       })
       .addCase(getCartThunk.rejected, (state, action) => {
@@ -59,7 +60,7 @@ const cartSlice = createSlice({
         state.tax = action.payload.cart.tax;
         state.discount = action.payload.cart.discount;
         state.finalTotal = action.payload.cart.finalTotal;
-        state.cartCount = action.payload.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        state.cartCount = action.payload.cart.items.length;
         state.error = null;
       })
       .addCase(addToCartThunk.rejected, (state, action) => {
@@ -79,7 +80,7 @@ const cartSlice = createSlice({
         state.tax = action.payload.cart.tax;
         state.discount = action.payload.cart.discount;
         state.finalTotal = action.payload.cart.finalTotal;
-        state.cartCount = action.payload.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        state.cartCount = action.payload.cart.items.length;
         state.error = null;
       })
       .addCase(updateCartItemThunk.rejected, (state, action) => {
@@ -99,7 +100,7 @@ const cartSlice = createSlice({
         state.tax = action.payload.cart.tax;
         state.discount = action.payload.cart.discount;
         state.finalTotal = action.payload.cart.finalTotal;
-        state.cartCount = action.payload.cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        state.cartCount = action.payload.cart.items.length;
         state.error = null;
       })
       .addCase(removeFromCartThunk.rejected, (state, action) => {

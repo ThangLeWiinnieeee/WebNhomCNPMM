@@ -4,7 +4,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
-import useCountdown from '../../../../stores/hooks/useCountdown.js';
+import { useCountdown } from '../../../../stores/hooks';
 import ProductCard from '../ProductCard/ProductCard';
 import './FlashSaleSection.css';
 
@@ -79,7 +79,15 @@ const FlashSaleSection = ({ products = [] }) => {
     },
   ];
 
-  const displayProducts = products.length > 0 ? products : mockProducts;
+  // Sắp xếp sản phẩm theo giá tăng dần (nhỏ → lớn)
+  const sortedProducts = React.useMemo(() => {
+    const productsToSort = products.length > 0 ? products : mockProducts;
+    return [...productsToSort].sort((a, b) => {
+      const priceA = a.discountPrice || a.price || 0;
+      const priceB = b.discountPrice || b.price || 0;
+      return priceA - priceB;
+    });
+  }, [products]);
 
   return (
     <section className="flash-sale-section">
@@ -168,7 +176,7 @@ const FlashSaleSection = ({ products = [] }) => {
                 }}
                 className="flash-sale-swiper"
               >
-                {displayProducts.map((product) => (
+                {sortedProducts.map((product) => (
                   <SwiperSlide key={product._id}>
                     <div className="flash-sale-card-wrapper">
                       <ProductCard product={product} />

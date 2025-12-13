@@ -14,16 +14,20 @@ const validateCreateCategory = async (req, res, next) => {
         'string.empty': 'Slug không hợp lệ!',
       }),
     description: Joi.string()
-      .optional()
-      .allow('')
+      .required()
+      .min(10)
       .messages({
-        'string.empty': 'Mô tả không hợp lệ!',
+        'string.empty': 'Mô tả không được để trống!',
+        'any.required': 'Mô tả không được để trống!',
+        'string.min': 'Mô tả phải có ít nhất 10 ký tự!',
       }),
     image: Joi.string()
-      .optional()
-      .allow('')
+      .required()
+      .uri()
       .messages({
-        'string.empty': 'URL ảnh không hợp lệ!',
+        'string.empty': 'Ảnh không được để trống!',
+        'any.required': 'Ảnh không được để trống!',
+        'string.uri': 'URL ảnh không hợp lệ!',
       }),
     isActive: Joi.boolean()
       .optional()

@@ -16,6 +16,14 @@ class OrderController {
         });
       }
 
+      // Validate ngày tổ chức
+      if (!eventDate || Number.isNaN(new Date(eventDate).getTime())) {
+        return res.status(400).json({
+          success: false,
+          message: 'Vui lòng chọn ngày tổ chức hợp lệ'
+        });
+      }
+
       // Lấy giỏ hàng
       const cart = await Cart.findOne({ userId }).populate('items.serviceId');
       if (!cart || cart.items.length === 0) {

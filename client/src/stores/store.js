@@ -5,6 +5,8 @@ import authReducer from './Slice/authSlice';
 import cartReducer from './Slice/cartSlice';
 import orderReducer from './Slice/orderSlice';
 import productReducer from './Slice/productSlice';
+import categoryReducer from './Slice/categorySlice';
+import paymentReducer from './Slice/paymentSlice';
 
 // Cáºu hÃnh persist cho auth slice
 const authPersistConfig = {
@@ -23,6 +25,8 @@ export const store = configureStore({
     cart: cartReducer,
     order: orderReducer,
     product: productReducer,
+    category: categoryReducer,
+    payment: paymentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

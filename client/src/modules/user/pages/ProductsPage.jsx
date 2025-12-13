@@ -7,6 +7,7 @@ import ProductGrid from '../components/ProductGrid/ProductGrid';
 import SidebarFilter from '../components/SidebarFilter/SidebarFilter';
 import FlashSaleSection from '../components/FlashSaleSection/FlashSaleSection';
 import { fetchAllProductsThunk, fetchPromotionProductsThunk } from '../../../stores/thunks/productThunks';
+import { addToCartThunk } from '../../../stores/thunks/cartThunks';
 import { toast } from 'sonner';
 import '../assets/css/productsPage.css';
 
@@ -18,7 +19,7 @@ const ProductsPage = () => {
   const [currentFilter, setCurrentFilter] = useState(searchParams.get('filter') || 'all');
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page')) || 1);
-  const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || searchParams.get('sortBy') || 'newest');
+  const [currentSort, setCurrentSort] = useState(searchParams.get('sort') || searchParams.get('sortBy') || 'price-asc');
   const [priceRange, setPriceRange] = useState({
     min: searchParams.get('minPrice') || '',
     max: searchParams.get('maxPrice') || '',
@@ -32,7 +33,7 @@ const ProductsPage = () => {
   const categoryIdParam = useMemo(() => searchParams.get('categoryId'), [searchParams]);
   const minPriceParam = useMemo(() => searchParams.get('minPrice'), [searchParams]);
   const maxPriceParam = useMemo(() => searchParams.get('maxPrice'), [searchParams]);
-  const sortParam = useMemo(() => searchParams.get('sort') || searchParams.get('sortBy') || 'newest', [searchParams]);
+  const sortParam = useMemo(() => searchParams.get('sort') || searchParams.get('sortBy') || 'price-asc', [searchParams]);
 
   // Update local states when params change
   useEffect(() => {
@@ -90,14 +91,14 @@ const ProductsPage = () => {
     switch (currentSort) {
       case 'price-asc':
         return sorted.sort((a, b) => {
-          const priceA = a.discountPrice || a.price;
-          const priceB = b.discountPrice || b.price;
+          const priceA = a.discountPrice || a.price || 0;
+          const priceB = b.discountPrice || b.price || 0;
           return priceA - priceB;
         });
       case 'price-desc':
         return sorted.sort((a, b) => {
-          const priceA = a.discountPrice || a.price;
-          const priceB = b.discountPrice || b.price;
+          const priceA = a.discountPrice || a.price || 0;
+          const priceB = b.discountPrice || b.price || 0;
           return priceB - priceA;
         });
       case 'name-asc':
@@ -106,7 +107,13 @@ const ProductsPage = () => {
         });
       case 'newest':
       default:
-        return sorted; // Already sorted by backend
+        // Backend đã sort: 
+        // - filter='all': tăng dần theo giá
+        // - filter='newest': theo orderNumber
+        // - filter='best-selling': theo purchaseCount
+        // - filter='most-viewed': theo viewCount
+        // Giữ nguyên thứ tự từ backend
+        return sorted;
     }
   }, [allProducts, currentSort]);
 
@@ -165,10 +172,21 @@ const ProductsPage = () => {
     setSearchParams(newParams);
   };
 
-  const handleAddToCart = (product) => {
-    // TODO: Implement add to cart logic
-    console.log('Add to cart:', product);
-    toast.success('Đã thêm vào giỏ hàng');
+  const handleAddToCart = async (product) => {
+    try {
+      const result = await dispatch(addToCartThunk({
+        serviceId: product._id,
+        quantity: 1,
+        selectedOptions: {}
+      })).unwrap();
+      
+      if (result.success || result.cart) {
+        toast.success('Đã thêm sản phẩm vào giỏ hàng!');
+      }
+    } catch (error) {
+      toast.error(error || 'Không thể thêm sản phẩm vào giỏ hàng');
+      console.error('Add to cart error:', error);
+    }
   };
 
   const handleAddToWishlist = (product) => {
@@ -192,6 +210,17 @@ const ProductsPage = () => {
       <Header />
 
       <div className="container-fluid my-5">
+        {/* Flash Sale Section - Hiển thị tất cả sản phẩm khuyến mãi, không bị ảnh hưởng bởi filter */}
+        <FlashSaleSection products={promotionProducts || []} />
+
+        <div className="products-page-header mb-4">
+          <h1 className="display-5 fw-bold mb-2">Dịch Vụ & Sản Phẩm</h1>
+          <p className="text-muted">
+            {pagination?.total ? `Tổng cộng: ${pagination.total} dịch vụ & sản phẩm` : 'Đang tải...'}
+          </p>
+        </div>
+
+        {/* Filter - Đặt xuống dưới phần Ưu Đãi Giờ Vàng */}
         <SidebarFilter
           currentFilter={currentFilter}
           searchQuery={searchQuery}
@@ -203,38 +232,28 @@ const ProductsPage = () => {
           onPriceRangeChange={handlePriceRangeChange}
           onSortChange={handleSortChange}
         />
-        {/* Flash Sale Section */}
-        <FlashSaleSection products={promotionProducts || []} />
-
-        <div className="products-page-header mb-4">
-          <h1 className="display-5 fw-bold mb-2">Dịch Vụ & Sản Phẩm</h1>
-          <p className="text-muted">
-            {pagination?.total ? `Tổng cộng: ${pagination.total} dịch vụ & sản phẩm` : 'Đang tải...'}
-          </p>
-        </div>
-
-        {/* Horizontal Filter - Top of Page */}
-
 
         {/* Main Content Layout */}
         <div className="row g-4">
           {/* Product Grid - Full Width */}
           <div className="col-12">
-            {loading ? (
-              <div className="text-center py-5">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Đang tải...</span>
+            <div className="product-grid-container" key={`${currentFilter}-${categoryId}-${currentSort}`}>
+              {loading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Đang tải...</span>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <ProductGrid
-                products={sortedProducts}
-                pagination={pagination}
-                onPageChange={handlePageChange}
-                onAddToCart={handleAddToCart}
-                onAddToWishlist={handleAddToWishlist}
-              />
-            )}
+              ) : (
+                <ProductGrid
+                  products={sortedProducts}
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
+                  onAddToCart={handleAddToCart}
+                  onAddToWishlist={handleAddToWishlist}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
