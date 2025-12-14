@@ -37,11 +37,6 @@ const Footer = () => {
                                 </Link>
                             </li>
                             <li className="mb-2">
-                                <Link to="/gallery" className="text-white-50 text-decoration-none footer-link">
-                                    Gallery
-                                </Link>
-                            </li>
-                            <li className="mb-2">
                                 <Link to="/about" className="text-white-50 text-decoration-none footer-link">
                                     Về chúng tôi
                                 </Link>

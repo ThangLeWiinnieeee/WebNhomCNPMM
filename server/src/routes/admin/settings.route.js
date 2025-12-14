@@ -1,6 +1,7 @@
 import express from 'express';
 import settingsController from '../../controllers/admin/settings.controller.js';
 import { requireAdmin } from '../../middlewares/admin/admin.middleware.js';
+import settingsValidate from '../../validates/admin/settings.validate.js';
 
 const router = express.Router();
 
@@ -11,6 +12,6 @@ const router = express.Router();
 router.get('/', requireAdmin, settingsController.getSettings);
 
 // Cập nhật settings
-router.put('/', requireAdmin, settingsController.updateSettings);
+router.put('/', requireAdmin, settingsValidate.validateUpdateSettings, settingsController.updateSettings);
 
 export default router;

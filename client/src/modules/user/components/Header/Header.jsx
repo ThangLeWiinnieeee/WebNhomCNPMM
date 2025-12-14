@@ -130,9 +130,6 @@ const Header = () => {
 								<Link to="/wedding-packages" className="nav-link fw-semibold px-3">Tiệc cưới trọn gói</Link>
 							</li>
 							<li className="nav-item">
-								<Link to="/gallery" className="nav-link fw-semibold px-3">Gallery</Link>
-							</li>
-							<li className="nav-item">
 								<Link to="/about" className="nav-link fw-semibold px-3">Về chúng tôi</Link>
 							</li>
 						</ul>

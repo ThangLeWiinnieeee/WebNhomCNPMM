@@ -247,62 +247,6 @@
   cursor: not-allowed;
 }
 
-/* Badges */
-.badge {
-  padding: 0.625rem 1.25rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 0.875rem;
-  letter-spacing: 0.5px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 100px;
-}
-
-.badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
-}
-
-.badge.bg-success {
-  background: linear-gradient(135deg, #27AE60 0%, #229954 100%) !important;
-  color: white;
-}
-
-.badge.bg-success:hover {
-  box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
-}
-
-.badge.bg-warning {
-  background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%) !important;
-  color: white;
-}
-
-.badge.bg-warning:hover {
-  box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
-}
-
-.badge.bg-danger {
-  background: linear-gradient(135deg, #E74C3C 0%, #C0392B 100%) !important;
-  color: white;
-}
-
-.badge.bg-danger:hover {
-  box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
-}
-
-.badge.bg-secondary {
-  background: linear-gradient(135deg, #95A5A6 0%, #7F8C8D 100%) !important;
-  color: white;
-}
-
-.badge.bg-secondary:hover {
-  box-shadow: 0 5px 15px rgba(149, 165, 166, 0.4);
-}
-
 /* Responsive */
 @media (max-width: 768px) {
   .admin-products-page {

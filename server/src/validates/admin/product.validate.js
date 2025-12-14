@@ -8,6 +8,12 @@ const validateCreateProduct = async (req, res, next) => {
         'string.empty': 'Vui lòng nhập tên sản phẩm!',
         'any.required': 'Vui lòng nhập tên sản phẩm!',
       }),
+    sku: Joi.string()
+      .optional()
+      .allow('', null)
+      .messages({
+        'string.base': 'Mã SKU phải là chuỗi!',
+      }),
     slug: Joi.string()
       .optional()
       .messages({
@@ -35,6 +41,7 @@ const validateCreateProduct = async (req, res, next) => {
       }),
     discountPrice: Joi.number()
       .optional()
+      .allow(null, '')
       .min(0)
       .messages({
         'number.base': 'Giá khuyến mãi phải là số!',
@@ -116,6 +123,12 @@ const validateUpdateProduct = async (req, res, next) => {
       .messages({
         'string.empty': 'Vui lòng nhập tên sản phẩm!',
       }),
+    sku: Joi.string()
+      .optional()
+      .allow('', null)
+      .messages({
+        'string.base': 'Mã SKU phải là chuỗi!',
+      }),
     slug: Joi.string()
       .optional()
       .allow('')
@@ -143,6 +156,7 @@ const validateUpdateProduct = async (req, res, next) => {
       }),
     discountPrice: Joi.number()
       .optional()
+      .allow(null, '')
       .min(0)
       .messages({
         'number.base': 'Giá khuyến mãi phải là số!',
