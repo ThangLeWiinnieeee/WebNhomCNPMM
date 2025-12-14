@@ -144,7 +144,6 @@ const Products = () => {
                 <th style={{ whiteSpace: 'nowrap' }}>Danh mục</th>
                 <th style={{ whiteSpace: 'nowrap' }}>Giá gốc</th>
                 <th style={{ whiteSpace: 'nowrap' }}>Giá KM</th>
-                <th style={{ whiteSpace: 'nowrap' }}>Trạng thái</th>
                 <th style={{ width: '150px', whiteSpace: 'nowrap' }}>Thao tác</th>
               </tr>
             </thead>
@@ -177,15 +176,6 @@ const Products = () => {
                       )}
                     </td>
                     <td>
-                      <span
-                        className={`badge ${
-                          product.isActive ? 'bg-success' : 'bg-secondary'
-                        }`}
-                      >
-                        {product.isActive ? 'Hoạt động' : 'Ẩn'}
-                      </span>
-                    </td>
-                    <td>
                       <div className="action-buttons">
                         <button
                           className="btn btn-sm btn-info"
@@ -207,7 +197,7 @@ const Products = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="text-center py-4">
+                  <td colSpan="6" className="text-center py-4">
                     Không có sản phẩm nào
                   </td>
                 </tr>

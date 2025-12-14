@@ -11,6 +11,11 @@ const schema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // Mã SKU (Stock Keeping Unit) - tùy chọn
+  sku: {
+    type: String,
+    default: null,
+  },
   // Slug URL-friendly (tự động tạo từ tên)
   slug: {
     type: String,

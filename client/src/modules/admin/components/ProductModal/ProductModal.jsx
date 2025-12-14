@@ -1,26 +1,89 @@
 import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllCategoriesThunk, createProductThunk, updateProductThunk } from '../../../../stores/thunks/productThunks';
 import { toast } from 'sonner';
 import './ProductModal.css';
 
+// Zod Schema cho validation
+const productSchema = z.object({
+  name: z
+    .string()
+    .min(2, 'Tên sản phẩm phải có ít nhất 2 ký tự')
+    .max(200, 'Tên sản phẩm không được vượt quá 200 ký tự')
+    .nonempty('Tên sản phẩm không được để trống'),
+  sku: z
+    .string()
+    .optional()
+    .or(z.literal('')),
+  category: z
+    .string()
+    .nonempty('Vui lòng chọn danh mục'),
+  price: z
+    .number({
+      required_error: 'Vui lòng nhập giá sản phẩm',
+      invalid_type_error: 'Giá sản phẩm phải là số',
+    })
+    .min(0, 'Giá sản phẩm phải lớn hơn hoặc bằng 0')
+    .positive('Giá sản phẩm phải lớn hơn 0'),
+  discountPrice: z
+    .number({
+      invalid_type_error: 'Giá khuyến mãi phải là số',
+    })
+    .min(0, 'Giá khuyến mãi phải lớn hơn hoặc bằng 0')
+    .optional()
+    .or(z.literal(''))
+    .or(z.nan())
+    .transform(val => val === '' || isNaN(val) ? undefined : val),
+  isActive: z
+    .boolean()
+    .default(true),
+  description: z
+    .string()
+    .max(2000, 'Mô tả không được vượt quá 2000 ký tự')
+    .optional()
+    .or(z.literal('')),
+}).refine(
+  (data) => {
+    if (data.discountPrice && data.price) {
+      return data.discountPrice < data.price;
+    }
+    return true;
+  },
+  {
+    message: 'Giá khuyến mãi phải nhỏ hơn giá gốc',
+    path: ['discountPrice'],
+  }
+);
+
 const ProductModal = ({ product, onClose }) => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.product);
   
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    discountPrice: '',
-    category: '',
-    status: 'active',
-    images: [],
-    sku: '',
-  });
-
   const [imagePreview, setImagePreview] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(productSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      price: 0,
+      discountPrice: '',
+      category: '',
+      isActive: true,
+      sku: '',
+    },
+  });
 
   useEffect(() => {
     dispatch(fetchAllCategoriesThunk());
@@ -28,27 +91,19 @@ const ProductModal = ({ product, onClose }) => {
 
   useEffect(() => {
     if (product) {
-      setFormData({
+      reset({
         name: product.name || '',
         description: product.description || '',
-        price: product.price || '',
+        price: product.price || 0,
         discountPrice: product.discountPrice || '',
         category: product.category?._id || '',
-        status: product.status || 'active',
-        images: product.images || [],
+        isActive: product.isActive !== undefined ? product.isActive : true,
         sku: product.sku || '',
       });
       setImagePreview(product.images || []);
+      setImageFiles(product.images || []);
     }
-  }, [product]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  }, [product, reset]);
 
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
@@ -59,40 +114,39 @@ const ProductModal = ({ product, onClose }) => {
 
     const newImages = files.map((file) => URL.createObjectURL(file));
     setImagePreview((prev) => [...prev, ...newImages]);
-    setFormData((prev) => ({
-      ...prev,
-      images: [...prev.images, ...files],
-    }));
+    setImageFiles((prev) => [...prev, ...files]);
   };
 
   const handleRemoveImage = (index) => {
     setImagePreview((prev) => prev.filter((_, i) => i !== index));
-    setFormData((prev) => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-    }));
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.price || !formData.category) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc');
-      return;
-    }
-
+  const onSubmit = async (data) => {
     setLoading(true);
+    
     try {
+      // Chuẩn bị dữ liệu
+      const dataToSubmit = {
+        ...data,
+        images: imageFiles,
+      };
+
+      // Loại bỏ discountPrice nếu rỗng hoặc undefined
+      if (!dataToSubmit.discountPrice || dataToSubmit.discountPrice === '') {
+        delete dataToSubmit.discountPrice;
+      }
+
       if (product) {
         // Update product
         await dispatch(updateProductThunk({ 
           productId: product._id, 
-          productData: formData 
+          productData: dataToSubmit 
         })).unwrap();
         toast.success('Cập nhật sản phẩm thành công');
       } else {
         // Create product
-        await dispatch(createProductThunk(formData)).unwrap();
+        await dispatch(createProductThunk(dataToSubmit)).unwrap();
         toast.success('Thêm sản phẩm thành công');
       }
       
@@ -116,20 +170,20 @@ const ProductModal = ({ product, onClose }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-body">
+        <form onSubmit={handleSubmit(onSubmit)} className="modal-body">
           <div className="row g-3">
             {/* Product Name */}
             <div className="col-12">
               <label className="form-label required">Tên sản phẩm</label>
               <input
                 type="text"
-                className="form-control"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
+                className={`form-control ${errors.name ? 'is-invalid' : ''}`}
+                {...register('name')}
                 placeholder="Nhập tên sản phẩm"
-                required
               />
+              {errors.name && (
+                <div className="invalid-feedback">{errors.name.message}</div>
+              )}
             </div>
 
             {/* SKU */}
@@ -137,23 +191,21 @@ const ProductModal = ({ product, onClose }) => {
               <label className="form-label">Mã SKU</label>
               <input
                 type="text"
-                className="form-control"
-                name="sku"
-                value={formData.sku}
-                onChange={handleInputChange}
+                className={`form-control ${errors.sku ? 'is-invalid' : ''}`}
+                {...register('sku')}
                 placeholder="Nhập mã SKU"
               />
+              {errors.sku && (
+                <div className="invalid-feedback">{errors.sku.message}</div>
+              )}
             </div>
 
             {/* Category */}
             <div className="col-md-6">
               <label className="form-label required">Danh mục</label>
               <select
-                className="form-select"
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                required
+                className={`form-select ${errors.category ? 'is-invalid' : ''}`}
+                {...register('category')}
               >
                 <option value="">Chọn danh mục</option>
                 {categories && categories.map((cat) => (
@@ -162,6 +214,9 @@ const ProductModal = ({ product, onClose }) => {
                   </option>
                 ))}
               </select>
+              {errors.category && (
+                <div className="invalid-feedback">{errors.category.message}</div>
+              )}
             </div>
 
             {/* Price */}
@@ -169,14 +224,14 @@ const ProductModal = ({ product, onClose }) => {
               <label className="form-label required">Giá gốc (VNĐ)</label>
               <input
                 type="number"
-                className="form-control"
-                name="price"
-                value={formData.price}
-                onChange={handleInputChange}
+                className={`form-control ${errors.price ? 'is-invalid' : ''}`}
+                {...register('price', { valueAsNumber: true })}
                 placeholder="0"
                 min="0"
-                required
               />
+              {errors.price && (
+                <div className="invalid-feedback">{errors.price.message}</div>
+              )}
             </div>
 
             {/* Discount Price */}
@@ -184,40 +239,47 @@ const ProductModal = ({ product, onClose }) => {
               <label className="form-label">Giá khuyến mãi (VNĐ)</label>
               <input
                 type="number"
-                className="form-control"
-                name="discountPrice"
-                value={formData.discountPrice}
-                onChange={handleInputChange}
+                className={`form-control ${errors.discountPrice ? 'is-invalid' : ''}`}
+                {...register('discountPrice', { 
+                  setValueAs: (v) => v === '' ? '' : parseFloat(v) || 0 
+                })}
                 placeholder="0"
                 min="0"
               />
+              {errors.discountPrice && (
+                <div className="invalid-feedback">{errors.discountPrice.message}</div>
+              )}
             </div>
 
             {/* Status */}
             <div className="col-md-12">
               <label className="form-label">Trạng thái</label>
               <select
-                className="form-select"
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
+                className={`form-select ${errors.isActive ? 'is-invalid' : ''}`}
+                {...register('isActive', {
+                  setValueAs: (v) => v === 'true' || v === true
+                })}
               >
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Ẩn</option>
+                <option value="true">Hoạt động</option>
+                <option value="false">Ẩn</option>
               </select>
+              {errors.isActive && (
+                <div className="invalid-feedback">{errors.isActive.message}</div>
+              )}
             </div>
 
             {/* Description */}
             <div className="col-12">
               <label className="form-label">Mô tả</label>
               <textarea
-                className="form-control"
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
+                className={`form-control ${errors.description ? 'is-invalid' : ''}`}
+                {...register('description')}
                 rows="4"
                 placeholder="Nhập mô tả sản phẩm"
               ></textarea>
+              {errors.description && (
+                <div className="invalid-feedback">{errors.description.message}</div>
+              )}
             </div>
 
             {/* Images */}

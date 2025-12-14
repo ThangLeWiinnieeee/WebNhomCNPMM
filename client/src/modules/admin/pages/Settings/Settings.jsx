@@ -1,22 +1,80 @@
 import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import api from '../../../../api/axiosConfig';
 import './Settings.css';
 
+// Zod Schema cho validation
+const settingsSchema = z.object({
+  brandName: z
+    .string()
+    .min(2, 'Tên thương hiệu phải có ít nhất 2 ký tự')
+    .max(100, 'Tên thương hiệu không được vượt quá 100 ký tự')
+    .nonempty('Tên thương hiệu không được để trống'),
+  website: z
+    .string()
+    .regex(/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, 'Website không đúng định dạng (VD: www.example.com)')
+    .or(z.literal(''))
+    .optional(),
+  hotline: z
+    .string()
+    .regex(/^[0-9]{9,11}$/, 'Số hotline phải từ 9-11 chữ số')
+    .or(z.literal(''))
+    .optional(),
+  email: z
+    .string()
+    .email('Email không đúng định dạng')
+    .or(z.literal(''))
+    .optional(),
+  address: z
+    .string()
+    .max(500, 'Địa chỉ không được vượt quá 500 ký tự')
+    .optional(),
+  socialLinks: z.object({
+    facebook: z
+      .string()
+      .url('Link Facebook không đúng định dạng URL')
+      .or(z.literal(''))
+      .optional(),
+    instagram: z
+      .string()
+      .url('Link Instagram không đúng định dạng URL')
+      .or(z.literal(''))
+      .optional(),
+    tiktok: z
+      .string()
+      .url('Link TikTok không đúng định dạng URL')
+      .or(z.literal(''))
+      .optional(),
+    zalo: z.string().optional(),
+  }),
+});
+
 const Settings = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState({
-    brandName: 'TONY WEDDING',
-    website: 'www.tonywedding.vn',
-    hotline: '',
-    email: '',
-    address: '',
-    socialLinks: {
-      facebook: '',
-      zalo: '',
-      instagram: '',
-      tiktok: '',
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      brandName: 'Wedding Dream',
+      website: 'www.weddingdream.vn',
+      hotline: '',
+      email: '',
+      address: '',
+      socialLinks: {
+        facebook: '',
+        zalo: '',
+        instagram: '',
+        tiktok: '',
+      },
     },
   });
 
@@ -34,7 +92,7 @@ const Settings = () => {
       const response = await api.get('/admin/settings');
       
       if (response.code === 'success' && response.data) {
-        setSettings({
+        const settingsData = {
           brandName: response.data.brandName || 'TONY WEDDING',
           website: response.data.website || 'www.tonywedding.vn',
           hotline: response.data.hotline || '',
@@ -46,7 +104,8 @@ const Settings = () => {
             instagram: response.data.socialLinks?.instagram || '',
             tiktok: response.data.socialLinks?.tiktok || '',
           },
-        });
+        };
+        reset(settingsData);
       }
     } catch (error) {
       console.error('Lỗi khi lấy settings:', error);
@@ -57,37 +116,12 @@ const Settings = () => {
   };
 
   /**
-   * Xử lý thay đổi input
-   */
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    if (name.startsWith('socialLinks.')) {
-      const socialKey = name.split('.')[1];
-      setSettings((prev) => ({
-        ...prev,
-        socialLinks: {
-          ...prev.socialLinks,
-          [socialKey]: value,
-        },
-      }));
-    } else {
-      setSettings((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
-  };
-
-  /**
    * Xử lý submit form
    */
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
+  const onSubmit = async (data) => {
     try {
       setSaving(true);
-      const response = await api.put('/admin/settings', settings);
+      const response = await api.put('/admin/settings', data);
       
       if (response.code === 'success') {
         toast.success('Cập nhật cài đặt thành công!');
@@ -121,7 +155,7 @@ const Settings = () => {
         <p className="text-muted">Quản lý thông tin thương hiệu và liên hệ</p>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="card shadow-sm">
           <div className="card-header bg-primary text-white">
             <h5 className="mb-0">Thông Tin Thương Hiệu</h5>
@@ -132,56 +166,60 @@ const Settings = () => {
                 <label className="form-label">Tên Thương Hiệu *</label>
                 <input
                   type="text"
-                  className="form-control"
-                  name="brandName"
-                  value={settings.brandName}
-                  onChange={handleChange}
-                  required
+                  className={`form-control ${errors.brandName ? 'is-invalid' : ''}`}
+                  {...register('brandName')}
                 />
+                {errors.brandName && (
+                  <div className="invalid-feedback">{errors.brandName.message}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label">Website</label>
                 <input
                   type="text"
-                  className="form-control"
-                  name="website"
-                  value={settings.website}
-                  onChange={handleChange}
+                  className={`form-control ${errors.website ? 'is-invalid' : ''}`}
+                  {...register('website')}
                   placeholder="www.tonywedding.vn"
                 />
+                {errors.website && (
+                  <div className="invalid-feedback">{errors.website.message}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label">Hotline</label>
                 <input
                   type="text"
-                  className="form-control"
-                  name="hotline"
-                  value={settings.hotline}
-                  onChange={handleChange}
+                  className={`form-control ${errors.hotline ? 'is-invalid' : ''}`}
+                  {...register('hotline')}
                   placeholder="0123456789"
                 />
+                {errors.hotline && (
+                  <div className="invalid-feedback">{errors.hotline.message}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label">Email</label>
                 <input
                   type="email"
-                  className="form-control"
-                  name="email"
-                  value={settings.email}
-                  onChange={handleChange}
+                  className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                  {...register('email')}
                   placeholder="info@tonywedding.vn"
                 />
+                {errors.email && (
+                  <div className="invalid-feedback">{errors.email.message}</div>
+                )}
               </div>
               <div className="col-12">
                 <label className="form-label">Địa Chỉ</label>
                 <textarea
-                  className="form-control"
-                  name="address"
-                  value={settings.address}
-                  onChange={handleChange}
+                  className={`form-control ${errors.address ? 'is-invalid' : ''}`}
+                  {...register('address')}
                   rows="3"
                   placeholder="Nhập địa chỉ..."
                 />
+                {errors.address && (
+                  <div className="invalid-feedback">{errors.address.message}</div>
+                )}
               </div>
             </div>
           </div>
@@ -199,12 +237,13 @@ const Settings = () => {
                 </label>
                 <input
                   type="url"
-                  className="form-control"
-                  name="socialLinks.facebook"
-                  value={settings.socialLinks.facebook}
-                  onChange={handleChange}
+                  className={`form-control ${errors.socialLinks?.facebook ? 'is-invalid' : ''}`}
+                  {...register('socialLinks.facebook')}
                   placeholder="https://facebook.com/..."
                 />
+                {errors.socialLinks?.facebook && (
+                  <div className="invalid-feedback">{errors.socialLinks.facebook.message}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label">
@@ -212,12 +251,13 @@ const Settings = () => {
                 </label>
                 <input
                   type="url"
-                  className="form-control"
-                  name="socialLinks.instagram"
-                  value={settings.socialLinks.instagram}
-                  onChange={handleChange}
+                  className={`form-control ${errors.socialLinks?.instagram ? 'is-invalid' : ''}`}
+                  {...register('socialLinks.instagram')}
                   placeholder="https://instagram.com/..."
                 />
+                {errors.socialLinks?.instagram && (
+                  <div className="invalid-feedback">{errors.socialLinks.instagram.message}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label">
@@ -225,12 +265,13 @@ const Settings = () => {
                 </label>
                 <input
                   type="url"
-                  className="form-control"
-                  name="socialLinks.tiktok"
-                  value={settings.socialLinks.tiktok}
-                  onChange={handleChange}
+                  className={`form-control ${errors.socialLinks?.tiktok ? 'is-invalid' : ''}`}
+                  {...register('socialLinks.tiktok')}
                   placeholder="https://tiktok.com/..."
                 />
+                {errors.socialLinks?.tiktok && (
+                  <div className="invalid-feedback">{errors.socialLinks.tiktok.message}</div>
+                )}
               </div>
               <div className="col-md-6">
                 <label className="form-label">
@@ -238,12 +279,13 @@ const Settings = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control"
-                  name="socialLinks.zalo"
-                  value={settings.socialLinks.zalo}
-                  onChange={handleChange}
+                  className={`form-control ${errors.socialLinks?.zalo ? 'is-invalid' : ''}`}
+                  {...register('socialLinks.zalo')}
                   placeholder="Số điện thoại Zalo hoặc link"
                 />
+                {errors.socialLinks?.zalo && (
+                  <div className="invalid-feedback">{errors.socialLinks.zalo.message}</div>
+                )}
               </div>
             </div>
           </div>

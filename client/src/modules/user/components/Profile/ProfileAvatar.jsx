@@ -126,20 +126,6 @@ const ProfileAvatar = () => {
                 </div>
                 <h3 className="h4 fw-bold mb-1">{displayName}</h3>
                 <p className="text-muted mb-0">{user?.email}</p>
-                {user?.role === 'admin' && (
-                    <div className="d-flex justify-content-center mt-2">
-                        <span className="badge bg-gradient" style={{
-                            background: 'linear-gradient(135deg, #ec4899 0%, #f97316 100%)',
-                            padding: '6px 16px',
-                            fontSize: '0.875rem',
-                            fontWeight: '600',
-                            color: '#1a1a1a'
-                        }}>
-                            <i className="fas fa-crown me-1"></i>
-                            Administrator
-                        </span>
-                    </div>
-                )}
             </div>
         </div>
     );
