@@ -1,5 +1,6 @@
 import express from 'express';
 import productController from '../../controllers/admin/product.controller.js';
+import { optionalAuth } from '../../middlewares/user/auth.middleware.js';
 
 const router = express.Router();
 
@@ -21,11 +22,14 @@ router.get('/search', productController.searchProducts);
 // Lấy sản phẩm theo danh mục
 router.get('/category/:categoryId', productController.getProductsByCategory);
 
+// Lấy sản phẩm tương tự (phải đặt trước /:id để tránh conflict)
+router.get('/:id/similar', productController.getSimilarProducts);
+
 // Lấy sản phẩm liên quan (phải đặt trước /:id để tránh conflict)
 router.get('/:id/related', productController.getRelatedProducts);
 
-// Lấy chi tiết một sản phẩm
-router.get('/:id', productController.getProductById);
+// Lấy chi tiết một sản phẩm (có optional auth để lưu product view nếu user đã đăng nhập)
+router.get('/:id', optionalAuth, productController.getProductById);
 
 // Lấy tất cả sản phẩm với filter và phân trang
 router.get('/', productController.getAllProducts);

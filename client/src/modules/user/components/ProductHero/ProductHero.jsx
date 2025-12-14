@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import QuantitySelector from '../QuantitySelector/QuantitySelector';
+import api from '../../../../api/axiosConfig';
+import { toast } from 'sonner';
 import './ProductHero.css';
 
 /**
@@ -8,16 +12,51 @@ import './ProductHero.css';
  * @param {IProduct} props.product - Product object
  * @param {Function} [props.onAddToCart] - Callback when add to cart button clicked (receives quantity for quantifiable products)
  * @param {Function} [props.onBookNow] - Callback when book now button clicked
+ * @param {string} [props.itemType='product'] - Type of item: 'product' or 'wedding_package'
  */
-const ProductHero = ({ product, onAddToCart, onBookNow }) => {
+const ProductHero = ({ product, onAddToCart, onBookNow, itemType = 'product' }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isCheckingLike, setIsCheckingLike] = useState(false);
+  const [isTogglingLike, setIsTogglingLike] = useState(false);
 
   // Reset quantity when product changes
   useEffect(() => {
     setQuantity(1);
     setSelectedImageIndex(0);
+    setIsLiked(false);
   }, [product?._id]);
+
+  // Check if product is liked when authenticated
+  useEffect(() => {
+    const checkLikedStatus = async () => {
+      if (!isAuthenticated || !product?._id) {
+        setIsLiked(false);
+        return;
+      }
+
+      try {
+        setIsCheckingLike(true);
+        const apiPath = itemType === 'wedding_package' 
+          ? `/wedding-packages/${product._id}/like/check`
+          : `/products/${product._id}/like/check`;
+        const response = await api.get(apiPath);
+        if (response.code === 'success') {
+          setIsLiked(response.data?.liked || false);
+        }
+      } catch (error) {
+        // Nếu lỗi, mặc định là false
+        setIsLiked(false);
+      } finally {
+        setIsCheckingLike(false);
+      }
+    };
+
+    checkLikedStatus();
+  }, [isAuthenticated, product?._id, itemType]);
 
   if (!product) return null;
 
@@ -33,6 +72,19 @@ const ProductHero = ({ product, onAddToCart, onBookNow }) => {
     serviceType = 'package',
     unit,
   } = product;
+
+  // Loại bỏ duplicate tags (case-insensitive)
+  const uniqueTags = useMemo(() => {
+    const seen = new Set();
+    return tags.filter((tag) => {
+      const normalizedTag = tag?.toLowerCase().trim();
+      if (!normalizedTag || seen.has(normalizedTag)) {
+        return false;
+      }
+      seen.add(normalizedTag);
+      return true;
+    });
+  }, [tags]);
 
   // Image handling
   const defaultImage = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400';
@@ -63,6 +115,55 @@ const ProductHero = ({ product, onAddToCart, onBookNow }) => {
 
   const handleThumbnailClick = (index) => {
     setSelectedImageIndex(index);
+  };
+
+  /**
+   * Xử lý toggle like/unlike sản phẩm
+   */
+  const handleToggleLike = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để thêm vào yêu thích');
+      navigate('/login');
+      return;
+    }
+
+    if (!product?._id || isTogglingLike) return;
+
+    try {
+      setIsTogglingLike(true);
+      
+      const basePath = itemType === 'wedding_package' 
+        ? `/wedding-packages/${product._id}/like`
+        : `/products/${product._id}/like`;
+      
+      if (isLiked) {
+        // Unlike
+        const response = await api.delete(basePath);
+        if (response.code === 'success') {
+          setIsLiked(false);
+          toast.success('Đã xóa khỏi danh sách yêu thích');
+        } else {
+          toast.error(response.message || 'Lỗi khi xóa khỏi yêu thích');
+        }
+      } else {
+        // Like
+        const response = await api.post(basePath);
+        if (response.code === 'success') {
+          setIsLiked(true);
+          toast.success('Đã thêm vào danh sách yêu thích');
+        } else {
+          toast.error(response.message || 'Lỗi khi thêm vào yêu thích');
+        }
+      }
+    } catch (error) {
+      console.error('Toggle like error:', error);
+      toast.error(error?.response?.data?.message || 'Không thể cập nhật yêu thích');
+    } finally {
+      setIsTogglingLike(false);
+    }
   };
 
   return (
@@ -114,18 +215,29 @@ const ProductHero = ({ product, onAddToCart, onBookNow }) => {
         <div className="col-lg-5">
           <div className="product-hero-info">
             {/* Tags */}
-            {tags.length > 0 && (
+            {uniqueTags.length > 0 && (
               <div className="product-hero-tags mb-3">
-                {tags.map((tag, index) => (
-                  <span key={index} className="product-hero-tag badge">
+                {uniqueTags.map((tag, index) => (
+                  <span key={`${tag}-${index}`} className="product-hero-tag">
                     {tag}
                   </span>
                 ))}
               </div>
             )}
 
-            {/* Title */}
-            <h1 className="product-hero-title font-heading mb-3">{name}</h1>
+            {/* Title and Like Button */}
+            <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
+              <h1 className="product-hero-title font-heading mb-0 flex-grow-1">{name}</h1>
+              {/* Like Button */}
+              <button
+                className={`btn product-hero-like-btn ${isLiked ? 'liked' : ''}`}
+                onClick={handleToggleLike}
+                disabled={isTogglingLike || isCheckingLike}
+                title={isLiked ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+              >
+                <i className={`fas fa-heart ${isLiked ? 'fas' : 'far'}`}></i>
+              </button>
+            </div>
 
             {/* Social Proof */}
             {purchaseCount > 0 && (

@@ -8,6 +8,7 @@ import SidebarFilter from '../components/SidebarFilter/SidebarFilter';
 import FlashSaleSection from '../components/FlashSaleSection/FlashSaleSection';
 import { fetchAllProductsThunk, fetchPromotionProductsThunk } from '../../../stores/thunks/productThunks';
 import { addToCartThunk } from '../../../stores/thunks/cartThunks';
+import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
 import '../assets/css/productsPage.css';
 
@@ -172,6 +173,13 @@ const ProductsPage = () => {
     setSearchParams(newParams);
   };
 
+  const handleResetFilter = () => {
+    // Xóa tất cả filter params
+    const newParams = new URLSearchParams();
+    newParams.set('page', '1');
+    setSearchParams(newParams);
+  };
+
   const handleAddToCart = async (product) => {
     try {
       const result = await dispatch(addToCartThunk({
@@ -189,10 +197,23 @@ const ProductsPage = () => {
     }
   };
 
-  const handleAddToWishlist = (product) => {
-    // TODO: Implement wishlist logic
-    console.log('Add to wishlist:', product);
-    toast.success('Đã thêm vào yêu thích');
+  const handleAddToWishlist = async (product, type = 'product') => {
+    try {
+      const apiPath = type === 'wedding_package' 
+        ? `/wedding-packages/${product._id}/like`
+        : `/products/${product._id}/like`;
+      
+      const response = await api.post(apiPath);
+      
+      if (response.code === 'success') {
+        toast.success('Đã thêm vào danh sách yêu thích');
+      } else {
+        toast.error(response.message || 'Lỗi khi thêm vào yêu thích');
+      }
+    } catch (error) {
+      console.error('Add to wishlist error:', error);
+      toast.error(error?.message || 'Không thể thêm vào yêu thích');
+    }
   };
 
   // Sort options
@@ -231,6 +252,7 @@ const ProductsPage = () => {
           onSearchChange={handleSearchChange}
           onPriceRangeChange={handlePriceRangeChange}
           onSortChange={handleSortChange}
+          onResetFilter={handleResetFilter}
         />
 
         {/* Main Content Layout */}

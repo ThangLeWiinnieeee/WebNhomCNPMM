@@ -11,14 +11,19 @@ import ProfilePage from './modules/user/pages/ProfilePage.jsx';
 import ChangePasswordPage from './modules/user/pages/ChangePasswordPage.jsx';
 import MyOrdersPage from './modules/user/pages/MyOrdersPage.jsx';
 import CartPage from './modules/user/pages/CartPage.jsx';
+import WishlistPage from './modules/user/pages/WishlistPage.jsx';
+import RecentlyViewedPage from './modules/user/pages/RecentlyViewedPage.jsx';
 import CheckoutPage from './modules/user/pages/CheckoutPage.jsx';
 import OrderDetailPage from './modules/user/pages/OrderDetailPage.jsx';
 import ProductsPage from './modules/user/pages/ProductsPage.jsx';
 import ProductDetailPage from './modules/user/pages/ProductDetailPage.jsx';
+import WeddingPackagesPage from './modules/user/pages/WeddingPackagesPage.jsx';
+import WeddingPackageDetailPage from './modules/user/pages/WeddingPackageDetailPage.jsx';
 import AdminLayout from './modules/admin/layouts/AdminLayout';
 import Dashboard from './modules/admin/pages/Dashboard/Dashboard';
 import Categories from './modules/admin/pages/Categories/Categories';
 import Products from './modules/admin/pages/Products/Products';
+import Settings from './modules/admin/pages/Settings/Settings';
 import AdminRoute from './modules/admin/components/AdminRoute/AdminRoute';
 import { useAuthInit } from './stores/hooks/useAuthInit.js';
 
@@ -51,10 +56,14 @@ function App() {
         <Route path="/change-password" element={<ChangePasswordPage />} />
         <Route path="/my-orders" element={<MyOrdersPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
+        <Route path="/recently-viewed" element={<RecentlyViewedPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:orderId" element={<OrderDetailPage />} />
         <Route path="/services" element={<ProductsPage />} />
         <Route path="/services/:id" element={<ProductDetailPage />} />
+        <Route path="/wedding-packages" element={<WeddingPackagesPage />} />
+        <Route path="/wedding-packages/:id" element={<WeddingPackageDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
 
         {/* Admin Routes - Protected */}
@@ -64,6 +73,7 @@ function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="categories" element={<Categories />} />
             <Route path="products" element={<Products />} />
+            <Route path="settings" element={<Settings />} />
           </Route>
         </Route>
       </Routes>
