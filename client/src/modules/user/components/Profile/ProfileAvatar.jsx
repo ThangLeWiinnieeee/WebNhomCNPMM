@@ -133,9 +133,9 @@ const ProfileAvatar = () => {
                             padding: '6px 16px',
                             fontSize: '0.875rem',
                             fontWeight: '600',
-                            color: '#1a1a1a'
+                            color: '#000'
                         }}>
-                            <i className="fas fa-crown me-1"></i>
+                            <i className="fas fa-crown me-1" style={{ color: '#FFD700' }}></i>
                             Administrator
                         </span>
                     </div>

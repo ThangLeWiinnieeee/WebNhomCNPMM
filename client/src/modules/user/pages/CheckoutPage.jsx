@@ -106,8 +106,8 @@ export default function CheckoutPage() {
         ).unwrap();
         
         // Redirect to ZaloPay
-        if (paymentResult && paymentResult.returnUrl) {
-          window.location.href = paymentResult.returnUrl;
+        if (paymentResult && paymentResult.paymentUrl) {
+          window.location.href = paymentResult.paymentUrl;
         } else {
           toast.error('Lỗi khi tạo yêu cầu thanh toán');
         }
