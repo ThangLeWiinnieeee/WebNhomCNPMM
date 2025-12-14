@@ -1,0 +1,16 @@
+.settings-page {
+  padding: 2rem;
+}
+
+.settings-header {
+  margin-bottom: 2rem;
+}
+
+.settings-page .card {
+  border: none;
+  border-radius: 0.5rem;
+}
+
+.settings-page .card-header {
+  border-radius: 0.5rem 0.5rem 0 0 !important;
+}

@@ -66,4 +66,44 @@ const verifyToken = async (req, res, next) => {
   }
 }
 
-export { verifyToken };
+/**
+ * Optional authentication middleware
+ * Set req.user nếu có token hợp lệ, nhưng không bắt buộc đăng nhập
+ * Dùng cho các route public nhưng cần biết user nếu đã đăng nhập
+ */
+const optionalAuth = async (req, res, next) => {
+  try {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    if (!token) {
+      // Không có token, tiếp tục mà không set req.user
+      return next();
+    }
+
+    // Xác minh token
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, decodedUser) => {
+      if (err) {
+        // Token không hợp lệ hoặc hết hạn, tiếp tục mà không set req.user
+        return next();
+      }
+      
+      try {
+        const user = await userModel.findById(decodedUser.userId).select('-password');
+        if (user) {
+          req.user = user;
+        }
+        return next();
+      } catch (dbError) {
+        // Lỗi database, tiếp tục mà không set req.user
+        console.error("Lỗi khi truy vấn database trong optionalAuth:", dbError);
+        return next();
+      }
+    });
+  } catch (error) {
+    // Lỗi, tiếp tục mà không set req.user
+    return next();
+  }
+};
+
+export { verifyToken, optionalAuth };

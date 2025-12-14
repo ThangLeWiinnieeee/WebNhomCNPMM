@@ -9,11 +9,13 @@ const SidebarFilter = ({
   onSearchChange,
   onPriceRangeChange,
   onSortChange,
+  onResetFilter,
   currentFilter = 'all',
   searchQuery = '',
   categoryId = null,
   currentSort = 'price-asc',
   priceRange: initialPriceRange = { min: '', max: '' },
+  showCategories = true, // Mặc định hiển thị categories
 }) => {
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.product);
@@ -33,7 +35,9 @@ const SidebarFilter = ({
 
   // Fetch categories and price range on mount
   useEffect(() => {
-    dispatch(fetchAllCategoriesThunk());
+    if (showCategories) {
+      dispatch(fetchAllCategoriesThunk());
+    }
     dispatch(fetchPriceRangeThunk())
       .unwrap()
       .then((data) => {
@@ -158,17 +162,21 @@ const SidebarFilter = ({
     }
   };
 
-  // Build filter options: Tất cả + Categories + Special filters
+  // Build filter options: Tất cả + Categories (nếu có) + Special filters
   const filterOptions = [
     { id: 'all', name: 'Tất cả', filter: 'all', categoryId: null },
-    ...(categories || []).map((cat) => ({
+    // Chỉ thêm categories nếu showCategories = true
+    ...(showCategories && categories ? categories.map((cat) => ({
       id: cat._id || cat.id,
       name: cat.name,
       filter: 'all',
       categoryId: cat._id || cat.id,
-    })),
-    { id: 'promotion', name: 'Khuyến mãi', filter: 'promotion', categoryId: null },
-    { id: 'best-selling', name: 'Bán chạy', filter: 'best-selling', categoryId: null },
+    })) : []),
+    // Chỉ thêm special filters nếu showCategories = true (vì chúng dành cho products)
+    ...(showCategories ? [
+      { id: 'promotion', name: 'Khuyến mãi', filter: 'promotion', categoryId: null },
+      { id: 'best-selling', name: 'Bán chạy', filter: 'best-selling', categoryId: null },
+    ] : []),
   ];
 
   // Sort options
@@ -204,7 +212,7 @@ const SidebarFilter = ({
             <input
               type="text"
               className="horizontal-search-input"
-              placeholder="Tìm dịch vụ..."
+              placeholder={showCategories ? "Tìm dịch vụ..." : "Tìm gói tiệc..."}
               value={searchInput}
               onChange={handleSearchChange}
             />
@@ -212,31 +220,33 @@ const SidebarFilter = ({
         </form>
       </div>
 
-      {/* Categories */}
-      <div className="horizontal-filter-section">
-        <div className="horizontal-filter-label">Danh mục:</div>
-        <div className="horizontal-filter-options">
-          {filterOptions.map((option) => (
-            <button
-              key={option.id}
-              className={`horizontal-filter-btn ${isActiveCategory(option) ? 'active' : ''}`}
-              onClick={() => {
-                if (option.categoryId) {
-                  handleCategoryClick(option.categoryId);
-                } else if (option.id === 'all') {
-                  // Clear all filters
-                  onFilterChange('all', null);
-                } else {
-                  // Special filters (promotion, best-selling)
-                  onFilterChange(option.filter, null);
-                }
-              }}
-            >
-              {option.name}
-            </button>
-          ))}
+      {/* Categories - Chỉ hiển thị nếu showCategories = true */}
+      {showCategories && filterOptions.length > 0 && (
+        <div className="horizontal-filter-section">
+          <div className="horizontal-filter-label">Danh mục:</div>
+          <div className="horizontal-filter-options">
+            {filterOptions.map((option) => (
+              <button
+                key={option.id}
+                className={`horizontal-filter-btn ${isActiveCategory(option) ? 'active' : ''}`}
+                onClick={() => {
+                  if (option.categoryId) {
+                    handleCategoryClick(option.categoryId);
+                  } else if (option.id === 'all') {
+                    // Clear all filters
+                    onFilterChange('all', null);
+                  } else {
+                    // Special filters (promotion, best-selling)
+                    onFilterChange(option.filter, null);
+                  }
+                }}
+              >
+                {option.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Price Range */}
       <div className="horizontal-filter-section">
@@ -326,6 +336,20 @@ const SidebarFilter = ({
           ))}
         </div>
       </div>
+
+      {/* Reset Filter Button */}
+      {onResetFilter && (
+        <div className="horizontal-filter-section">
+          <button
+            className="btn btn-outline-secondary reset-filter-btn"
+            onClick={onResetFilter}
+            title="Xóa tất cả bộ lọc"
+          >
+            <i className="fas fa-redo me-2"></i>
+            Đặt lại bộ lọc
+          </button>
+        </div>
+      )}
     </div>
   );
 };

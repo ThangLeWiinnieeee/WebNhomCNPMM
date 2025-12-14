@@ -512,9 +512,44 @@
   }
 }
 
+/* Reset Filter Button */
+.reset-filter-btn {
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: 1px solid rgba(44, 62, 80, 0.2);
+  border-radius: 50px;
+  color: var(--text-secondary, #7F8C8D);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-base, all 0.3s ease);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reset-filter-btn:hover {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: #dc3545;
+  color: #dc3545;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+}
+
+.reset-filter-btn i {
+  font-size: 0.875rem;
+}
+
 @media (max-width: 576px) {
   .horizontal-filter-btn {
     padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+  }
+
+  .reset-filter-btn {
+    padding: 0.5rem 1rem;
     font-size: 0.8125rem;
   }
 }

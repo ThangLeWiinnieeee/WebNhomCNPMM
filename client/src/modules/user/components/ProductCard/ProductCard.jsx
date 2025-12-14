@@ -2,11 +2,23 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './ProductCard.css';
 
-const ProductCard = ({ product, onAddToCart, onAddToWishlist }) => {
+/**
+ * ProductCard Component - Hiển thị thông tin sản phẩm trong danh sách
+ * Hỗ trợ cả product và wedding_package
+ * @param {Object} props
+ * @param {Object} props.product - Product hoặc WeddingPackage object
+ * @param {Function} [props.onAddToCart] - Callback khi thêm vào giỏ hàng
+ * @param {Function} [props.onAddToWishlist] - Callback khi thêm vào wishlist (nhận item và type)
+ * @param {string} [props.itemType='product'] - Type của item: 'product' hoặc 'wedding_package'
+ */
+const ProductCard = ({ product, onAddToCart, onAddToWishlist, itemType = 'product' }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   if (!product) return null;
 
+  // Tự động detect type từ product nếu có
+  const type = product.type || itemType;
+  
   const {
     _id,
     name,
@@ -43,7 +55,8 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist }) => {
     e.preventDefault();
     e.stopPropagation();
     if (onAddToWishlist) {
-      onAddToWishlist(product);
+      // Truyền cả product và type để handler có thể gọi đúng API
+      onAddToWishlist(product, type);
     }
   };
 
@@ -53,7 +66,10 @@ const ProductCard = ({ product, onAddToCart, onAddToWishlist }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Link to={`/services/${_id}`} className="product-card text-decoration-none">
+      <Link 
+        to={type === 'wedding_package' ? `/wedding-packages/${_id}` : `/services/${_id}`} 
+        className="product-card text-decoration-none"
+      >
         <div className="product-card-image-wrapper position-relative">
           <img 
             src={mainImage} 

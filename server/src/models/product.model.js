@@ -68,11 +68,6 @@ const schema = new mongoose.Schema({
     unique: true,
     sparse: true, // Cho phép null nhưng vẫn unique khi có giá trị
   },
-  // Số lượt đặt hàng (tăng khi có đơn hàng)
-  purchaseCount: {
-    type: Number,
-    default: 0,
-  },
   // Số lượt xem (tăng khi có người xem chi tiết)
   viewCount: {
     type: Number,
@@ -92,6 +87,11 @@ const schema = new mongoose.Schema({
   tags: {
     type: [String],
     default: [],
+  },
+  // Số lượng khách hàng unique đã mua sản phẩm (tính bằng aggregate từ Order)
+  customerCount: {
+    type: Number,
+    default: 0,
   },
 }, {
   timestamps: true, // Tự động tạo createdAt và updatedAt
