@@ -49,23 +49,26 @@ class PaymentController {
       }
 
       // Create ZaloPay payment request
-      const paymentRequest = ZaloPayService.createPaymentRequest({
-        orderId: order._id.toString(),
+      const paymentRequest = await ZaloPayService.createPaymentRequest({
+        orderId: order.orderID,                    // User-facing order ID
+        orderObjectId: order._id.toString(),       // MongoDB _id as string
         amount: order.finalTotal,
         description: `Thanh toán đơn hàng #${order.orderID}`,
-        returnUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/order/${orderId}/payment-result`,
+        returnUrl: `${process.env.CLIENT_URL || 'http://localhost:5173'}/order/${order._id}/payment-result`,
       });
 
       if (!paymentRequest.success) {
-        return res.status(500).json({
+        console.error('ZaloPay Error:', paymentRequest);
+        return res.status(400).json({
           success: false,
-          message: 'Lỗi khi tạo yêu cầu thanh toán',
+          message: paymentRequest.error || 'Lỗi khi tạo yêu cầu thanh toán',
+          details: paymentRequest.details || {},
         });
       }
 
       // Save transaction ID to order
       order.paymentData = {
-        transactionId: paymentRequest.transactionId,
+        appTransId: paymentRequest.appTransId,
         provider: 'zalopay',
         createdAt: new Date(),
       };
@@ -74,8 +77,8 @@ class PaymentController {
       res.json({
         success: true,
         message: 'Tạo yêu cầu thanh toán thành công',
-        data: paymentRequest.paymentData,
-        returnUrl: paymentRequest.paymentData.redirect_url,
+        paymentUrl: paymentRequest.paymentData.orderUrl,
+        appTransId: paymentRequest.appTransId,
       });
     } catch (error) {
       console.error('Error creating ZaloPay payment:', error);
@@ -106,7 +109,7 @@ class PaymentController {
       // Parse callback data
       const callbackData = ZaloPayService.parseCallbackData(data);
 
-      // Extract order ID from embed_data
+      // Extract order data from embed_data
       let embedData;
       try {
         embedData = JSON.parse(callbackData.embed_data);
@@ -118,15 +121,29 @@ class PaymentController {
         });
       }
 
-      const orderId = embedData.orderId;
+      // Use orderObjectId (_id) để tìm order trong database
+      const orderObjectId = embedData.orderObjectId;
+      const orderIdForVerify = embedData.orderId;  // Dùng để verify thông tin
 
-      // Find order
-      const order = await Order.findById(orderId);
+      // Find order by MongoDB _id
+      const order = await Order.findById(orderObjectId);
 
       if (!order) {
         return res.status(404).json({
           return_code: 1,
           return_message: 'Không tìm thấy đơn hàng',
+        });
+      }
+
+      // Verify order information matches
+      if (order.orderID !== orderIdForVerify) {
+        console.warn('Order verification failed:', {
+          expected: order.orderID,
+          received: orderIdForVerify
+        });
+        return res.status(400).json({
+          return_code: 1,
+          return_message: 'Thông tin đơn hàng không khớp',
         });
       }
 

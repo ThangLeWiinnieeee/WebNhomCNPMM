@@ -11,21 +11,26 @@ import '../assets/css/Cart.css';
 export default function CartPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector(state => state.auth);
+  const { user, isAuthenticated } = useSelector(state => state.auth);
   const { items, status, error, totalPrice, tax, discount, finalTotal, cartCount } = useSelector(
     state => state.cart
   );
 
+  // Redirect nếu chưa login (kiểm tra trước)
   useEffect(() => {
-    dispatch(getCartThunk());
-  }, [dispatch]);
-
-  // Redirect nếu chưa login
-  useEffect(() => {
-    if (!user) {
+    if (!isAuthenticated && !user) {
+      console.log('⚠️ Not authenticated, redirecting to login');
       navigate('/login');
     }
-  }, [user, navigate]);
+  }, [isAuthenticated, user, navigate]);
+
+  // Gọi cart API khi đã authenticated
+  useEffect(() => {
+    if (isAuthenticated || user) {
+      console.log('🛒 Authenticated, fetching cart');
+      dispatch(getCartThunk());
+    }
+  }, [dispatch, isAuthenticated, user]);
 
   if (status === 'loading') {
     return (

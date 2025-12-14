@@ -15,6 +15,7 @@ import WishlistPage from './modules/user/pages/WishlistPage.jsx';
 import RecentlyViewedPage from './modules/user/pages/RecentlyViewedPage.jsx';
 import CheckoutPage from './modules/user/pages/CheckoutPage.jsx';
 import OrderDetailPage from './modules/user/pages/OrderDetailPage.jsx';
+import PaymentResultPage from './modules/user/pages/PaymentResultPage.jsx';
 import ProductsPage from './modules/user/pages/ProductsPage.jsx';
 import ProductDetailPage from './modules/user/pages/ProductDetailPage.jsx';
 import WeddingPackagesPage from './modules/user/pages/WeddingPackagesPage.jsx';
@@ -60,6 +61,7 @@ function App() {
         <Route path="/recently-viewed" element={<RecentlyViewedPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/order/:orderId" element={<OrderDetailPage />} />
+        <Route path="/order/:orderId/payment-result" element={<PaymentResultPage />} />
         <Route path="/services" element={<ProductsPage />} />
         <Route path="/services/:id" element={<ProductDetailPage />} />
         <Route path="/wedding-packages" element={<WeddingPackagesPage />} />
