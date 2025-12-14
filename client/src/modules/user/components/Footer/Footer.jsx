@@ -1,14 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchSettingsThunk } from '../../../../stores/thunks/settingsThunks';
 import './Footer.css';
 
 const Footer = () => {
+    const dispatch = useDispatch();
+    const { settings } = useSelector((state) => state.settings);
+
+    // Fetch settings on mount
+    useEffect(() => {
+        dispatch(fetchSettingsThunk());
+    }, [dispatch]);
+
     return (
         <footer className="footer-section bg-dark text-white py-5">
             <div className="container">
                 <div className="row g-4 py-4">
                     <div className="col-lg-4">
-                        <h3 className="h5 fw-bold mb-3">Wedding Dream</h3>
+                        <h3 className="h5 fw-bold mb-3">{settings?.brandName || 'Wedding Dream'}</h3>
                         <p className="text-white-50">
                             Biến giấc mơ đám cưới của bạn thành hiện thực với dịch vụ chuyên nghiệp và tận tâm.
                         </p>
@@ -41,15 +51,28 @@ const Footer = () => {
                     <div className="col-lg-4">
                         <h4 className="h6 fw-bold mb-3">Liên hệ</h4>
                         <ul className="list-unstyled text-white-50">
-                            <li className="mb-2">📞 Hotline: 1900-xxxx</li>
-                            <li className="mb-2">✉️ Email: info@weddingdream.vn</li>
-                            <li className="mb-2">📍 Địa chỉ: TP. Hồ Chí Minh</li>
+                            {settings?.hotline && (
+                                <li className="mb-2">📞 Hotline: {settings.hotline}</li>
+                            )}
+                            {settings?.email && (
+                                <li className="mb-2">✉️ Email: {settings.email}</li>
+                            )}
+                            {settings?.address && (
+                                <li className="mb-2">📍 Địa chỉ: {settings.address}</li>
+                            )}
+                            {!settings?.hotline && !settings?.email && !settings?.address && (
+                                <>
+                                    <li className="mb-2">📞 Hotline: 1900-xxxx</li>
+                                    <li className="mb-2">✉️ Email: info@weddingdream.vn</li>
+                                    <li className="mb-2">📍 Địa chỉ: TP. Hồ Chí Minh</li>
+                                </>
+                            )}
                         </ul>
                     </div>
                 </div>
                 <hr className="my-4 border-secondary" />
                 <div className="text-center text-white-50">
-                    <p className="mb-0">&copy; 2025 Wedding Dream. All rights reserved.</p>
+                    <p className="mb-0">&copy; {new Date().getFullYear()} {settings?.brandName || 'Wedding Dream'}. All rights reserved.</p>
                 </div>
             </div>
         </footer>

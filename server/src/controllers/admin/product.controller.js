@@ -1,4 +1,44 @@
 import productModel from '../../models/product.model.js';
+import orderModel from '../../models/order.model.js';
+import productViewModel from '../../models/product-view.model.js';
+
+/**
+ * Tính purchaseCount từ số lượng orders thành công chứa sản phẩm này
+ * @param {String} productId - ID của sản phẩm
+ * @returns {Number} - Số lượng đơn hàng thành công
+ */
+const getPurchaseCount = async (productId) => {
+  try {
+    const count = await orderModel.countDocuments({
+      'items.serviceId': productId,
+      paymentStatus: 'completed',
+      orderStatus: { $in: ['confirmed', 'processing', 'completed'] }
+    });
+    return count;
+  } catch (error) {
+    console.error('Lỗi khi tính purchaseCount:', error);
+    return 0;
+  }
+};
+
+/**
+ * Đếm số khách hàng unique đã mua sản phẩm
+ * @param {String} productId - ID của sản phẩm
+ * @returns {Number} - Số lượng khách hàng unique
+ */
+const getCustomerCount = async (productId) => {
+  try {
+    const uniqueCustomers = await orderModel.distinct('userId', {
+      'items.serviceId': productId,
+      paymentStatus: 'completed',
+      orderStatus: { $in: ['confirmed', 'processing', 'completed'] }
+    });
+    return uniqueCustomers.length;
+  } catch (error) {
+    console.error('Lỗi khi tính customerCount:', error);
+    return 0;
+  }
+};
 
 /**
  * Lấy danh sách sản phẩm mới nhất
@@ -30,7 +70,7 @@ const getNewestProducts = async (req, res) => {
 
 /**
  * Lấy danh sách sản phẩm bán chạy nhất
- * Sắp xếp theo purchaseCount giảm dần, giới hạn 8 sản phẩm
+ * Tính purchaseCount bằng aggregate từ Order, sắp xếp giảm dần, giới hạn 8 sản phẩm
  * @route GET /product/best-selling
  * @returns {Object} Danh sách sản phẩm bán chạy
  */
@@ -39,13 +79,28 @@ const getBestSellingProducts = async (req, res) => {
     const products = await productModel
       .find({ isActive: true })
       .populate('category', 'name slug')
-      .sort({ purchaseCount: -1 })
-      .limit(8);
+      .limit(50); // Lấy nhiều hơn để tính purchaseCount và sort
+
+    // Tính purchaseCount cho từng sản phẩm và sort
+    const productsWithCounts = await Promise.all(
+      products.map(async (product) => {
+        const purchaseCount = await getPurchaseCount(product._id);
+        return {
+          ...product.toObject(),
+          purchaseCount,
+        };
+      })
+    );
+
+    // Sort theo purchaseCount giảm dần và lấy top 8
+    const sortedProducts = productsWithCounts
+      .sort((a, b) => b.purchaseCount - a.purchaseCount)
+      .slice(0, 8);
 
     return res.status(200).json({
       code: 'success',
       message: 'Lấy danh sách sản phẩm bán chạy thành công!',
-      data: products,
+      data: sortedProducts,
     });
   } catch (error) {
     console.error('Lỗi trong getBestSellingProducts:', error);
@@ -252,7 +307,8 @@ const getAllProducts = async (req, res) => {
       if (filter === 'newest') {
         sortOption = { orderNumber: -1 };
       } else if (filter === 'best-selling') {
-        sortOption = { purchaseCount: -1 };
+        // purchaseCount được tính bằng aggregate, sort sẽ được xử lý sau
+        sortOption = { createdAt: -1 }; // Tạm thời sort theo createdAt
       } else if (filter === 'most-viewed') {
         sortOption = { viewCount: -1 };
       } else if (filter === 'promotion') {
@@ -296,14 +352,44 @@ const getAllProducts = async (req, res) => {
       });
     }
 
+    // Nếu filter là 'best-selling', cần tính purchaseCount trước khi sort
+    let productsToPaginate = products;
+    if (filter === 'best-selling' && !sortBy) {
+      // Tính purchaseCount cho tất cả products và sort
+      const productsWithCounts = await Promise.all(
+        products.map(async (product) => {
+          const purchaseCount = await getPurchaseCount(product._id);
+          return {
+            ...product,
+            purchaseCount,
+          };
+        })
+      );
+      productsToPaginate = productsWithCounts.sort((a, b) => b.purchaseCount - a.purchaseCount);
+    }
+
     // Áp dụng pagination sau khi sort
-    const paginatedProducts = products.slice(skip, skip + limit);
+    const paginatedProducts = productsToPaginate.slice(skip, skip + limit);
     const totalPages = Math.ceil(total / limit);
+
+    // Tính purchaseCount và customerCount cho từng sản phẩm bằng aggregate
+    const productsWithCounts = await Promise.all(
+      paginatedProducts.map(async (product) => {
+        const productObj = product.toObject ? product.toObject() : product;
+        const purchaseCount = productObj.purchaseCount || await getPurchaseCount(productObj._id);
+        const customerCount = await getCustomerCount(productObj._id);
+        return {
+          ...productObj,
+          purchaseCount,
+          customerCount,
+        };
+      })
+    );
 
     return res.status(200).json({
       code: 'success',
       message: 'Lấy danh sách sản phẩm thành công!',
-      data: paginatedProducts,
+      data: productsWithCounts,
       pagination: {
         page,
         limit,
@@ -346,13 +432,127 @@ const getProductById = async (req, res) => {
     product.viewCount = (product.viewCount || 0) + 1;
     await product.save();
 
+    // Lưu vào product-view collection nếu user đã đăng nhập
+    const userId = req.user?._id || null;
+    if (userId) {
+      try {
+        // Tìm xem đã có record chưa (trong vòng 1 giờ)
+        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+        const existingView = await productViewModel.findOne({
+          userId,
+          itemId: id,
+          type: 'product',
+          viewedAt: { $gte: oneHourAgo },
+        });
+
+        // Nếu chưa có hoặc đã quá 1 giờ, tạo mới
+        if (!existingView) {
+          await productViewModel.create({
+            userId,
+            itemId: id,
+            type: 'product',
+            typeModel: 'Product',
+            viewedAt: new Date(),
+          });
+        } else {
+          // Cập nhật thời gian xem
+          existingView.viewedAt = new Date();
+          await existingView.save();
+        }
+      } catch (viewError) {
+        // Không làm gián đoạn response nếu lỗi khi lưu view
+        console.error('Lỗi khi lưu product view:', viewError);
+      }
+    }
+
+    // Tính purchaseCount và customerCount bằng aggregate
+    const purchaseCount = await getPurchaseCount(id);
+    const customerCount = await getCustomerCount(id);
+
+    const productWithCounts = {
+      ...product.toObject(),
+      purchaseCount,
+      customerCount,
+    };
+
     return res.status(200).json({
       code: 'success',
       message: 'Lấy thông tin sản phẩm thành công!',
-      data: product,
+      data: productWithCounts,
     });
   } catch (error) {
     console.error('Lỗi trong getProductById:', error);
+    return res.status(500).json({
+      code: 'error',
+      message: 'Lỗi máy chủ',
+    });
+  }
+};
+
+/**
+ * Lấy danh sách sản phẩm tương tự
+ * Sản phẩm tương tự dựa trên category và tags
+ * @route GET /products/:id/similar
+ * @param {string} req.params.id - ID của sản phẩm hiện tại
+ * @param {number} [req.query.limit=4] - Số lượng sản phẩm tương tự muốn lấy
+ * @returns {Object} Danh sách sản phẩm tương tự
+ */
+const getSimilarProducts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const limit = parseInt(req.query.limit) || 4;
+
+    // Lấy sản phẩm hiện tại để lấy category và tags
+    const currentProduct = await productModel.findById(id).populate('category', 'name slug');
+
+    if (!currentProduct) {
+      return res.status(404).json({
+        code: 'error',
+        message: 'Không tìm thấy sản phẩm!',
+      });
+    }
+
+    // Tìm sản phẩm tương tự:
+    // 1. Cùng category
+    // 2. Có ít nhất 1 tag trùng
+    // 3. Khác ID hiện tại
+    // 4. Đang active
+    const similarProducts = await productModel
+      .find({
+        _id: { $ne: id }, // Loại trừ sản phẩm hiện tại
+        isActive: true,
+        $or: [
+          { category: currentProduct.category._id }, // Cùng category
+          { tags: { $in: currentProduct.tags || [] } }, // Có tag trùng
+        ],
+      })
+      .populate('category', 'name slug')
+      .sort({ orderNumber: -1 })
+      .limit(limit * 2); // Lấy nhiều hơn để có thể filter
+
+    // Ưu tiên sản phẩm có cả category và tags trùng
+    const prioritized = similarProducts.sort((a, b) => {
+      const aHasCategory = a.category?._id?.toString() === currentProduct.category._id.toString();
+      const aHasTags = (a.tags || []).some(tag => (currentProduct.tags || []).includes(tag));
+      const bHasCategory = b.category?._id?.toString() === currentProduct.category._id.toString();
+      const bHasTags = (b.tags || []).some(tag => (currentProduct.tags || []).includes(tag));
+
+      const aScore = (aHasCategory ? 2 : 0) + (aHasTags ? 1 : 0);
+      const bScore = (bHasCategory ? 2 : 0) + (bHasTags ? 1 : 0);
+
+      return bScore - aScore;
+    });
+
+    // Lấy top limit sản phẩm
+    const result = prioritized.slice(0, limit);
+
+    return res.status(200).json({
+      code: 'success',
+      message: 'Lấy danh sách sản phẩm tương tự thành công!',
+      data: result,
+    });
+  } catch (error) {
+    console.error('Lỗi trong getSimilarProducts:', error);
     return res.status(500).json({
       code: 'error',
       message: 'Lỗi máy chủ',
@@ -689,6 +889,7 @@ export default {
   getPromotionProducts,
   getAllProducts,
   getProductById,
+  getSimilarProducts,
   getRelatedProducts,
   searchProducts,
   getProductsByCategory,

@@ -138,6 +138,7 @@ const ProductGrid = ({
             <div key={product._id} className="col">
               <ProductCard
                 product={product}
+                itemType={product.type || 'product'}
                 onAddToCart={onAddToCart}
                 onAddToWishlist={onAddToWishlist}
               />

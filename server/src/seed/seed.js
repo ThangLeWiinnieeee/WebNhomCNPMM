@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
-import categoryModel from './src/models/category.model.js';
-import productModel from './src/models/product.model.js';
+import categoryModel from '../models/category.model.js';
+import productModel from '../models/product.model.js';
 import 'dotenv/config';
 
 // Dữ liệu categories mẫu - 6 dịch vụ wedding
