@@ -11,6 +11,7 @@ import productCommentRoutes from './user/product-comment.route.js';
 import productViewRoutes from './user/product-view.route.js';
 import wishlistRoutes from './user/wishlist.route.js';
 import publicSettingsRoutes from './user/settings.route.js';
+import reviewRoutes from './user/review.route.js';
 // Admin routes
 import adminOrderRoutes from './admin/order.route.js';
 import adminProductRoutes from './admin/product.route.js';
@@ -35,6 +36,7 @@ router.use('/', productCommentRoutes); // Product comment routes (mixed public/p
 router.use('/', productViewRoutes); // Product view routes
 router.use('/', wishlistRoutes); // Wishlist routes
 router.use('/settings', publicSettingsRoutes); // Public settings routes
+router.use('/reviews', reviewRoutes);
 
 // Admin routes
 router.use('/admin/orders', adminOrderRoutes);
