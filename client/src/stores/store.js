@@ -9,6 +9,7 @@ import categoryReducer from './Slice/categorySlice';
 import paymentReducer from './Slice/paymentSlice';
 import weddingPackageReducer from './Slice/weddingPackageSlice';
 import settingsReducer from './Slice/settingsSlice';
+import reviewReducer from './Slice/review.slice';
 
 // Cáºu hÃnh persist cho auth slice
 const authPersistConfig = {
@@ -31,6 +32,7 @@ export const store = configureStore({
     payment: paymentReducer,
     weddingPackage: weddingPackageReducer,
     settings: settingsReducer,
+    review: reviewReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

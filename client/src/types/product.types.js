@@ -139,9 +139,51 @@ export const sampleProductNoDiscount = {
   updatedAt: '2024-03-15T16:30:00.000Z',
 };
 
+/**
+ * Review Interface - For product reviews
+ * 
+ * @typedef {Object} Review
+ * @property {string} _id - Review ID
+ * @property {string} productId - Product ID
+ * @property {string} userId - User ID
+ * @property {string} orderId - Order ID (for validation)
+ * @property {number} rating - Rating (1-5)
+ * @property {string} comment - Review comment
+ * @property {string[]} images - Review images
+ * @property {Date|string} createdAt - Creation timestamp
+ * @property {Date|string} updatedAt - Update timestamp
+ */
+
+/**
+ * User Points Interface - For loyalty points
+ * 
+ * @typedef {Object} UserPoints
+ * @property {string} _id - Points record ID
+ * @property {string} userId - User ID
+ * @property {number} points - Current points balance
+ * @property {number} totalEarned - Total points earned
+ * @property {Date|string} lastUpdated - Last update timestamp
+ */
+
+/**
+ * Coupon Interface - For discount codes
+ * 
+ * @typedef {Object} Coupon
+ * @property {string} _id - Coupon ID
+ * @property {string} code - Coupon code
+ * @property {string} userId - User ID
+ * @property {number} discount - Discount percentage
+ * @property {Date} expiryDate - Expiry date
+ * @property {boolean} isUsed - Whether used
+ * @property {string} type - Coupon type (e.g., 'review-reward')
+ */
+
 // Export type definition for use in JSDoc comments
 export default {
   sampleProduct,
   sampleQuantifiableProduct,
   sampleProductNoDiscount,
 };
+
+// Export interfaces for TypeScript/JS use (if using TS, convert to interface)
+export { Review, UserPoints, Coupon } from './product.types'; // Self-export for convenience

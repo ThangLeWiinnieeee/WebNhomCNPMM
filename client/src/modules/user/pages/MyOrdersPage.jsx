@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import Header from '../components/Header/Header';
 import OrderFilterTabs from '../components/Orders/OrderFilterTabs';
 import OrderList from '../components/Orders/OrderList';
@@ -11,9 +10,10 @@ import '../assets/css/MyOrdersPage.css';
 const MyOrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('all'); // all, pending, completed, cancelled
+    const [activeTab, setActiveTab] = useState('all'); 
     const [showCancelConfirm, setShowCancelConfirm] = useState(false);
     const [cancelOrderId, setCancelOrderId] = useState(null);
+    const [reviewingOrderId, setReviewingOrderId] = useState(null); // Order đang review
 
     useEffect(() => {
         fetchOrders();
@@ -22,17 +22,14 @@ const MyOrdersPage = () => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            // Kiểm tra nếu chưa login
             const token = localStorage.getItem('token');
             if (!token) {
                 toast.error('Vui lòng đăng nhập để xem đơn hàng');
                 setOrders([]);
                 return;
             }
-            
-            // Gọi endpoint đúng: GET /api/orders
+
             const response = await api.get('/orders');
-            // Response có thể là { success: true, orders: [...] } hoặc { orders: [...] }
             const ordersData = response.orders || response.data?.orders || response || [];
             setOrders(Array.isArray(ordersData) ? ordersData : []);
         } catch (error) {
@@ -57,21 +54,19 @@ const MyOrdersPage = () => {
         return <span className={`badge bg-${statusInfo.class}`}>{statusInfo.text}</span>;
     };
 
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-    };
+    const formatPrice = (price) =>
+        new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
 
-    const formatDate = (dateString) => {
-        return new Date(dateString).toLocaleDateString('vi-VN', {
+    const formatDate = (dateString) =>
+        new Date(dateString).toLocaleDateString('vi-VN', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
         });
-    };
 
-    const handleCancelOrder = async (orderId) => {
+    const handleCancelOrder = (orderId) => {
         setCancelOrderId(orderId);
         setShowCancelConfirm(true);
     };
@@ -82,15 +77,26 @@ const MyOrdersPage = () => {
             toast.success('Hủy đơn hàng thành công');
             setShowCancelConfirm(false);
             setCancelOrderId(null);
-            fetchOrders(); // Làm mới danh sách
+            fetchOrders();
         } catch (error) {
             toast.error(error?.message || 'Lỗi khi hủy đơn hàng');
         }
     };
 
+    // Mở modal review
+    const handleStartReview = (orderId) => {
+        console.log('Start review for order:', orderId);
+        setReviewingOrderId(orderId);
+    };
+    const handleCloseReview = () => {
+        setReviewingOrderId(null);
+        fetchOrders(); // refresh order list sau khi review xong
+    };
+
     return (
         <div className="my-orders-page">
             <Header />
+
             <ConfirmModal
                 isOpen={showCancelConfirm}
                 title="❌ Hủy đơn hàng"
@@ -104,24 +110,24 @@ const MyOrdersPage = () => {
                     setCancelOrderId(null);
                 }}
             />
+
             <div className="container py-5">
-                <div className="row">
-                    <div className="col-12">
-                        <h2 className="h3 fw-bold mb-4">Đơn hàng của tôi</h2>
+                <h2 className="h3 fw-bold mb-4">Đơn hàng của tôi</h2>
 
-                        <OrderFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
+                <OrderFilterTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                        <OrderList
-                            orders={orders}
-                            loading={loading}
-                            activeTab={activeTab}
-                            onCancel={handleCancelOrder}
-                            getStatusBadge={getStatusBadge}
-                            formatPrice={formatPrice}
-                            formatDate={formatDate}
-                        />
-                    </div>
-                </div>
+                <OrderList
+                    orders={orders}
+                    loading={loading}
+                    activeTab={activeTab}
+                    onCancel={handleCancelOrder}
+                    onStartReview={handleStartReview}
+                    reviewingOrderId={reviewingOrderId}
+                    onCloseReview={handleCloseReview}
+                    getStatusBadge={getStatusBadge}
+                    formatPrice={formatPrice}
+                    formatDate={formatDate}
+                />
             </div>
         </div>
     );

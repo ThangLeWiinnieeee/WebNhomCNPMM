@@ -1,7 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { unwrapResult } from '@reduxjs/toolkit'; // Add this import if using RTK's createAsyncThunk
 import { Link } from 'react-router-dom';
+import ReviewForm from '../../components/Orders/ReviewForm';
+import { fetchReviewThunk } from '../../../../stores/thunks/review.thunk';
 
-const OrderCard = ({ order, onCancel, getStatusBadge, formatPrice, formatDate }) => {
+const OrderCard = ({ order, onCancel, onStartReview, isReviewing, onCloseReview, getStatusBadge, formatPrice, formatDate }) => {
+  const dispatch = useDispatch();
+  const [existingReview, setExistingReview] = useState(null); // Local state to avoid global conflicts
+
+  useEffect(() => {
+    const loadReview = async () => {
+      try {
+        const orderId = order.orderID || order._id;
+        const resultAction = await dispatch(fetchReviewThunk(orderId));
+        const review = unwrapResult(resultAction);
+        setExistingReview(review);
+      } catch (error) {
+        setExistingReview(null);
+      }
+    };
+
+    loadReview();
+  }, [dispatch, order.orderID, order._id]);
+
   return (
     <div className="col-12">
       <div className="card border-0 shadow-sm">
@@ -58,11 +80,21 @@ const OrderCard = ({ order, onCancel, getStatusBadge, formatPrice, formatDate })
               </button>
             )}
             {order.orderStatus === 'completed' && (
-              <button className="btn btn-gradient-pink btn-sm">
-                Đánh giá
+              <button className="btn btn-gradient-pink btn-sm" onClick={() => onStartReview(order._id)}>
+                {existingReview ? 'Xem đánh giá' : 'Đánh giá'}
               </button>
             )}
           </div>
+          {/* REVIEW FORM HIỂN THỊ NGAY DƯỚI ĐƠN */}
+          {isReviewing && (
+            <div className="mt-4 border-top pt-4">
+              <ReviewForm
+                orderId={order._id}
+                productId={order.items?.[0]?.productId}
+                onClose={onCloseReview}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
