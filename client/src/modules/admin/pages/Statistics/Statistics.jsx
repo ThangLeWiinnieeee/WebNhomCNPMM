@@ -21,6 +21,7 @@ const Statistics = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [page, setPage] = useState(1);
+  const [isFiltering, setIsFiltering] = useState(false);
 
   const {
     revenueSales,
@@ -48,19 +49,6 @@ const Statistics = () => {
     loadAllData();
   }, []);
 
-  // Fetch when date filters change
-  useEffect(() => {
-    if (startDate || endDate) {
-      dispatch(fetchRevenueSales({ startDate, endDate, page }))
-        .unwrap()
-        .catch((error) => toast.error(`Lỗi: ${error}`));
-      
-      dispatch(fetchTopProducts({ startDate, endDate }))
-        .unwrap()
-        .catch((error) => toast.error(`Lỗi: ${error}`));
-    }
-  }, [startDate, endDate, dispatch]);
-
   const loadAllData = async () => {
     try {
       dispatch(fetchRevenueSales({ page }));
@@ -74,7 +62,54 @@ const Statistics = () => {
     }
   };
 
+  // Handle filter with button click
+  const handleApplyFilter = () => {
+    // Validate dates
+    if (startDate && endDate && startDate > endDate) {
+      toast.error('Ngày bắt đầu không thể sau ngày kết thúc');
+      return;
+    }
+
+    // Reset to page 1 when filtering
+    setPage(1);
+    setIsFiltering(true);
+
+    Promise.all([
+      dispatch(fetchRevenueSales({ startDate, endDate, page: 1 }))
+        .unwrap()
+        .catch((error) => {
+          console.error('Error fetching revenue sales:', error);
+          toast.error(`Lỗi tải doanh thu: ${error}`);
+        }),
+      
+      dispatch(fetchTopProducts({ startDate, endDate }))
+        .unwrap()
+        .catch((error) => {
+          console.error('Error fetching top products:', error);
+          toast.error(`Lỗi tải sản phẩm: ${error}`);
+        }),
+
+      dispatch(fetchCashFlow({ startDate, endDate }))
+        .unwrap()
+        .catch((error) => {
+          console.error('Error fetching cash flow:', error);
+        }),
+
+      dispatch(fetchNewCustomers({ startDate, endDate }))
+        .unwrap()
+        .catch((error) => {
+          console.error('Error fetching new customers:', error);
+        }),
+    ]).finally(() => {
+      setIsFiltering(false);
+      toast.success('Lọc dữ liệu thành công');
+    });
+  };
+
   const handleRefresh = () => {
+    setStartDate('');
+    setEndDate('');
+    setPage(1);
     loadAllData();
     toast.success('Đang làm mới dữ liệu...');
   };
@@ -83,7 +118,9 @@ const Statistics = () => {
     setStartDate('');
     setEndDate('');
     setPage(1);
+    setIsFiltering(false);
     loadAllData();
+    toast.success('Đã xóa bộ lọc');
   };
 
   const formatCurrency = (amount) => {
@@ -94,6 +131,8 @@ const Statistics = () => {
     }
     return amount.toLocaleString('vi-VN') + ' ₫';
   };
+
+  const isFilterActive = startDate || endDate;
 
   return (
     <div className="container-fluid py-4">
@@ -112,7 +151,7 @@ const Statistics = () => {
           <button
             className="btn btn-outline-primary"
             onClick={handleRefresh}
-            disabled={loadingRevenueSales || loadingCashFlow || loadingTopProducts}
+            disabled={loadingRevenueSales || loadingCashFlow || loadingTopProducts || isFiltering}
           >
             <i className="fas fa-sync me-2"></i>
             Làm mới
@@ -124,14 +163,14 @@ const Statistics = () => {
       {!loadingSummary && (
         <div className="row g-3 mb-4">
           <div className="col-12 col-sm-6 col-lg-3">
-            <div className="card border-0 shadow-sm">
+            <div className="card border-0 shadow-sm summary-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <p className="text-muted small mb-1">Doanh thu tháng này</p>
-                    <h5 className="fw-bold mb-0">{summary?.monthRevenue ? formatCurrency(summary.monthRevenue) : '0 ₫'}</h5>
+                    <h5 className="fw-bold mb-0 summary-value">{summary?.monthRevenue ? formatCurrency(summary.monthRevenue) : '0 ₫'}</h5>
                   </div>
-                  <div style={{ fontSize: '2rem', color: '#28a745', opacity: 0.2 }}>
+                  <div className="summary-card-icon" style={{ backgroundColor: 'rgba(40, 167, 69, 0.1)', color: '#28a745' }}>
                     <i className="fas fa-money-bill-wave"></i>
                   </div>
                 </div>
@@ -140,14 +179,14 @@ const Statistics = () => {
           </div>
 
           <div className="col-12 col-sm-6 col-lg-3">
-            <div className="card border-0 shadow-sm">
+            <div className="card border-0 shadow-sm summary-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <p className="text-muted small mb-1">Đơn hàng tháng này</p>
-                    <h5 className="fw-bold mb-0">{summary?.monthOrders || 0}</h5>
+                    <h5 className="fw-bold mb-0 summary-value">{summary?.monthOrders || 0}</h5>
                   </div>
-                  <div style={{ fontSize: '2rem', color: '#007bff', opacity: 0.2 }}>
+                  <div className="summary-card-icon" style={{ backgroundColor: 'rgba(0, 123, 255, 0.1)', color: '#007bff' }}>
                     <i className="fas fa-shopping-cart"></i>
                   </div>
                 </div>
@@ -156,14 +195,14 @@ const Statistics = () => {
           </div>
 
           <div className="col-12 col-sm-6 col-lg-3">
-            <div className="card border-0 shadow-sm">
+            <div className="card border-0 shadow-sm summary-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <p className="text-muted small mb-1">Tiền đang chờ xử lý</p>
-                    <h5 className="fw-bold mb-0">{summary?.pendingAmount ? formatCurrency(summary.pendingAmount) : '0 ₫'}</h5>
+                    <h5 className="fw-bold mb-0 summary-value">{summary?.pendingAmount ? formatCurrency(summary.pendingAmount) : '0 ₫'}</h5>
                   </div>
-                  <div style={{ fontSize: '2rem', color: '#ffc107', opacity: 0.2 }}>
+                  <div className="summary-card-icon" style={{ backgroundColor: 'rgba(255, 193, 7, 0.1)', color: '#ffc107' }}>
                     <i className="fas fa-hourglass-half"></i>
                   </div>
                 </div>
@@ -172,14 +211,14 @@ const Statistics = () => {
           </div>
 
           <div className="col-12 col-sm-6 col-lg-3">
-            <div className="card border-0 shadow-sm">
+            <div className="card border-0 shadow-sm summary-card">
               <div className="card-body">
                 <div className="d-flex justify-content-between align-items-start">
                   <div>
                     <p className="text-muted small mb-1">Khách hàng mới tháng này</p>
-                    <h5 className="fw-bold mb-0">{summary?.newCustomersThisMonth || 0}</h5>
+                    <h5 className="fw-bold mb-0 summary-value">{summary?.newCustomersThisMonth || 0}</h5>
                   </div>
-                  <div style={{ fontSize: '2rem', color: '#17a2b8', opacity: 0.2 }}>
+                  <div className="summary-card-icon" style={{ backgroundColor: 'rgba(23, 162, 184, 0.1)', color: '#17a2b8' }}>
                     <i className="fas fa-user-plus"></i>
                   </div>
                 </div>
@@ -190,37 +229,69 @@ const Statistics = () => {
       )}
 
       {/* Filters */}
-      <div className="card border-0 shadow-sm mb-4">
+      <div className="card border-0 shadow-sm mb-4 filter-section">
         <div className="card-body">
           <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-4">
-              <label className="form-label small fw-500">Từ ngày</label>
+            <div className="col-12 col-md-3">
+              <label className="form-label small fw-500">
+                <i className="fas fa-calendar me-1"></i>
+                Từ ngày
+              </label>
               <input
                 type="date"
                 className="form-control form-control-sm"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
+                disabled={isFiltering}
               />
             </div>
-            <div className="col-12 col-md-4">
-              <label className="form-label small fw-500">Đến ngày</label>
+
+            <div className="col-12 col-md-3">
+              <label className="form-label small fw-500">
+                <i className="fas fa-calendar me-1"></i>
+                Đến ngày
+              </label>
               <input
                 type="date"
                 className="form-control form-control-sm"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
+                disabled={isFiltering}
               />
             </div>
-            <div className="col-12 col-md-4">
+
+            <div className="col-12 col-md-3">
+              <button
+                className="btn btn-sm btn-primary w-100 filter-apply-btn"
+                onClick={handleApplyFilter}
+                disabled={isFiltering || (!startDate && !endDate)}
+              >
+                <i className="fas fa-filter me-2"></i>
+                {isFiltering ? 'Đang lọc...' : 'Lọc dữ liệu'}
+              </button>
+            </div>
+
+            <div className="col-12 col-md-3">
               <button
                 className="btn btn-sm btn-outline-secondary w-100"
                 onClick={handleDateReset}
+                disabled={isFiltering || !isFilterActive}
               >
                 <i className="fas fa-times me-2"></i>
                 Xóa bộ lọc
               </button>
             </div>
           </div>
+
+          {/* Filter Status Info */}
+          {isFilterActive && (
+            <div className="alert alert-info alert-sm mt-3 mb-0 d-flex align-items-center">
+              <i className="fas fa-info-circle me-2"></i>
+              <span>
+                Đang hiển thị dữ liệu từ <strong>{startDate || 'hôm đầu'}</strong> đến <strong>{endDate || 'hôm nay'}</strong>
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

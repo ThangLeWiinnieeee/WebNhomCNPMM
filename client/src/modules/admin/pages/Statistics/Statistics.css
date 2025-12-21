@@ -26,6 +26,15 @@
   font-size: 1.8rem;
 }
 
+/* Summary Value - Monospace Font */
+.summary-value {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
 /* Filter Section */
 .filter-section {
   background-color: white;
@@ -38,6 +47,42 @@
   font-weight: 500;
   color: #333;
   margin-bottom: 0.5rem;
+}
+
+/* Filter Apply Button */
+.filter-apply-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.filter-apply-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+.filter-apply-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.filter-apply-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Filter Status Alert */
+.alert-sm {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+}
+
+.alert-info {
+  background-color: #e7f3ff;
+  border: 1px solid #b3d9ff;
+  color: #0066cc;
 }
 
 /* Table Styling */
@@ -58,6 +103,8 @@
 .statistics-table td {
   vertical-align: middle;
   padding: 0.75rem;
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Status Badge */
@@ -141,7 +188,16 @@
     font-size: 1.5rem;
   }
 
+  .summary-value {
+    font-size: 1.1rem;
+  }
+
   .filter-section {
     padding: 1rem;
+  }
+
+  .alert-sm {
+    font-size: 0.85rem;
+    padding: 0.6rem 0.8rem;
   }
 }

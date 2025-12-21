@@ -73,6 +73,51 @@ const initialState = {
   errorMonthlyRevenue: null,
 };
 
+// Helper function to transform monthly revenue data
+const transformMonthlyRevenueData = (rawData) => {
+  if (!Array.isArray(rawData) || rawData.length === 0) {
+    return {
+      labels: [],
+      datasets: [],
+      rawData: [],
+    };
+  }
+
+  try {
+    return {
+      labels: rawData.map(item => item.month || item.label || ''),
+      datasets: [
+        {
+          label: 'Doanh Thu (VND)',
+          data: rawData.map(item => item.revenue || item.amount || 0),
+          borderColor: '#4CAF50',
+          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        },
+        {
+          label: 'Số Đơn',
+          data: rawData.map(item => item.orders || item.count || 0),
+          borderColor: '#2196F3',
+          backgroundColor: 'rgba(33, 150, 243, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+        },
+      ],
+      rawData: rawData,
+    };
+  } catch (e) {
+    console.error('Error transforming monthly revenue data:', e);
+    return {
+      labels: [],
+      datasets: [],
+      rawData: [],
+    };
+  }
+};
+
 const adminStatisticsSlice = createSlice({
   name: 'adminStatistics',
   initialState,
@@ -97,16 +142,15 @@ const adminStatisticsSlice = createSlice({
       })
       .addCase(fetchRevenueSales.fulfilled, (state, action) => {
         state.loadingRevenueSales = false;
-        state.revenueSales = action.payload || {
-          orders: [],
-          pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
-          totalRevenue: 0,
+        state.revenueSales = {
+          orders: Array.isArray(action.payload?.orders) ? action.payload.orders : [],
+          pagination: action.payload?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
+          totalRevenue: action.payload?.totalRevenue || 0,
         };
       })
       .addCase(fetchRevenueSales.rejected, (state, action) => {
         state.loadingRevenueSales = false;
         state.errorRevenueSales = action.payload;
-        // Set default values to prevent UI crashes
         state.revenueSales = {
           orders: [],
           pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
@@ -131,7 +175,6 @@ const adminStatisticsSlice = createSlice({
       .addCase(fetchCashFlow.rejected, (state, action) => {
         state.loadingCashFlow = false;
         state.errorCashFlow = action.payload;
-        // Set default values to prevent UI crashes
         state.cashFlow = {
           pending: { total: 0, count: 0, percentage: 0 },
           deposit: { total: 0, count: 0, percentage: 0 },
@@ -147,7 +190,7 @@ const adminStatisticsSlice = createSlice({
       })
       .addCase(fetchTopProducts.fulfilled, (state, action) => {
         state.loadingTopProducts = false;
-        state.topProducts = action.payload || [];
+        state.topProducts = Array.isArray(action.payload) ? action.payload : [];
       })
       .addCase(fetchTopProducts.rejected, (state, action) => {
         state.loadingTopProducts = false;
@@ -215,31 +258,8 @@ const adminStatisticsSlice = createSlice({
       })
       .addCase(fetchMonthlyRevenueChart.fulfilled, (state, action) => {
         state.loadingMonthlyRevenue = false;
-        const revenueData = Array.isArray(action.payload) ? action.payload : [];
-        state.monthlyRevenue = {
-          labels: revenueData.map(item => item.month),
-          datasets: [
-            {
-              label: 'Doanh Thu (VND)',
-              data: revenueData.map(item => item.revenue),
-              borderColor: '#4CAF50',
-              backgroundColor: 'rgba(76, 175, 80, 0.1)',
-              borderWidth: 2,
-              fill: true,
-              tension: 0.4,
-            },
-            {
-              label: 'Số Đơn',
-              data: revenueData.map(item => item.orders),
-              borderColor: '#2196F3',
-              backgroundColor: 'rgba(33, 150, 243, 0.1)',
-              borderWidth: 2,
-              fill: true,
-              tension: 0.4,
-            },
-          ],
-          rawData: revenueData,
-        };
+        // Transform raw data into chart-ready format
+        state.monthlyRevenue = transformMonthlyRevenueData(action.payload);
       })
       .addCase(fetchMonthlyRevenueChart.rejected, (state, action) => {
         state.loadingMonthlyRevenue = false;

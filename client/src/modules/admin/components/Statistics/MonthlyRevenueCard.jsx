@@ -6,7 +6,12 @@
 
 import React from 'react';
 
-const MonthlyRevenueCard = ({ data, loading, error }) => {
+const MonthlyRevenueCard = ({ data = {}, loading = false, error = null }) => {
+  // Safe extract rawData from object or use as array if it's array
+  const chartData = Array.isArray(data) ? data : (data?.rawData || []);
+
+  console.log('MonthlyRevenueCard received:', { data, chartData });
+
   // Helper function to format currency
   const formatCurrency = (amount) => {
     if (amount >= 1000000) {
@@ -59,8 +64,8 @@ const MonthlyRevenueCard = ({ data, loading, error }) => {
     );
   }
 
-  // Empty state
-  if (!data || data.length === 0) {
+  // Empty state - check if chartData is valid array and has items
+  if (!Array.isArray(chartData) || chartData.length === 0) {
     return (
       <div className="card border-0 shadow-sm">
         <div className="card-header bg-white border-0 px-4 py-3 d-flex justify-content-between align-items-center">
@@ -85,14 +90,12 @@ const MonthlyRevenueCard = ({ data, loading, error }) => {
   }
 
   // Calculate max revenue for scaling
-  const maxRevenue = Math.max(...data.map(item => item.revenue || 0));
+  const maxRevenue = Math.max(...chartData.map(item => item.revenue || 0));
   const chartHeight = 300;
-  const barPadding = 8;
-  const barWidth = (100 / data.length) - (barPadding / data.length) * 2;
 
   // Total revenue calculation
-  const totalRevenue = data.reduce((sum, item) => sum + (item.revenue || 0), 0);
-  const totalOrders = data.reduce((sum, item) => sum + (item.orders || 0), 0);
+  const totalRevenue = chartData.reduce((sum, item) => sum + (item.revenue || 0), 0);
+  const totalOrders = chartData.reduce((sum, item) => sum + (item.orders || 0), 0);
 
   return (
     <div className="card border-0 shadow-sm">
@@ -124,7 +127,7 @@ const MonthlyRevenueCard = ({ data, loading, error }) => {
             <div className="p-3 bg-light rounded">
               <small className="text-muted d-block mb-2">Trung Bình/Tháng</small>
               <h6 className="text-info fw-bold">
-                {formatCurrency(totalRevenue / data.length)}
+                {formatCurrency(totalRevenue / chartData.length)}
               </h6>
             </div>
           </div>
@@ -143,7 +146,7 @@ const MonthlyRevenueCard = ({ data, loading, error }) => {
               borderBottom: '1px solid #e9ecef',
             }}
           >
-            {data.map((item, index) => {
+            {chartData.map((item, index) => {
               const barHeight = maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
               return (
                 <div
@@ -161,14 +164,18 @@ const MonthlyRevenueCard = ({ data, loading, error }) => {
                     style={{
                       width: '100%',
                       height: `${barHeight}%`,
-                      backgroundColor: barHeight > 70 ? '#28a745' : barHeight > 40 ? '#17a2b8' : '#ffc107',
+                      backgroundColor:
+                        barHeight > 70 ? '#28a745' : barHeight > 40 ? '#17a2b8' : '#ffc107',
                       borderRadius: '4px 4px 0 0',
                       transition: 'all 0.3s ease',
                       cursor: 'pointer',
                       position: 'relative',
                       minHeight: '5px',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                     }}
                     title={`${item.month}: ${formatCurrency(item.revenue)} (${item.orders} đơn)`}
+                    onMouseEnter={(e) => (e.target.style.opacity = '0.8')}
+                    onMouseLeave={(e) => (e.target.style.opacity = '1')}
                   >
                     {barHeight > 20 && (
                       <div
@@ -208,44 +215,46 @@ const MonthlyRevenueCard = ({ data, loading, error }) => {
         <div className="mt-4">
           <h6 className="fw-bold mb-3">Chi Tiết Doanh Thu Theo Tháng</h6>
           <div style={{ overflowX: 'auto' }}>
-            <table className="table table-sm table-hover">
+            <table className="table table-sm table-hover mb-0">
               <thead className="table-light">
                 <tr>
                   <th style={{ width: '20%' }}>Tháng</th>
-                  <th style={{ width: '40%' }} className="text-end">Doanh Thu</th>
-                  <th style={{ width: '20%' }} className="text-center">Số Đơn</th>
-                  <th style={{ width: '20%' }} className="text-end">TB/Đơn</th>
+                  <th style={{ width: '40%' }} className="text-end">
+                    Doanh Thu
+                  </th>
+                  <th style={{ width: '20%' }} className="text-center">
+                    Số Đơn
+                  </th>
+                  <th style={{ width: '20%' }} className="text-end">
+                    TB/Đơn
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {data.map((item, index) => (
+                {chartData.map((item, index) => (
                   <tr key={index} style={{ verticalAlign: 'middle' }}>
                     <td className="fw-500">{item.month}</td>
-                    <td className="text-end text-success fw-bold">
+                    <td className="text-end text-success fw-bold" style={{ fontFamily: 'monospace' }}>
                       {formatCurrency(item.revenue)}
                     </td>
                     <td className="text-center">
                       <span className="badge bg-info">{item.orders}</span>
                     </td>
-                    <td className="text-end text-muted">
-                      {item.orders > 0
-                        ? formatCurrency(item.revenue / item.orders)
-                        : '0 đ'}
+                    <td className="text-end text-muted" style={{ fontFamily: 'monospace' }}>
+                      {item.orders > 0 ? formatCurrency(item.revenue / item.orders) : '0 đ'}
                     </td>
                   </tr>
                 ))}
-                <tr style={{ backgroundColor: '#f8f9fa', fontWeight: '600' }}>
+                <tr style={{ backgroundColor: '#f8f9fa', fontWeight: '600', borderTop: '2px solid #dee2e6' }}>
                   <td>Tổng Cộng</td>
-                  <td className="text-end text-success">
+                  <td className="text-end text-success" style={{ fontFamily: 'monospace' }}>
                     {formatCurrency(totalRevenue)}
                   </td>
                   <td className="text-center">
                     <span className="badge bg-success">{totalOrders}</span>
                   </td>
-                  <td className="text-end">
-                    {totalOrders > 0
-                      ? formatCurrency(totalRevenue / totalOrders)
-                      : '0 đ'}
+                  <td className="text-end" style={{ fontFamily: 'monospace' }}>
+                    {totalOrders > 0 ? formatCurrency(totalRevenue / totalOrders) : '0 đ'}
                   </td>
                 </tr>
               </tbody>

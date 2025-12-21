@@ -18,9 +18,17 @@ export const fetchRevenueSales = createAsyncThunk(
       if (endDate) params.endDate = endDate;
 
       console.log('Fetching revenue sales with params:', params);
-      const data = await axios.get('/admin/statistics/revenue-sales', { params });
+      const response = await axios.get('/admin/statistics/revenue-sales', { params });
+      const data = response?.data;
+      
       console.log('Revenue sales response:', data);
-      return data?.data || { orders: [], pagination: { page: 1, limit: 10, total: 0, totalPages: 0 }, totalRevenue: 0 };
+      
+      // Ensure consistent data structure
+      return {
+        orders: Array.isArray(data?.orders) ? data.orders : [],
+        pagination: data?.pagination || { page: 1, limit: 10, total: 0, totalPages: 0 },
+        totalRevenue: data?.totalRevenue || 0,
+      };
     } catch (error) {
       console.error('Revenue sales error:', error);
       return rejectWithValue(error.message || 'Failed to fetch revenue sales');
@@ -33,16 +41,26 @@ export const fetchRevenueSales = createAsyncThunk(
  */
 export const fetchTopProducts = createAsyncThunk(
   'admin/statistics/fetchTopProducts',
-  async ({ limit = 10, startDate, endDate }, { rejectWithValue }) => {
+  async ({ limit = 10, startDate, endDate } = {}, { rejectWithValue }) => {
     try {
       const params = { limit };
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
       console.log('Fetching top products with params:', params);
-      const data = await axios.get('/admin/statistics/top-products', { params });
+      const response = await axios.get('/admin/statistics/top-products', { params });
+      const data = response?.data;
+      
       console.log('Top products response:', data);
-      return data?.data?.topProducts || [];
+      
+      // Handle different response formats
+      const topProducts = Array.isArray(data?.topProducts) 
+        ? data.topProducts 
+        : Array.isArray(data) 
+          ? data 
+          : [];
+      
+      return topProducts;
     } catch (error) {
       console.error('Top products error:', error);
       return rejectWithValue(error.message || 'Failed to fetch top products');
@@ -55,12 +73,24 @@ export const fetchTopProducts = createAsyncThunk(
  */
 export const fetchCashFlow = createAsyncThunk(
   'admin/statistics/fetchCashFlow',
-  async (_, { rejectWithValue }) => {
+  async ({ startDate, endDate } = {}, { rejectWithValue }) => {
     try {
-      console.log('Fetching cash flow...');
-      const data = await axios.get('/admin/statistics/cash-flow');
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      console.log('Fetching cash flow with params:', params);
+      const response = await axios.get('/admin/statistics/cash-flow', { params });
+      const data = response?.data;
+      
       console.log('Cash flow response:', data);
-      return data?.data?.cashFlow || { pending: { total: 0, count: 0, percentage: 0 }, deposit: { total: 0, count: 0, percentage: 0 }, fullPayment: { total: 0, count: 0, percentage: 0 } };
+      
+      // Ensure consistent structure
+      return data?.cashFlow || {
+        pending: { total: 0, count: 0, percentage: 0 },
+        deposit: { total: 0, count: 0, percentage: 0 },
+        fullPayment: { total: 0, count: 0, percentage: 0 },
+      };
     } catch (error) {
       console.error('Cash flow error:', error);
       return rejectWithValue(error.message || 'Failed to fetch cash flow');
@@ -73,16 +103,24 @@ export const fetchCashFlow = createAsyncThunk(
  */
 export const fetchNewCustomers = createAsyncThunk(
   'admin/statistics/fetchNewCustomers',
-  async ({ startDate, endDate }, { rejectWithValue }) => {
+  async ({ startDate, endDate } = {}, { rejectWithValue }) => {
     try {
       const params = {};
       if (startDate) params.startDate = startDate;
       if (endDate) params.endDate = endDate;
 
       console.log('Fetching new customers with params:', params);
-      const data = await axios.get('/admin/statistics/new-customers', { params });
+      const response = await axios.get('/admin/statistics/new-customers', { params });
+      const data = response?.data;
+      
       console.log('New customers response:', data);
-      return data?.data?.newCustomers || { total: 0, thisMonth: 0, lastMonth: 0, growthRate: 0 };
+      
+      return data?.newCustomers || {
+        total: 0,
+        thisMonth: 0,
+        lastMonth: 0,
+        growthRate: 0,
+      };
     } catch (error) {
       console.error('New customers error:', error);
       return rejectWithValue(error.message || 'Failed to fetch new customers');
@@ -98,9 +136,17 @@ export const fetchStatisticsSummary = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       console.log('Fetching summary...');
-      const data = await axios.get('/admin/statistics/summary');
+      const response = await axios.get('/admin/statistics/summary');
+      const data = response?.data;
+      
       console.log('Summary response:', data);
-      return data?.data?.summary || { monthRevenue: 0, monthOrders: 0, pendingAmount: 0, newCustomersThisMonth: 0 };
+      
+      return data?.summary || {
+        monthRevenue: 0,
+        monthOrders: 0,
+        pendingAmount: 0,
+        newCustomersThisMonth: 0,
+      };
     } catch (error) {
       console.error('Summary error:', error);
       return rejectWithValue(error.message || 'Failed to fetch statistics summary');
@@ -109,16 +155,35 @@ export const fetchStatisticsSummary = createAsyncThunk(
 );
 
 /**
- * Fetch monthly revenue chart (12 months)
+ * Fetch monthly revenue chart (12 months or filtered range)
  */
 export const fetchMonthlyRevenueChart = createAsyncThunk(
   'admin/statistics/fetchMonthlyRevenue',
-  async (_, { rejectWithValue }) => {
+  async ({ startDate, endDate } = {}, { rejectWithValue }) => {
     try {
-      console.log('Fetching monthly revenue chart...');
-      const data = await axios.get('/admin/statistics/monthly-revenue');
+      const params = {};
+      if (startDate) params.startDate = startDate;
+      if (endDate) params.endDate = endDate;
+
+      console.log('Fetching monthly revenue chart with params:', params);
+      const response = await axios.get('/admin/statistics/monthly-revenue', { params });
+      const data = response?.data;
+      
       console.log('Monthly revenue response:', data);
-      return data?.data || [];
+      
+      // Handle both array and object responses
+      const revenueData = Array.isArray(data) ? data : (data?.data || data?.monthlyRevenue || []);
+      
+      if (!Array.isArray(revenueData) || revenueData.length === 0) {
+        console.warn('No revenue data returned, returning default structure');
+        return {
+          labels: [],
+          datasets: [],
+          rawData: [],
+        };
+      }
+      
+      return revenueData;
     } catch (error) {
       console.error('Monthly revenue error:', error);
       return rejectWithValue(error.message || 'Failed to fetch monthly revenue');
