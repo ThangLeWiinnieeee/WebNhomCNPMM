@@ -225,12 +225,14 @@
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  opacity: 0;
+  opacity: 1;
   flex-shrink: 0;
 }
 
 .notification-item:hover .notification-delete-btn {
   opacity: 1;
+  background: #fee2e2;
+  color: #ef4444;
 }
 
 .notification-delete-btn:hover {

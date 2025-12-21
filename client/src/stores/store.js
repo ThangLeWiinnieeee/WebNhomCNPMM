@@ -9,6 +9,9 @@ import categoryReducer from './Slice/categorySlice';
 import paymentReducer from './Slice/paymentSlice';
 import weddingPackageReducer from './Slice/weddingPackageSlice';
 import settingsReducer from './Slice/settingsSlice';
+import adminDashboardReducer from './Slice/adminDashboardSlice';
+import adminOrderReducer from './Slice/adminOrderSlice';
+import adminStatisticsReducer from './Slice/adminStatisticsSlice';
 
 // Cáºu hÃnh persist cho auth slice
 const authPersistConfig = {
@@ -31,6 +34,9 @@ export const store = configureStore({
     payment: paymentReducer,
     weddingPackage: weddingPackageReducer,
     settings: settingsReducer,
+    adminDashboard: adminDashboardReducer,
+    adminOrder: adminOrderReducer,
+    adminStatistics: adminStatisticsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -1,0 +1,146 @@
+/* Stats Cards Styles */
+/* Location: client/src/modules/admin/components/Cards/StatsCards.css */
+
+.stat-card {
+  transition: all 0.3s ease-in-out;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+}
+
+.stat-card-success {
+  border-left: 4px solid #28a745;
+}
+
+.stat-card-primary {
+  border-left: 4px solid #007bff;
+}
+
+.stat-card-info {
+  border-left: 4px solid #17a2b8;
+}
+
+.stat-card-warning {
+  border-left: 4px solid #ffc107;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  line-height: 1.2;
+  color: #2c3e50;
+}
+
+.stat-subvalue {
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.5rem;
+  color: white;
+  border-radius: 0.75rem;
+}
+
+.stat-icon-success {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.stat-icon-primary {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+}
+
+.stat-icon-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #0c5460 100%);
+  color: white;
+}
+
+.stat-icon-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: white;
+}
+
+.trend-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 0.25rem;
+}
+
+.trend-badge.bg-success {
+  background-color: #d4edda !important;
+  color: #155724;
+}
+
+.trend-badge.bg-danger {
+  background-color: #f8d7da !important;
+  color: #721c24;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .stat-icon {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .stat-card {
+    border-left: none;
+    border-top: 4px solid #28a745;
+  }
+
+  .stat-card-primary {
+    border-top: 4px solid #007bff;
+    border-left: none;
+  }
+
+  .stat-card-info {
+    border-top: 4px solid #17a2b8;
+    border-left: none;
+  }
+
+  .stat-card-warning {
+    border-top: 4px solid #ffc107;
+    border-left: none;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .stat-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+  }
+}
