@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../../stores/hooks/useAuth';
 import { logoutUserThunk } from '../../../../stores/thunks/authThunks.js';
 import { fetchAllCategoriesThunk } from '../../../../stores/thunks/productThunks.js';
 import { getCartThunk } from '../../../../stores/thunks/cartThunks.js';

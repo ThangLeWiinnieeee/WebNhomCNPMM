@@ -6,33 +6,33 @@ import userModel from '../../models/user.model.js';
 import sessionModel from '../../models/session.model.js';
 import forgotPasswordModel from '../../models/forgot-password.model.js';
 import crypto from 'crypto';
-import {generateRandomNumber} from '../../helpers/generate.helper.js';
-import {sendMail} from '../../helpers/mail.helper.js';
+import {generateRandomNumber} from '../helpers/generate.helper.js';
+import {sendMail} from '../helpers/mail.helper.js';
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const registerPost = async (req, res) => {
     try {
         const { fullName, email, password } = req.body;
-        if(!fullName || !email || !password) {
-            return res.json({ 
+        if (!fullName || !email || !password) {
+            return res.json({
                 code: 'error',
-                message: 'Vui lòng điền đầy đủ thông tin' 
+                message: 'Vui lòng điền đầy đủ thông tin'
             });
         }
 
         // Kiểm tra xem tên đăng nhập hoặc email đã tồn tại chưa
         const existingEmail = await userModel.findOne({ email });
         if (existingEmail) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Email đã được sử dụng' 
+                message: 'Email đã được sử dụng'
             });
         }
 
         // Mã hóa mật khẩu trước khi lưu vào cơ sở dữ liệu
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         // Tạo người dùng mới
         await userModel.create({
             fullname: fullName,
@@ -44,16 +44,16 @@ const registerPost = async (req, res) => {
         });
         console.log(req.body)
 
-        res.json({ 
+        res.json({
             code: 'success',
-            message: 'Đăng ký thành công' 
+            message: 'Đăng ký thành công'
         });
 
     } catch (error) {
-        console.error("Lỗi khi tạo mới tài khoản",error);
-        return res.json({ 
+        console.error("Lỗi khi tạo mới tài khoản", error);
+        return res.json({
             code: 'error',
-            message: 'Lỗi máy chủ' 
+            message: 'Lỗi máy chủ'
         });
     }
 }
@@ -61,34 +61,34 @@ const registerPost = async (req, res) => {
 const loginPost = async (req, res) => {
     try {
         const { email, password } = req.body;
-        if(!email) {
-            return res.json({ 
+        if (!email) {
+            return res.json({
                 code: 'error',
-                message: 'Vui lòng nhập email' 
+                message: 'Vui lòng nhập email'
             });
         }
-        if(!password) {
-            return res.json({ 
+        if (!password) {
+            return res.json({
                 code: 'error',
-                message: 'Vui lòng nhập mật khẩu' 
+                message: 'Vui lòng nhập mật khẩu'
             });
         }
 
         // Tìm người dùng theo tên đăng nhập
         const findEmail = await userModel.findOne({ email });
         if (!findEmail) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Người dùng không tồn tại' 
+                message: 'Người dùng không tồn tại'
             });
         }
 
         // Kiểm tra mật khẩu
         const isPasswordValid = await bcrypt.compare(password, findEmail.password);
         if (!isPasswordValid) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Mật khẩu không đúng' 
+                message: 'Mật khẩu không đúng'
             });
         }
 
@@ -106,7 +106,7 @@ const loginPost = async (req, res) => {
         await sessionModel.create({
             userID: findEmail._id,
             refreshToken: refreshToken,
-            expiresAt: new Date(Date.now() + 15*24*60*60*1000) // 15 ngày
+            expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // 15 ngày
         });
 
         //Trả refresh token qua client
@@ -114,7 +114,7 @@ const loginPost = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production' ? true : false,
             sameSite: 'none',
-            maxAge: 15*24*60*60*1000 // 15 ngày
+            maxAge: 15 * 24 * 60 * 60 * 1000 // 15 ngày
         });
 
         // Trả access token và thông tin user cho client
@@ -136,7 +136,7 @@ const loginPost = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi đăng nhập tài khoản", error);
-        return res.json({ 
+        return res.json({
             code: 'error',
             message: 'Lỗi máy chủ'
         });
@@ -149,9 +149,9 @@ const forgotPasswordPost = async (req, res) => {
         console.log(email);
         const existEmail = await userModel.findOne({ email: email });
         if (!existEmail) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Email không tồn tại trong hệ thống' 
+                message: 'Email không tồn tại trong hệ thống'
             });
         }
 
@@ -170,7 +170,7 @@ const forgotPasswordPost = async (req, res) => {
         await forgotPasswordModel.create({
             email: email,
             otp: otp,
-            expiresAt: new Date(Date.now() + 5*60*1000) // 5 phút
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 phút
         });
 
         //Gửi mã OTP qua email
@@ -178,7 +178,7 @@ const forgotPasswordPost = async (req, res) => {
         const content = `Mã OTP của bạn là <b style="font-size: 20px;">${otp}</b>. 
         Mã của bạn có hiệu lực trong 5 phút, vui lòng không cung cấp cho bất kỳ ai. `
         sendMail(email, title, content);
-        
+
         res.json({
             code: "success",
             message: "Đã gửi mã OTP qua email!"
@@ -186,7 +186,7 @@ const forgotPasswordPost = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi gửi mã OTP", error);
-        return res.json({ 
+        return res.json({
             code: 'error',
             message: 'Lỗi máy chủ'
         });
@@ -198,17 +198,17 @@ const otpPasswordPost = async (req, res) => {
         const { otp, email } = req.body;
         const existEmail = await forgotPasswordModel.findOne({ email: email });
         if (!existEmail) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Email không tồn tại trong hệ thống' 
+                message: 'Email không tồn tại trong hệ thống'
             });
         }
 
         const validOtp = await forgotPasswordModel.findOne({ email: email, otp: otp });
         if (!validOtp) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Mã OTP không đúng' 
+                message: 'Mã OTP không đúng'
             });
         }
         //Tao token để đổi mật khẩu
@@ -217,7 +217,7 @@ const otpPasswordPost = async (req, res) => {
             process.env.ACCESS_TOKEN_SECRET,
             { expiresIn: '1h' }
         );
-        
+
         return res.json({
             code: "success",
             message: "Xác thực OTP thành công!",
@@ -226,7 +226,7 @@ const otpPasswordPost = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi gửi mã otp password post", error);
-        return res.json({ 
+        return res.json({
             code: 'error',
             message: 'Lỗi máy chủ'
         });
@@ -236,19 +236,19 @@ const otpPasswordPost = async (req, res) => {
 const resetPasswordPost = async (req, res) => {
     try {
         const { email, password } = req.body;
-        
+
         // Kiểm tra user có tồn tại không
         const existUser = await userModel.findOne({ email: email });
         if (!existUser) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Email không tồn tại trong hệ thống' 
+                message: 'Email không tồn tại trong hệ thống'
             });
         }
 
         // Mã hóa mật khẩu mới
         const hashedPassword = await bcrypt.hash(password, 10);
-        
+
         // Cập nhật mật khẩu
         await userModel.updateOne(
             { email: email },
@@ -265,7 +265,7 @@ const resetPasswordPost = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi reset password", error);
-        return res.json({ 
+        return res.json({
             code: 'error',
             message: 'Lỗi máy chủ'
         });
@@ -282,15 +282,15 @@ const logoutPost = async (req, res) => {
             res.clearCookie("refreshToken");
         }
         // Không có token cũng coi là thành công (đã đăng xuất từ trước)
-        return res.json({ 
+        return res.json({
             code: 'success',
-            message: 'Đăng xuất thành công' 
+            message: 'Đăng xuất thành công'
         });
     } catch (error) {
         console.error("Lỗi khi đăng xuất tài khoản", error);
-        return res.json({ 
+        return res.json({
             code: 'error',
-            message: 'Lỗi máy chủ' 
+            message: 'Lỗi máy chủ'
         });
     }
 }
@@ -298,26 +298,26 @@ const logoutPost = async (req, res) => {
 const googleLoginPost = async (req, res) => {
     try {
         const { email, name, picture, sub } = req.body;
-        
+
         if (!email || !sub) {
-            return res.json({ 
+            return res.json({
                 code: 'error',
-                message: 'Thông tin Google không hợp lệ' 
+                message: 'Thông tin Google không hợp lệ'
             });
         }
 
         // Kiểm tra email đã tồn tại chưa
         const existingUser = await userModel.findOne({ email: email });
-        
+
         if (existingUser) {
             // Nếu user đã tồn tại và là tài khoản đăng ký thường
             if (existingUser.type === 'login') {
-                return res.json({ 
+                return res.json({
                     code: 'error',
-                    message: 'Email này đã được đăng ký bằng tài khoản thường. Vui lòng đăng nhập bằng email và mật khẩu' 
+                    message: 'Email này đã được đăng ký bằng tài khoản thường. Vui lòng đăng nhập bằng email và mật khẩu'
                 });
             }
-            
+
             // Nếu đã là tài khoản Google, cho đăng nhập
             if (existingUser.type === 'loginGoogle') {
                 // Tạo access token
@@ -334,7 +334,7 @@ const googleLoginPost = async (req, res) => {
                 await sessionModel.create({
                     userID: existingUser._id,
                     refreshToken: refreshToken,
-                    expiresAt: new Date(Date.now() + 15*24*60*60*1000) // 15 ngày
+                    expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // 15 ngày
                 });
 
                 // Trả refresh token qua cookie
@@ -342,7 +342,7 @@ const googleLoginPost = async (req, res) => {
                     httpOnly: true,
                     secure: process.env.NODE_ENV === 'production' ? true : false,
                     sameSite: 'none',
-                    maxAge: 15*24*60*60*1000 // 15 ngày
+                    maxAge: 15 * 24 * 60 * 60 * 1000 // 15 ngày
                 });
 
                 // Trả về thông tin user
@@ -388,7 +388,7 @@ const googleLoginPost = async (req, res) => {
         await sessionModel.create({
             userID: newUser._id,
             refreshToken: refreshToken,
-            expiresAt: new Date(Date.now() + 15*24*60*60*1000) // 15 ngày
+            expiresAt: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000) // 15 ngày
         });
 
         // Trả refresh token qua cookie
@@ -396,7 +396,7 @@ const googleLoginPost = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production' ? true : false,
             sameSite: 'none',
-            maxAge: 15*24*60*60*1000 // 15 ngày
+            maxAge: 15 * 24 * 60 * 60 * 1000 // 15 ngày
         });
 
         // Trả về thông tin user
@@ -418,11 +418,11 @@ const googleLoginPost = async (req, res) => {
 
     } catch (error) {
         console.error("Lỗi khi đăng nhập Google", error);
-        return res.json({ 
+        return res.json({
             code: 'error',
             message: 'Lỗi máy chủ khi đăng nhập Google'
         });
     }
 }
 
-export default { registerPost, loginPost, forgotPasswordPost , otpPasswordPost, resetPasswordPost, logoutPost, googleLoginPost };
+export default { registerPost, loginPost, forgotPasswordPost, otpPasswordPost, resetPasswordPost, logoutPost, googleLoginPost };
