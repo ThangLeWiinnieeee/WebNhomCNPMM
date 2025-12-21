@@ -81,3 +81,33 @@ export const updateOrderStatusThunk = createAsyncThunk(
     }
   }
 );
+
+// Lấy điểm
+export const getUserPointsThunk = createAsyncThunk(
+  'order/getUserPoints',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.get('/orders/points');
+      return res; // { success, points }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Không lấy được điểm'
+      );
+    }
+  }
+);
+
+// Lấy coupon
+export const getUserCouponsThunk = createAsyncThunk(
+  'order/getUserCoupons',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.get('/orders/coupons');
+      return res; // { success, coupons }
+    } catch (err) {
+      return rejectWithValue(
+        err.response?.data?.message || 'Không lấy được coupon'
+      );
+    }
+  }
+);
