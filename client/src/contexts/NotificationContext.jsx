@@ -19,7 +19,7 @@ export const NOTIFICATION_TYPES = {
   PAYMENT_FAILED: 'payment_failed',
 };
 
-// Notification messages
+// Notification messages with type mapping
 const notificationMessages = {
   order_created: {
     title: 'Đơn hàng mới',
@@ -50,26 +50,67 @@ const notificationMessages = {
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
+  const [notifiedOrderIds, setNotifiedOrderIds] = useState(new Set()); // Chặn trùng thông báo
 
   // Load notifications from localStorage on mount
   useEffect(() => {
     const savedNotifications = localStorage.getItem('adminNotifications');
+    const savedOrderIds = localStorage.getItem('notifiedOrderIds');
+    
     if (savedNotifications) {
       try {
-        setNotifications(JSON.parse(savedNotifications));
+        const parsed = JSON.parse(savedNotifications);
+        setNotifications(Array.isArray(parsed) ? parsed : []);
       } catch (e) {
         console.error('Failed to load notifications:', e);
+        setNotifications([]);
+      }
+    }
+
+    if (savedOrderIds) {
+      try {
+        const parsed = JSON.parse(savedOrderIds);
+        setNotifiedOrderIds(new Set(parsed));
+      } catch (e) {
+        console.error('Failed to load notified order IDs:', e);
+        setNotifiedOrderIds(new Set());
       }
     }
   }, []);
 
   // Save notifications to localStorage whenever they change
   useEffect(() => {
-    localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+    try {
+      localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+    } catch (e) {
+      console.error('Failed to save notifications:', e);
+    }
   }, [notifications]);
 
+  // Save notified order IDs to prevent duplicates
+  useEffect(() => {
+    try {
+      localStorage.setItem('notifiedOrderIds', JSON.stringify(Array.from(notifiedOrderIds)));
+    } catch (e) {
+      console.error('Failed to save notified order IDs:', e);
+    }
+  }, [notifiedOrderIds]);
+
   const addNotification = (notification) => {
-    const { type, orderId, customerName, amount } = notification;
+    const { 
+      type, 
+      orderId, 
+      customerName = 'Khách hàng', 
+      amount,
+      message: customMessage 
+    } = notification;
+
+    // Chặn trùng: Nếu đơn hàng này đã được thông báo, không thêm lại
+    if (orderId && notifiedOrderIds.has(orderId)) {
+      console.log(`Notification for order ${orderId} already sent, skipping`);
+      return;
+    }
+
     const meta = notificationMessages[type] || {};
 
     // Generate message based on type
@@ -79,7 +120,13 @@ export const NotificationProvider = ({ children }) => {
         message = `Khách ${customerName} vừa tạo đơn hàng mới`;
         break;
       case NOTIFICATION_TYPES.PAYMENT_RECEIVED:
-        message = `Thanh toán từ ${customerName}: ${amount ? `${(amount / 1000000).toFixed(1)}M` : ''}`;
+        message = amount 
+          ? `Thanh toán từ ${customerName}: ${new Intl.NumberFormat('vi-VN', {
+              style: 'currency',
+              currency: 'VND',
+              maximumFractionDigits: 0,
+            }).format(amount)}`
+          : `Thanh toán từ ${customerName} đã được xác nhận`;
         break;
       case NOTIFICATION_TYPES.ORDER_CANCELLED:
         message = `Đơn hàng từ ${customerName} đã bị hủy`;
@@ -91,23 +138,38 @@ export const NotificationProvider = ({ children }) => {
         message = `Thanh toán từ ${customerName} thất bại`;
         break;
       default:
-        message = notification.message || 'Thông báo';
+        message = customMessage || notification.message || 'Thông báo';
+    }
+
+    // Ensure message is not empty
+    if (!message || message.trim() === '') {
+      console.warn('Warning: Empty message for notification type:', type);
+      message = `${meta.title || 'Thông báo'} từ ${customerName}`;
     }
 
     const newNotification = {
       id: Date.now(),
       type,
-      orderId,
+      orderId, // Lưu orderId để tracking
+      customerName,
+      amount,
       timestamp: new Date().toISOString(),
       read: false,
       message,
       title: meta.title || 'Thông báo',
       icon: meta.icon || 'fa-bell',
       color: meta.color || 'info',
-      ...notification
     };
 
-    setNotifications(prev => [newNotification, ...prev].slice(0, 100)); // Keep only 100 latest
+    // Add to notifications list (keep only 100 latest)
+    setNotifications(prev => [newNotification, ...prev].slice(0, 100));
+
+    // Mark order as notified
+    if (orderId) {
+      setNotifiedOrderIds(prev => new Set([...prev, orderId]));
+    }
+
+    console.log('Notification added:', newNotification);
   };
 
   const markAsRead = (id) => {
@@ -125,18 +187,37 @@ export const NotificationProvider = ({ children }) => {
   };
 
   const deleteNotification = (id) => {
+    const notification = notifications.find(n => n.id === id);
+    if (notification && notification.orderId) {
+      // Không xóa khỏi notifiedOrderIds - để giữ nguyên lịch sử
+      // Nếu muốn cho phép thông báo lại, hãy uncomment dòng dưới:
+      // setNotifiedOrderIds(prev => {
+      //   const newSet = new Set(prev);
+      //   newSet.delete(notification.orderId);
+      //   return newSet;
+      // });
+    }
     setNotifications(prev => prev.filter(notif => notif.id !== id));
   };
 
   const clearAllNotifications = () => {
     setNotifications([]);
+    // KHÔNG xóa notifiedOrderIds - giữ lịch sử để chặn trùng
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const clearNotificationHistory = () => {
+    // Hàm này để xóa hoàn toàn khi cần reset
+    setNotifications([]);
+    setNotifiedOrderIds(new Set());
+    localStorage.removeItem('adminNotifications');
+    localStorage.removeItem('notifiedOrderIds');
+  };
 
   const getNotificationsByType = (type) => {
     return notifications.filter(n => n.type === type);
   };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <NotificationContext.Provider
@@ -148,6 +229,7 @@ export const NotificationProvider = ({ children }) => {
         markAllAsRead,
         deleteNotification,
         clearAllNotifications,
+        clearNotificationHistory,
         getNotificationsByType
       }}
     >

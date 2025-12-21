@@ -15,10 +15,20 @@ export const useOrderNotifications = () => {
       message
     } = data;
 
+    // Validate dữ liệu trước khi gửi
+    if (!orderId) {
+      console.warn('Warning: orderId is required for notification', data);
+      return;
+    }
+
+    if (!customerName || customerName.trim() === '') {
+      console.warn('Warning: customerName is empty', data);
+    }
+
     addNotification({
       type,
       orderId,
-      customerName,
+      customerName: customerName || 'Khách hàng',
       amount,
       message
     });

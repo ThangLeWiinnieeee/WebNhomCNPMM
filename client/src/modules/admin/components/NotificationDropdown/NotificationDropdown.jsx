@@ -1,11 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNotifications } from '../../../../contexts/NotificationContext';
+import { useNotifications, NOTIFICATION_TYPES } from '../../../../contexts/NotificationContext';
 import './NotificationDropdown.css';
 
 const NotificationDropdown = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification, clearAllNotifications } = useNotifications();
+  const { 
+    notifications, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead, 
+    deleteNotification, 
+    clearAllNotifications 
+  } = useNotifications();
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -24,18 +31,14 @@ const NotificationDropdown = () => {
   };
 
   const getIcon = (type) => {
-    switch (type) {
-      case 'create':
-        return { icon: 'fa-plus-circle', color: '#10b981' };
-      case 'update':
-        return { icon: 'fa-edit', color: '#3b82f6' };
-      case 'delete':
-        return { icon: 'fa-trash-alt', color: '#ef4444' };
-      case 'toggle':
-        return { icon: 'fa-toggle-on', color: '#f59e0b' };
-      default:
-        return { icon: 'fa-info-circle', color: '#6b7280' };
-    }
+    const iconMap = {
+      [NOTIFICATION_TYPES.ORDER_CREATED]: { icon: 'fa-shopping-bag', color: '#007bff' },
+      [NOTIFICATION_TYPES.PAYMENT_RECEIVED]: { icon: 'fa-credit-card', color: '#28a745' },
+      [NOTIFICATION_TYPES.ORDER_CANCELLED]: { icon: 'fa-times-circle', color: '#dc3545' },
+      [NOTIFICATION_TYPES.ORDER_COMPLETED]: { icon: 'fa-check-circle', color: '#28a745' },
+      [NOTIFICATION_TYPES.PAYMENT_FAILED]: { icon: 'fa-exclamation-circle', color: '#ffc107' },
+    };
+    return iconMap[type] || { icon: 'fa-bell', color: '#6c757d' };
   };
 
   const formatTime = (timestamp) => {
@@ -63,6 +66,7 @@ const NotificationDropdown = () => {
         className="notification-bell-btn" 
         onClick={toggleDropdown}
         aria-label="Thông báo"
+        title={`${unreadCount} thông báo chưa đọc`}
       >
         <i className="fas fa-bell"></i>
         {unreadCount > 0 && (
@@ -84,6 +88,7 @@ const NotificationDropdown = () => {
                   className="notification-action-btn" 
                   onClick={markAllAsRead}
                   title="Đánh dấu tất cả đã đọc"
+                  aria-label="Đánh dấu tất cả đã đọc"
                 >
                   <i className="fas fa-check-double"></i>
                 </button>
@@ -91,6 +96,7 @@ const NotificationDropdown = () => {
                   className="notification-action-btn text-danger" 
                   onClick={clearAllNotifications}
                   title="Xóa tất cả"
+                  aria-label="Xóa tất cả"
                 >
                   <i className="fas fa-trash"></i>
                 </button>
@@ -113,20 +119,42 @@ const NotificationDropdown = () => {
                     key={notification.id}
                     className={`notification-item ${!notification.read ? 'unread' : ''}`}
                     onClick={() => handleNotificationClick(notification)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        handleNotificationClick(notification);
+                      }
+                    }}
                   >
-                    <div className="notification-icon" style={{ backgroundColor: `${color}20`, color }}>
+                    {/* Icon */}
+                    <div 
+                      className="notification-icon" 
+                      style={{ backgroundColor: `${color}20`, color }}
+                    >
                       <i className={`fas ${icon}`}></i>
                     </div>
+
+                    {/* Content */}
                     <div className="notification-content">
-                      <div className="notification-message">{notification.message}</div>
-                      {notification.details && (
-                        <div className="notification-details">{notification.details}</div>
-                      )}
+                      {/* Title */}
+                      <div className="notification-message">
+                        {notification.title}
+                      </div>
+
+                      {/* Message/Details */}
+                      <div className="notification-details">
+                        {notification.message}
+                      </div>
+
+                      {/* Time */}
                       <div className="notification-time">
                         <i className="fas fa-clock me-1"></i>
                         {formatTime(notification.timestamp)}
                       </div>
                     </div>
+
+                    {/* Delete Button */}
                     <button
                       className="notification-delete-btn"
                       onClick={(e) => {
@@ -134,6 +162,7 @@ const NotificationDropdown = () => {
                         deleteNotification(notification.id);
                       }}
                       title="Xóa thông báo"
+                      aria-label="Xóa thông báo"
                     >
                       <i className="fas fa-times"></i>
                     </button>
@@ -147,7 +176,9 @@ const NotificationDropdown = () => {
           {notifications.length > 0 && (
             <div className="notification-footer">
               <span className="text-muted small">
-                {unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Đã xem tất cả'}
+                {unreadCount > 0 
+                  ? `${unreadCount} thông báo chưa đọc` 
+                  : 'Đã xem tất cả'}
               </span>
             </div>
           )}
