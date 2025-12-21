@@ -6,6 +6,7 @@ export const submitReviewThunk = createAsyncThunk(
   'review/submitReview',
   async (reviewData, { rejectWithValue }) => {
     try {
+      console.log('Submitting review data:', reviewData);
       // For FormData, explicitly pass config to avoid JSON header override
       const response = await api.post('/reviews/submit', reviewData, {
         headers: {
@@ -25,6 +26,7 @@ export const fetchReviewThunk = createAsyncThunk(
   'review/fetchReview',
   async (orderId, { rejectWithValue }) => {
     try {
+      console.log('orderId: ', orderId);
       const response = await api.get(`/reviews/order/${orderId}`);
       return response?.data?.review || response?.review || null;
     } catch (error) {

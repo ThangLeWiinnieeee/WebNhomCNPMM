@@ -49,7 +49,7 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = [...images, ...files].slice(0, 5); // Giới hạn 5 ảnh
+    const newImages = [...images, ...files].slice(0, 2); // Giới hạn 2 ảnh
     setImages(newImages);
     // Reset input để có thể chọn lại file cũ nếu cần
     e.target.value = '';
@@ -138,7 +138,7 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
                   <img
                     src={imgUrl}
                     alt={`Review image ${index}`}
-                    className="rounded-md object-cover" // Giữ class cơ bản
+                    className="rounded-md object-cover"
                     style={{ width: '120px', height: '120px' }} // Inline style để force size nhỏ
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
@@ -203,7 +203,7 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
         </p>
       </div>
 
-      {/* Comment - Fixed full width */}
+      {/* Comment */}
       <textarea
         rows={4}
         value={comment}
@@ -222,30 +222,32 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
 
       {/* Images Upload */}
       <div className="mb-4">
-        <label
-          htmlFor="image-upload"
-          className="
-            flex flex-col items-center justify-center
-            w-full h-32 border-2 border-dashed border-gray-300
-            rounded-xl cursor-pointer
-            hover:border-blue-400 hover:bg-blue-50
-            transition-colors duration-200
-            text-center p-4
-          "
-        >
-          <FaCamera className="text-3xl text-gray-400 mb-2" />
-          <p className="text-sm text-gray-500">
-            Chọn ảnh (tối đa 5 ảnh)
-          </p>
-          <input
-            id="image-upload"
-            type="file"
-            multiple
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-        </label>
+        {images.length < 2 && (
+          <label
+            htmlFor="image-upload"
+            className="
+              flex flex-col items-center justify-center
+              w-full h-32 border-2 border-dashed border-gray-300
+              rounded-xl cursor-pointer
+              hover:border-blue-400 hover:bg-blue-50
+              transition-colors duration-200
+              text-center p-4
+            "
+          >
+            <FaCamera className="text-3xl text-gray-400 mb-2" />
+            <p className="text-sm text-gray-500">
+              Chọn ảnh (tối đa 2 ảnh)
+            </p>
+            <input
+              id="image-upload"
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </label>
+        )}
 
         {/* Image Previews */}
         {images.length > 0 && (
@@ -263,7 +265,7 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
                     transition={{ duration: 0.2 }}
                   />
 
-                  {/* Nút xóa - Căn góc trên bên phải */}
+                  {/* Nút xóa */}
                   <button
                     onClick={() => removeImage(index)}
                     title="Xóa ảnh"
@@ -276,13 +278,13 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
               ))}
             </div>
             <p className="mt-3 text-sm font-medium text-gray-600">
-              Đã chọn {images.length}/5 ảnh
+              Đã chọn {images.length}/2 ảnh
             </p>
           </div>
         )}
       </div>
 
-      {/* Submit Button with Color */}
+      {/* Submit Button */}
       <button
         disabled={loading || !rating}
         onClick={handleSubmit}

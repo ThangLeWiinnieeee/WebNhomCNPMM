@@ -37,8 +37,6 @@ const uploadToCloudinary = (file) => {
 // Submit review
 export const submitReview = async (req, res) => {
   try {
-    console.log('Received review submission:', req.body);
-    console.log('Uploaded files:', req.files); // Debug log for files
     const { productId, orderId, rating, comment } = req.body;
     const userId = req.user.id; // Từ middleware auth
     const images = req.files || [];
@@ -110,7 +108,6 @@ export const getReviewByOrder = async (req, res) => {
   try {
     const { orderId } = req.params;
     const userId = req.user.id;
-
     // Optional: Validate order belongs to user
     const order = await Order.findOne({ _id: orderId, userId });
     if (!order) {

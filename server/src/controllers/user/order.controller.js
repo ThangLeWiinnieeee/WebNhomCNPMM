@@ -31,12 +31,24 @@ class OrderController {
   async getUserCoupons(req, res) {
     try {
       const userId = req.user._id;
+      const now = new Date();
+
       const coupons = await Coupon.find({
-        userId,
-        isUsed: false,
-        expiryDate: { $gt: new Date() }
+        expiryDate: { $gt: now },
+        $or: [
+          // Coupon cá nhân
+          {
+            userId: userId,
+            isUsed: false
+          },
+          // Coupon global (userId = null) mà user chưa dùng
+          {
+            userId: null,
+            usedBy: { $ne: userId }
+          }
+        ]
       })
-        .select('code discount expiryDate')
+        .select('code discount expiryDate type')
         .sort({ createdAt: -1 });
 
       res.json({
@@ -68,19 +80,57 @@ class OrderController {
 
       const coupon = await Coupon.findOne({
         code,
-        userId,
-        isUsed: false,
         expiryDate: { $gt: new Date() }
       });
 
       if (!coupon) {
         return res.status(400).json({
           success: false,
-          message: 'Mã giảm giá không hợp lệ, đã sử dụng hoặc hết hạn'
+          message: 'Mã giảm giá không tồn tại hoặc đã hết hạn'
         });
       }
 
-      const discountAmount = Math.round(totalPrice * (coupon.discount / 100));
+      // CASE 1: Coupon cá nhân
+      if (coupon.userId) {
+        if (coupon.userId.toString() !== userId.toString()) {
+          return res.status(400).json({
+            success: false,
+            message: 'Mã giảm giá không dành cho bạn'
+          });
+        }
+
+        if (coupon.isUsed) {
+          return res.status(400).json({
+            success: false,
+            message: 'Mã giảm giá đã được sử dụng'
+          });
+        }
+      }
+
+      // CASE 2: Coupon global
+      if (!coupon.userId) {
+        const used = coupon.usedBy.some(
+          u => u.toString() === userId.toString()
+        );
+
+        if (used) {
+          return res.status(400).json({
+            success: false,
+            message: 'Bạn đã sử dụng mã giảm giá này rồi'
+          });
+        }
+
+        if (coupon.quantity <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: 'Mã giảm giá đã hết lượt sử dụng'
+          });
+        }
+      }
+
+      const discountAmount = Math.round(
+        totalPrice * (coupon.discount / 100)
+      );
 
       res.json({
         success: true,
@@ -105,89 +155,62 @@ class OrderController {
       const { customerInfo, paymentMethod = 'cod', eventDate, couponCode, pointsToRedeem = 0 } = req.body;
 
       // Validate thông tin khách hàng
-      if (!customerInfo || !customerInfo.fullName || !customerInfo.phone || !customerInfo.address) {
-        return res.status(400).json({
-          success: false,
-          message: 'Vui lòng điền đầy đủ thông tin khách hàng'
-        });
+      if (!customerInfo?.fullName || !customerInfo?.phone || !customerInfo?.address) {
+        return res.status(400).json({ success: false, message: 'Vui lòng điền đầy đủ thông tin khách hàng' });
       }
 
       // Validate ngày tổ chức
       if (!eventDate || Number.isNaN(new Date(eventDate).getTime())) {
-        return res.status(400).json({
-          success: false,
-          message: 'Vui lòng chọn ngày tổ chức hợp lệ'
-        });
+        return res.status(400).json({ success: false, message: 'Vui lòng chọn ngày tổ chức hợp lệ' });
       }
 
       // Lấy giỏ hàng
       const cart = await Cart.findOne({ userId }).populate('items.serviceId');
-      if (!cart || cart.items.length === 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'Giỏ hàng trống'
-        });
-      }
+      if (!cart?.items?.length) return res.status(400).json({ success: false, message: 'Giỏ hàng trống' });
 
       let additionalDiscount = 0;
       let orderCouponId = null;
       let orderPointsRedeemed = 0;
-      const POINT_VALUE = 1000; // 1 điểm = 1000 VND
+      const POINT_VALUE = 1000;
 
-      // Tính toán totalPrice từ items (để đảm bảo tính chính xác)
-      const calculatedTotalPrice = cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const calculatedTax = Math.round(calculatedTotalPrice * 0.1 * 100) / 100;
+      let coupon = null;
+      let userPointsDoc = null;
 
-      // Xử lý mã giảm giá
+      // Xử lý coupon (chỉ check, chưa update)
       if (couponCode) {
-        const coupon = await Coupon.findOne({
-          code: couponCode,
-          userId,
-          isUsed: false,
-          expiryDate: { $gt: new Date() }
-        });
+        coupon = await Coupon.findOne({ code: couponCode, expiryDate: { $gt: new Date() } });
+        if (!coupon) return res.status(400).json({ success: false, message: 'Mã giảm giá không tồn tại hoặc đã hết hạn' });
 
-        if (!coupon) {
-          return res.status(400).json({
-            success: false,
-            message: 'Mã giảm giá không hợp lệ, đã sử dụng hoặc hết hạn'
-          });
+        if (coupon.userId) {
+          if (coupon.userId.toString() !== userId.toString()) return res.status(400).json({ success: false, message: 'Mã giảm giá không dành cho bạn' });
+          if (coupon.isUsed) return res.status(400).json({ success: false, message: 'Mã giảm giá đã được sử dụng' });
+        } else {
+          if (coupon.usedBy?.some(u => u.toString() === userId.toString())) {
+            return res.status(400).json({ success: false, message: 'Bạn đã sử dụng mã giảm giá này rồi' });
+          }
         }
 
-        const couponDiscount = Math.round(calculatedTotalPrice * (coupon.discount / 100));
+        const couponDiscount = Math.round(cart.items.reduce((sum, i) => sum + i.price * i.quantity, 0) * (coupon.discount / 100));
         additionalDiscount += couponDiscount;
         orderCouponId = coupon._id;
-
-        // Đánh dấu đã sử dụng
-        coupon.isUsed = true;
-        await coupon.save();
       }
 
-      // Xử lý đổi điểm
+      // Xử lý điểm (chỉ check, chưa update)
       if (pointsToRedeem > 0) {
-        const userPointsDoc = await UserPoints.findOne({ userId });
+        userPointsDoc = await UserPoints.findOne({ userId });
         if (!userPointsDoc || userPointsDoc.points < pointsToRedeem) {
-          return res.status(400).json({
-            success: false,
-            message: 'Không đủ điểm để đổi'
-          });
+          return res.status(400).json({ success: false, message: 'Không đủ điểm để đổi' });
         }
-
-        const pointsDiscount = pointsToRedeem * POINT_VALUE;
-        additionalDiscount += pointsDiscount;
+        additionalDiscount += pointsToRedeem * POINT_VALUE;
         orderPointsRedeemed = pointsToRedeem;
-
-        // Trừ điểm
-        userPointsDoc.points -= pointsToRedeem;
-        userPointsDoc.lastUpdated = new Date();
-        await userPointsDoc.save();
       }
 
-      // Tính totalDiscount và finalTotal
-      const totalDiscount = (cart.discount || 0) + additionalDiscount;
-      const calculatedFinalTotal = calculatedTotalPrice + calculatedTax - totalDiscount;
+      // Tính tổng
+      const totalPrice = cart.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      const tax = Math.round(totalPrice * 0.1 * 100) / 100;
+      const finalTotal = totalPrice + tax - ((cart.discount || 0) + additionalDiscount);
 
-      // Tạo đơn hàng
+      // Tạo order
       const order = new Order({
         userId,
         customerInfo: {
@@ -201,35 +224,41 @@ class OrderController {
           notes: customerInfo.notes
         },
         items: cart.items,
-        totalPrice: calculatedTotalPrice,
-        tax: calculatedTax,
-        discount: totalDiscount,
-        finalTotal: calculatedFinalTotal,
+        totalPrice,
+        tax,
+        discount: (cart.discount || 0) + additionalDiscount,
+        finalTotal,
         paymentMethod,
         eventDate: new Date(eventDate),
         orderStatus: 'pending',
-        paymentStatus: paymentMethod === 'cod' ? 'pending' : 'pending',
+        paymentStatus: 'pending',
         couponId: orderCouponId,
         pointsRedeemed: orderPointsRedeemed
       });
 
+      // Save order trước
       await order.save();
 
-      // Xóa giỏ hàng sau khi tạo đơn hàng
+      // Sau khi order thành công → đánh dấu coupon và trừ điểm
+      if (coupon) {
+        if (coupon.userId) coupon.isUsed = true;
+        else coupon.usedBy.push(userId);
+        await coupon.save();
+      }
+
+      if (userPointsDoc && orderPointsRedeemed > 0) {
+        userPointsDoc.points -= orderPointsRedeemed;
+        userPointsDoc.lastUpdated = new Date();
+        await userPointsDoc.save();
+      }
+
+      // Xóa giỏ hàng
       await Cart.deleteOne({ userId });
 
-      res.json({
-        success: true,
-        message: 'Tạo đơn hàng thành công',
-        order
-      });
+      return res.json({ success: true, message: 'Tạo đơn hàng thành công', order });
     } catch (error) {
       console.error('Error creating order:', error);
-      res.status(500).json({
-        success: false,
-        message: 'Lỗi khi tạo đơn hàng',
-        error: error.message
-      });
+      return res.status(500).json({ success: false, message: 'Lỗi khi tạo đơn hàng', error: error.message });
     }
   }
 

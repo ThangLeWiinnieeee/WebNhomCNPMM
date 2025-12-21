@@ -12,7 +12,7 @@ const OrderCard = ({ order, onCancel, onStartReview, isReviewing, onCloseReview,
   useEffect(() => {
     const loadReview = async () => {
       try {
-        const orderId = order.orderID || order._id;
+        const orderId = order._id;
         const resultAction = await dispatch(fetchReviewThunk(orderId));
         const review = unwrapResult(resultAction);
         setExistingReview(review);
@@ -23,7 +23,7 @@ const OrderCard = ({ order, onCancel, onStartReview, isReviewing, onCloseReview,
 
     loadReview();
   }, [dispatch, order.orderID, order._id]);
-
+  console.log('order: ', order);
   return (
     <div className="col-12">
       <div className="card border-0 shadow-sm">
@@ -90,7 +90,7 @@ const OrderCard = ({ order, onCancel, onStartReview, isReviewing, onCloseReview,
             <div className="mt-4 border-top pt-4">
               <ReviewForm
                 orderId={order._id}
-                productId={order.items?.[0]?.productId}
+                productId={order.items?.[0]?.serviceId._id}
                 onClose={onCloseReview}
               />
             </div>

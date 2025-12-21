@@ -7,16 +7,26 @@ import {
   cancelOrderThunk,
   updateOrderStatusThunk,
   getUserPointsThunk,
-  getUserCouponsThunk
+  getUserCouponsThunk,
+  getReviewsThunk,
+  deleteReviewThunk,
+  getPromotionsThunk,
+  createPromotionThunk,
+  updatePromotionThunk,
+  deletePromotionThunk
 } from '../thunks/orderThunks';
 
 const initialState = {
   orders: [],
   currentOrder: null,
-  points: 0,  // Key thống nhất
-  coupons: [],  // Key thống nhất
+  points: 0,
+  coupons: [],
   pointsStatus: 'idle',  // 'idle' | 'loading' | 'succeeded' | 'rejected'
   couponsStatus: 'idle',
+  reviews: [], 
+  reviewPagination: {}, 
+  promotions: [], 
+  promotionPagination: {},
   status: 'idle',
   error: null,
   message: ''
@@ -173,6 +183,31 @@ const orderSlice = createSlice({
       .addCase(updateOrderStatusThunk.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;
+      })
+      
+      // Reviews
+      .addCase(getReviewsThunk.fulfilled, (state, action) => {
+        state.reviews = action.payload.reviews;
+        state.reviewPagination = action.payload.pagination;
+      })
+      .addCase(deleteReviewThunk.fulfilled, (state, action) => {
+        state.reviews = state.reviews.filter(r => r._id !== action.meta.arg);
+      })
+
+      // Promotions
+      .addCase(getPromotionsThunk.fulfilled, (state, action) => {
+        state.promotions = action.payload.promotions;
+        state.promotionPagination = action.payload.pagination;
+      })
+      .addCase(createPromotionThunk.fulfilled, (state, action) => {
+        state.promotions.unshift(action.payload.promotion);
+      })
+      .addCase(updatePromotionThunk.fulfilled, (state, action) => {
+        const index = state.promotions.findIndex(p => p._id === action.payload.promotion._id);
+        if (index !== -1) state.promotions[index] = action.payload.promotion;
+      })
+      .addCase(deletePromotionThunk.fulfilled, (state, action) => {
+        state.promotions = state.promotions.filter(p => p._id !== action.meta.arg);
       });
   }
 });
