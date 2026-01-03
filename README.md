@@ -168,7 +168,7 @@ VITE_BACKEND_URL=http://localhost:5001
 ```bash
 # Tạo 12 dịch vụ mẫu trong MongoDB
 cd server
-node scripts/seedServices.js
+node src/seed/seed.js
 ```
 
 Output mong đợi:
