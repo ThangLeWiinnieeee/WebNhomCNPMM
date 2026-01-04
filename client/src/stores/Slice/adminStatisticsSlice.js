@@ -71,6 +71,13 @@ const initialState = {
   errorNewCustomers: null,
   errorSummary: null,
   errorMonthlyRevenue: null,
+
+  // Filter states
+  currentFilter: {
+    startDate: '',
+    endDate: '',
+    filterType: 'all',
+  },
 };
 
 // Helper function to transform monthly revenue data

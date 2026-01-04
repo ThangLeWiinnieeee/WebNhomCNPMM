@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import RevenueChart from '../../components/Charts/RevenueChart';
+import DashboardRevenueChart from '../../components/Charts/DashboardRevenueChart';
 import RecentOrdersTable from '../../components/Tables/RecentOrdersTable';
 import RecentCompletedOrders from '../../components/Cards/RecentCompletedOrders';
 import DashboardNotifications from '../../components/Cards/DashboardNotifications';
@@ -170,9 +170,9 @@ const Dashboard = () => {
 
       {/* Charts Section */}
       <div className="row g-4 mb-4">
-        {/* Revenue Chart */}
+        {/* Revenue Chart with Year Selector */}
         <div className="col-12 col-lg-8">
-          <RevenueChart
+          <DashboardRevenueChart
             data={monthlyRevenue}
             loading={loadingCharts}
             error={errorCharts}

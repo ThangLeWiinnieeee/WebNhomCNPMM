@@ -189,7 +189,7 @@ const NewCustomersCard = ({ data = {}, loading = false, error = null }) => {
             <div className="alert alert-warning alert-sm mb-0 py-2" role="alert">
               <i className="fas fa-arrow-down me-2"></i>
               <small>
-                Giảm <strong>{Math.abs(growthRate)}%</strong> so với tháng trước. Mất{' '}
+                Giảm <strong>{Math.abs(growthRate)}%</strong> so với tháng trước. Giảm {' '}
                 <strong>{Math.abs(thisMonth - lastMonth)}</strong> khách hàng.
               </small>
             </div>

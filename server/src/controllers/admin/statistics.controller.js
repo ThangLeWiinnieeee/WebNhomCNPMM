@@ -20,22 +20,43 @@ class StatisticsController {
       
       // Build match query
       const matchQuery = { orderStatus: 'completed' };
+      
+      // Add date filter if provided
       if (startDate || endDate) {
-        matchQuery.completedAt = {};
-        if (startDate) matchQuery.completedAt.$gte = new Date(startDate);
+        const dateRangeCondition = {};
+        if (startDate) dateRangeCondition.$gte = new Date(startDate);
         if (endDate) {
           const end = new Date(endDate);
           end.setHours(23, 59, 59, 999);
-          matchQuery.completedAt.$lte = end;
+          dateRangeCondition.$lte = end;
         }
+        
+        // Match orders where completedAt, updatedAt, or createdAt is in range
+        matchQuery.$or = [
+          { completedAt: dateRangeCondition },
+          { updatedAt: dateRangeCondition },
+          { createdAt: dateRangeCondition }
+        ];
+        matchQuery.orderStatus = 'completed'; // Keep status check
       }
 
       // Get total count
       const total = await Order.countDocuments(matchQuery);
 
-      // Get paginated orders
+      // Get paginated orders with fallback date field
       const orders = await Order.aggregate([
         { $match: matchQuery },
+        {
+          $addFields: {
+            dateForDisplay: {
+              $cond: [
+                { $ne: ['$completedAt', null] },
+                '$completedAt',
+                { $cond: [{ $ne: ['$updatedAt', null] }, '$updatedAt', '$createdAt'] }
+              ]
+            }
+          }
+        },
         {
           $lookup: {
             from: 'users',
@@ -56,10 +77,12 @@ class StatisticsController {
             orderStatus: 1,
             completedAt: 1,
             createdAt: 1,
+            updatedAt: 1,
+            dateForDisplay: 1,
             userName: { $arrayElemAt: ['$userDetails.fullname', 0] },
           },
         },
-        { $sort: { completedAt: -1 } },
+        { $sort: { dateForDisplay: -1 } },
         { $skip: (page - 1) * limit },
         { $limit: parseInt(limit) },
       ]);
@@ -104,14 +127,23 @@ class StatisticsController {
 
       // Build match query for orders
       const matchQuery = { orderStatus: 'completed' };
+      
       if (startDate || endDate) {
-        matchQuery.completedAt = {};
-        if (startDate) matchQuery.completedAt.$gte = new Date(startDate);
+        const dateRangeCondition = {};
+        if (startDate) dateRangeCondition.$gte = new Date(startDate);
         if (endDate) {
           const end = new Date(endDate);
           end.setHours(23, 59, 59, 999);
-          matchQuery.completedAt.$lte = end;
+          dateRangeCondition.$lte = end;
         }
+        
+        // Match orders where completedAt, updatedAt, or createdAt is in range
+        matchQuery.$or = [
+          { completedAt: dateRangeCondition },
+          { updatedAt: dateRangeCondition },
+          { createdAt: dateRangeCondition }
+        ];
+        matchQuery.orderStatus = 'completed';
       }
 
       // Get top products from completed orders
@@ -120,14 +152,15 @@ class StatisticsController {
         { $unwind: '$items' },
         {
           $group: {
-            _id: '$items.productId',
+            _id: '$items.serviceId',
             productName: { $first: '$items.serviceName' },
             unitsSold: { $sum: '$items.quantity' },
             totalRevenue: { $sum: { $multiply: ['$items.quantity', '$items.price'] } },
             avgPrice: { $avg: '$items.price' },
+            orderCount: { $sum: 1 }, // Count how many orders contain this product
           },
         },
-        { $sort: { unitsSold: -1 } },
+        { $sort: { totalRevenue: -1, unitsSold: -1 } },
         { $limit: parseInt(limit) },
         {
           $lookup: {
@@ -146,6 +179,7 @@ class StatisticsController {
             unitsSold: 1,
             totalRevenue: 1,
             avgPrice: 1,
+            orderCount: 1,
           },
         },
       ]);
@@ -196,7 +230,7 @@ class StatisticsController {
         },
       ]);
 
-      // Get last month comparison
+      // Get last month comparison (only if not using date filters)
       const now = new Date();
       const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -205,7 +239,7 @@ class StatisticsController {
         createdAt: { $gte: lastMonthStart, $lte: lastMonthEnd },
       });
 
-      // Get this month
+      // Get this month (only if not using date filters)
       const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       const thisMonthNewCustomers = await User.countDocuments({
         createdAt: { $gte: thisMonthStart },
@@ -223,7 +257,7 @@ class StatisticsController {
             total: newCustomersData[0]?.totalNewCustomers || 0,
             thisMonth: thisMonthNewCustomers,
             lastMonth: lastMonthNewCustomers,
-            growthRate: growthRate.toFixed(2),
+            growthRate: parseFloat(growthRate.toFixed(2)),
           },
         },
       });
@@ -238,23 +272,47 @@ class StatisticsController {
   }
 
   /**
-   * GET /api/admin/statistics/summary
-   * Lấy tóm tắt thống kê (sử dụng cho dashboard banner)
+   * GET /api/admin/statistics/cash-flow
+   * Lấy thống kê dòng tiền (pending, deposit, fullPayment)
+   * Query params: startDate, endDate
    */
   async getCashFlow(req, res) {
     try {
+      const { startDate, endDate } = req.query;
+      
+      // Build date range condition if provided
+      let dateRangeCondition = null;
+      if (startDate || endDate) {
+        dateRangeCondition = {};
+        if (startDate) dateRangeCondition.$gte = new Date(startDate);
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          dateRangeCondition.$lte = end;
+        }
+      }
+      
       // Get pending amount (orders with status: pending, confirmed, processing - no deposit confirmed yet)
+      const pendingMatchQuery = {
+        $or: [
+          { orderStatus: 'pending' },
+          { orderStatus: 'confirmed' },
+          { orderStatus: 'processing' },
+        ],
+        'paymentTracking.depositConfirmed': false,
+      };
+      
+      if (dateRangeCondition) {
+        pendingMatchQuery.$or = [
+          ...pendingMatchQuery.$or,
+          { completedAt: dateRangeCondition },
+          { updatedAt: dateRangeCondition },
+          { createdAt: dateRangeCondition }
+        ];
+      }
+      
       const pendingOrders = await Order.aggregate([
-        {
-          $match: {
-            $or: [
-              { orderStatus: 'pending' },
-              { orderStatus: 'confirmed' },
-              { orderStatus: 'processing' },
-            ],
-            'paymentTracking.depositConfirmed': false,
-          },
-        },
+        { $match: pendingMatchQuery },
         {
           $group: {
             _id: null,
@@ -265,13 +323,21 @@ class StatisticsController {
       ]);
 
       // Get deposit amount (paymentTracking.depositConfirmed = true, but not fullPaymentConfirmed)
+      const depositMatchQuery = {
+        'paymentTracking.depositConfirmed': true,
+        'paymentTracking.fullPaymentConfirmed': false,
+      };
+      
+      if (dateRangeCondition) {
+        depositMatchQuery.$or = [
+          { completedAt: dateRangeCondition },
+          { updatedAt: dateRangeCondition },
+          { createdAt: dateRangeCondition }
+        ];
+      }
+      
       const depositOrders = await Order.aggregate([
-        {
-          $match: {
-            'paymentTracking.depositConfirmed': true,
-            'paymentTracking.fullPaymentConfirmed': false,
-          },
-        },
+        { $match: depositMatchQuery },
         {
           $group: {
             _id: null,
@@ -282,12 +348,20 @@ class StatisticsController {
       ]);
 
       // Get full payment amount (paymentTracking.fullPaymentConfirmed = true)
+      const fullPaymentMatchQuery = {
+        'paymentTracking.fullPaymentConfirmed': true,
+      };
+      
+      if (dateRangeCondition) {
+        fullPaymentMatchQuery.$or = [
+          { completedAt: dateRangeCondition },
+          { updatedAt: dateRangeCondition },
+          { createdAt: dateRangeCondition }
+        ];
+      }
+      
       const fullPaymentOrders = await Order.aggregate([
-        {
-          $match: {
-            'paymentTracking.fullPaymentConfirmed': true,
-          },
-        },
+        { $match: fullPaymentMatchQuery },
         {
           $group: {
             _id: null,
@@ -408,26 +482,71 @@ class StatisticsController {
 
   /**
    * GET /api/admin/statistics/monthly-revenue
-   * Lấy doanh thu theo từng tháng (12 tháng gần nhất)
-   * Giống như Dashboard endpoint nhưng dành cho Statistics page
+   * Lấy doanh thu theo từng tháng (12 tháng gần nhất hoặc khoảng thời gian tùy chọn)
+   * Query params: startDate, endDate
    */
   async getMonthlyRevenue(req, res) {
     try {
+      const { startDate, endDate } = req.query;
+      
       const today = new Date();
       const twelveMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 11, 1);
 
+      // Build match query - use completedAt or createdAt
+      let matchQuery = {
+        orderStatus: 'completed',
+      };
+
+      if (startDate || endDate) {
+        const dateRangeCondition = {};
+        if (startDate) {
+          dateRangeCondition.$gte = new Date(startDate);
+        } else {
+          dateRangeCondition.$gte = twelveMonthsAgo;
+        }
+        if (endDate) {
+          const end = new Date(endDate);
+          end.setHours(23, 59, 59, 999);
+          dateRangeCondition.$lte = end;
+        }
+        
+        // Match orders where completedAt, updatedAt, or createdAt falls within range
+        matchQuery.$or = [
+          { completedAt: dateRangeCondition },
+          { updatedAt: dateRangeCondition },
+          { createdAt: dateRangeCondition }
+        ];
+        matchQuery.orderStatus = 'completed';
+      } else {
+        // Default: use either completedAt or createdAt from last 12 months
+        matchQuery.$or = [
+          { completedAt: { $gte: twelveMonthsAgo } },
+          { updatedAt: { $gte: twelveMonthsAgo } },
+          { createdAt: { $gte: twelveMonthsAgo } }
+        ];
+        matchQuery.orderStatus = 'completed';
+      }
+
       const revenues = await Order.aggregate([
         {
-          $match: {
-            orderStatus: 'completed',
-            createdAt: { $gte: twelveMonthsAgo },
-          },
+          $match: matchQuery,
+        },
+        {
+          $addFields: {
+            dateForGrouping: {
+              $cond: [
+                { $ne: ['$completedAt', null] },
+                '$completedAt',
+                { $cond: [{ $ne: ['$updatedAt', null] }, '$updatedAt', '$createdAt'] }
+              ]
+            }
+          }
         },
         {
           $group: {
             _id: {
-              year: { $year: '$createdAt' },
-              month: { $month: '$createdAt' },
+              year: { $year: '$dateForGrouping' },
+              month: { $month: '$dateForGrouping' },
             },
             totalRevenue: { $sum: '$finalTotal' },
             orderCount: { $sum: 1 },

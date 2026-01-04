@@ -9,11 +9,13 @@ import {
   fetchStatisticsSummary,
   fetchMonthlyRevenueChart,
 } from '../../../../stores/thunks/adminStatisticsThunks';
-import RevenueSalesCard from '../../components/Statistics/RevenueSalesCard';
+import RevenueAreaChart from '../../components/Charts/RevenueAreaChart';
 import CashFlowStats from '../../components/Statistics/CashFlowStats';
 import TopProductsCard from '../../components/Statistics/TopProductsCard';
 import NewCustomersCard from '../../components/Statistics/NewCustomersCard';
-import MonthlyRevenueCard from '../../components/Statistics/MonthlyRevenueCard';
+import RevenueChartRecharts from '../../components/Charts/RevenueChartRecharts';
+import TopProductsChartRecharts from '../../components/Charts/TopProductsChartRecharts';
+import FilterDateRange from '../../components/Statistics/FilterDateRange';
 import './Statistics.css';
 
 const Statistics = () => {
@@ -53,7 +55,7 @@ const Statistics = () => {
     try {
       dispatch(fetchRevenueSales({ page }));
       dispatch(fetchCashFlow());
-      dispatch(fetchTopProducts({}));
+      dispatch(fetchTopProducts({ limit: 10 }));
       dispatch(fetchNewCustomers({}));
       dispatch(fetchStatisticsSummary());
       dispatch(fetchMonthlyRevenueChart());
@@ -62,13 +64,16 @@ const Statistics = () => {
     }
   };
 
-  // Handle filter with button click
-  const handleApplyFilter = () => {
+  // Handle filter change from FilterDateRange component
+  const handleFilterChange = ({ startDate, endDate }) => {
     // Validate dates
     if (startDate && endDate && startDate > endDate) {
       toast.error('Ngày bắt đầu không thể sau ngày kết thúc');
       return;
     }
+
+    setStartDate(startDate);
+    setEndDate(endDate);
 
     // Reset to page 1 when filtering
     setPage(1);
@@ -82,7 +87,7 @@ const Statistics = () => {
           toast.error(`Lỗi tải doanh thu: ${error}`);
         }),
       
-      dispatch(fetchTopProducts({ startDate, endDate }))
+      dispatch(fetchTopProducts({ limit: 10, startDate, endDate }))
         .unwrap()
         .catch((error) => {
           console.error('Error fetching top products:', error);
@@ -100,9 +105,17 @@ const Statistics = () => {
         .catch((error) => {
           console.error('Error fetching new customers:', error);
         }),
+
+      dispatch(fetchMonthlyRevenueChart({ startDate, endDate }))
+        .unwrap()
+        .catch((error) => {
+          console.error('Error fetching monthly revenue:', error);
+        }),
     ]).finally(() => {
       setIsFiltering(false);
-      toast.success('Lọc dữ liệu thành công');
+      if (startDate || endDate) {
+        toast.success('Lọc dữ liệu thành công');
+      }
     });
   };
 
@@ -230,65 +243,22 @@ const Statistics = () => {
 
       {/* Filters */}
       <div className="card border-0 shadow-sm mb-4 filter-section">
+        <div className="card-header bg-white border-0 px-4 py-3">
+          <h6 className="mb-0 fw-bold">
+            <i className="fas fa-filter me-2"></i>
+            Bộ lọc dữ liệu
+          </h6>
+        </div>
         <div className="card-body">
-          <div className="row g-3 align-items-end">
-            <div className="col-12 col-md-3">
-              <label className="form-label small fw-500">
-                <i className="fas fa-calendar me-1"></i>
-                Từ ngày
-              </label>
-              <input
-                type="date"
-                className="form-control form-control-sm"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                disabled={isFiltering}
-              />
-            </div>
-
-            <div className="col-12 col-md-3">
-              <label className="form-label small fw-500">
-                <i className="fas fa-calendar me-1"></i>
-                Đến ngày
-              </label>
-              <input
-                type="date"
-                className="form-control form-control-sm"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                disabled={isFiltering}
-              />
-            </div>
-
-            <div className="col-12 col-md-3">
-              <button
-                className="btn btn-sm btn-primary w-100 filter-apply-btn"
-                onClick={handleApplyFilter}
-                disabled={isFiltering || (!startDate && !endDate)}
-              >
-                <i className="fas fa-filter me-2"></i>
-                {isFiltering ? 'Đang lọc...' : 'Lọc dữ liệu'}
-              </button>
-            </div>
-
-            <div className="col-12 col-md-3">
-              <button
-                className="btn btn-sm btn-outline-secondary w-100"
-                onClick={handleDateReset}
-                disabled={isFiltering || !isFilterActive}
-              >
-                <i className="fas fa-times me-2"></i>
-                Xóa bộ lọc
-              </button>
-            </div>
-          </div>
+          <FilterDateRange onFilter={handleFilterChange} loading={isFiltering} />
 
           {/* Filter Status Info */}
-          {isFilterActive && (
+          {(startDate || endDate) && (
             <div className="alert alert-info alert-sm mt-3 mb-0 d-flex align-items-center">
               <i className="fas fa-info-circle me-2"></i>
               <span>
-                Đang hiển thị dữ liệu từ <strong>{startDate || 'hôm đầu'}</strong> đến <strong>{endDate || 'hôm nay'}</strong>
+                Đang hiển thị dữ liệu từ <strong>{startDate || 'đầu thời gian'}</strong> đến{' '}
+                <strong>{endDate || 'hôm nay'}</strong>
               </span>
             </div>
           )}
@@ -297,14 +267,30 @@ const Statistics = () => {
 
       {/* Main Content */}
       <div className="row g-4">
-        {/* Revenue Sales */}
+        {/* Revenue Chart using Recharts */}
         <div className="col-12">
-          <RevenueSalesCard
+          <RevenueChartRecharts
+            data={monthlyRevenue}
+            loading={loadingMonthlyRevenue}
+            error={errorMonthlyRevenue}
+          />
+        </div>
+
+        {/* Revenue Sales Area Chart */}
+        <div className="col-12">
+          <RevenueAreaChart
             data={revenueSales}
             loading={loadingRevenueSales}
             error={errorRevenueSales}
-            onPageChange={setPage}
-            currentPage={page}
+          />
+        </div>
+
+        {/* Top Products Chart using Recharts */}
+        <div className="col-12">
+          <TopProductsChartRecharts
+            data={topProducts}
+            loading={loadingTopProducts}
+            error={errorTopProducts}
           />
         </div>
 
@@ -326,7 +312,7 @@ const Statistics = () => {
           />
         </div>
 
-        {/* Top Products */}
+        {/* Legacy Top Products (Optional - can be removed if needed) */}
         <div className="col-12 col-lg-6">
           <TopProductsCard
             data={topProducts}
