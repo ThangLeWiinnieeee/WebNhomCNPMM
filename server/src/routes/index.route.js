@@ -13,6 +13,8 @@ import wishlistRoutes from './user/wishlist.route.js';
 import publicSettingsRoutes from './user/settings.route.js';
 import reviewRoutes from './user/review.route.js';
 // Admin routes
+import adminDashboardRoutes from './admin/dashboard.route.js';
+import adminStatisticsRoutes from './admin/statistics.route.js';
 import adminOrderRoutes from './admin/order.route.js';
 import adminProductRoutes from './admin/product.route.js';
 import adminCategoryRoutes from './admin/category.route.js';
@@ -41,6 +43,8 @@ router.use('/settings', publicSettingsRoutes); // Public settings routes
 router.use('/reviews', reviewRoutes);
 
 // Admin routes
+router.use('/admin/dashboard', adminDashboardRoutes);
+router.use('/admin/statistics', adminStatisticsRoutes);
 router.use('/admin/orders', adminOrderRoutes);
 router.use('/admin/products', adminProductRoutes);
 router.use('/admin/categories', adminCategoryRoutes);

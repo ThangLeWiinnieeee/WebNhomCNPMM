@@ -22,8 +22,10 @@ import WeddingPackagesPage from './modules/user/pages/WeddingPackagesPage.jsx';
 import WeddingPackageDetailPage from './modules/user/pages/WeddingPackageDetailPage.jsx';
 import AdminLayout from './modules/admin/layouts/AdminLayout';
 import Dashboard from './modules/admin/pages/Dashboard/Dashboard';
+import Statistics from './modules/admin/pages/Statistics/Statistics';
 import Categories from './modules/admin/pages/Categories/Categories';
 import Products from './modules/admin/pages/Products/Products';
+import Orders from './modules/admin/pages/Orders/Orders';
 import Settings from './modules/admin/pages/Settings/Settings';
 import Reviews from './modules/admin/pages/Reviews/Reviews';
 import Promotions from './modules/admin/pages/Promotions/Promotions';
@@ -75,8 +77,10 @@ function App() {
           <Route element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="dashboard" element={<Dashboard />} />
+            <Route path="statistics" element={<Statistics />} />
             <Route path="categories" element={<Categories />} />
             <Route path="products" element={<Products />} />
+            <Route path="orders" element={<Orders />} />
             <Route path="reviews" element={<Reviews />} />
             <Route path="promotions" element={<Promotions />} />
             <Route path="settings" element={<Settings />} />

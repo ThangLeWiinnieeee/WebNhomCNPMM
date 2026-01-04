@@ -36,8 +36,44 @@
   background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%);
 }
 
+/* Unified numeric font styling */
+.stat-card h3,
+.stat-card h5,
+.comparison-item strong,
+.order-status-item .fw-bold,
+.card-body .fw-bold {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+
+/* Revenue chart numbers */
+.revenue-chart-value {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recent orders table numbers */
+.orders-table-number {
+  font-family: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
 /* Empty state styling */
 .empty-state {
   opacity: 0.7;
 }
 
+/* Dashboard numbers - default font */
+.stat-card h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stat-card h3 {
+    font-size: 1.5rem;
+  }
+}

@@ -110,6 +110,30 @@ const orderSchema = new mongoose.Schema(
       enum: ['pending', 'completed', 'failed', 'cancelled'],
       default: 'pending'
     },
+    // Payment tracking for admin workflow
+    // Tracks which payment steps have been completed
+    paymentTracking: {
+      depositConfirmed: {
+        type: Boolean,
+        default: false
+      },
+      depositAmount: {
+        type: Number,
+        default: 0,
+        min: 0
+      },
+      depositConfirmedAt: Date,
+      fullPaymentConfirmed: {
+        type: Boolean,
+        default: false
+      },
+      fullPaymentConfirmedAt: Date,
+      serviceCompletedConfirmed: {
+        type: Boolean,
+        default: false
+      },
+      serviceCompletedConfirmedAt: Date
+    },
     // Payment gateway data (for ZaloPay, etc.)
     paymentData: {
       transactionId: String,
@@ -131,6 +155,14 @@ const orderSchema = new mongoose.Schema(
     eventDate: {
       type: Date,
       required: true
+    },
+    completedAt: {
+      type: Date,
+      default: null // Set khi order chuyển sang status 'completed'
+    },
+    deliveredAt: {
+      type: Date,
+      default: null // Set khi order đã giao
     },
     createdAt: {
       type: Date,
