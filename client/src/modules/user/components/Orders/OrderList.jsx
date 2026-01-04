@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import OrderCard from './OrderCard';
 
-const OrderList = ({ orders, loading, activeTab, onCancel, getStatusBadge, formatPrice, formatDate }) => {
+const OrderList = ({ orders, loading, activeTab, onCancel, onStartReview, reviewingOrderId, onCloseReview, getStatusBadge, formatPrice, formatDate }) => {
   const filterOrders = () => {
     if (activeTab === 'all') return orders;
     return orders.filter(order => order.orderStatus === activeTab);
@@ -39,6 +39,9 @@ const OrderList = ({ orders, loading, activeTab, onCancel, getStatusBadge, forma
           key={order.id || order._id}
           order={order}
           onCancel={onCancel}
+          onStartReview={onStartReview}
+          isReviewing={reviewingOrderId === order._id}
+          onCloseReview={onCloseReview}
           getStatusBadge={getStatusBadge}
           formatPrice={formatPrice}
           formatDate={formatDate}

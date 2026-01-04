@@ -11,6 +11,8 @@ const AdminSidebar = () => {
     { icon: 'fa-list', label: 'Danh mục', path: '/admin/categories' },
     { icon: 'fa-shopping-cart', label: 'Đơn hàng', path: '/admin/orders' },
     { icon: 'fa-users', label: 'Khách hàng', path: '/admin/customers' },
+    { icon: 'fa-star', label: 'Đánh giá', path: '/admin/reviews' },
+    { icon: 'fa-tags', label: 'Khuyến mãi', path: '/admin/promotions' },
     { icon: 'fa-chart-bar', label: 'Thống kê', path: '/admin/statistics' },
     { icon: 'fa-cog', label: 'Cài đặt', path: '/admin/settings' },
   ];

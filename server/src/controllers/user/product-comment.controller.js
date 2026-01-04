@@ -24,12 +24,12 @@ const createComment = async (req, res) => {
       });
     }
 
-    if (!comment || comment.trim().length === 0) {
-      return res.status(400).json({
-        code: 'error',
-        message: 'Vui lòng nhập nội dung bình luận!',
-      });
-    }
+    // if (!comment || comment.trim().length === 0) {
+    //   return res.status(400).json({
+    //     code: 'error',
+    //     message: 'Vui lòng nhập nội dung bình luận!',
+    //   });
+    // }
 
     // Kiểm tra user đã mua sản phẩm này thành công chưa
     const hasPurchased = await orderModel.findOne({
@@ -51,7 +51,7 @@ const createComment = async (req, res) => {
       productId,
       userId,
       rating,
-      comment: comment.trim(),
+      comment: comment ? comment.trim() : null,
     });
 
     await newComment.save();
@@ -160,17 +160,17 @@ const updateComment = async (req, res) => {
       });
     }
 
-    if (comment !== undefined && comment.trim().length === 0) {
-      return res.status(400).json({
-        code: 'error',
-        message: 'Vui lòng nhập nội dung bình luận!',
-      });
-    }
+    // if (comment !== undefined && comment.trim().length === 0) {
+    //   return res.status(400).json({
+    //     code: 'error',
+    //     message: 'Vui lòng nhập nội dung bình luận!',
+    //   });
+    // }
 
     // Cập nhật comment
     const updateData = {};
     if (rating !== undefined) updateData.rating = rating;
-    if (comment !== undefined) updateData.comment = comment.trim();
+    if (comment !== undefined) updateData.comment = comment ? comment.trim() : null;
 
     const updatedComment = await productCommentModel.findByIdAndUpdate(
       commentId,

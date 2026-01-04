@@ -18,6 +18,12 @@ const schema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+   // Liên kết order để kiểm tra mua
+  orderId: {
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Order', 
+    required: true 
+  },
   // Điểm đánh giá (1-5 sao)
   rating: {
     type: Number,
@@ -28,9 +34,11 @@ const schema = new mongoose.Schema({
   // Nội dung bình luận
   comment: {
     type: String,
-    required: true,
     trim: true,
+    default: null,
   },
+  // Ảnh review (từ upload)
+  images: [{ type: String }],
 }, {
   timestamps: true, // Tự động tạo createdAt và updatedAt
 });

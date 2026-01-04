@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import Header from '../components/Header/Header';
 import Footer from '../components/Footer/Footer';
-import { createOrderThunk } from '../../../stores/thunks/orderThunks.js';
+import { createOrderThunk, getUserPointsThunk, getUserCouponsThunk } from '../../../stores/thunks/orderThunks.js';
 import { createZaloPayPaymentThunk } from '../../../stores/thunks/paymentThunks.js';
 import { getCartThunk } from '../../../stores/thunks/cartThunks.js';
 import '../assets/css/CheckoutPage.css';
@@ -13,8 +13,17 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { items, totalPrice, tax, discount, finalTotal } = useSelector(state => state.cart);
-  const { currentOrder, status, error } = useSelector(state => state.order);
+  const { 
+    currentOrder, 
+    status, 
+    error, 
+    points,
+    coupons,
+    pointsStatus,
+    couponsStatus
+  } = useSelector(state => state.order);
   const { user } = useSelector(state => state.auth);
+  const token = localStorage.getItem('token');
 
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [eventDate, setEventDate] = useState('');
@@ -28,6 +37,14 @@ export default function CheckoutPage() {
     ward: '',
     notes: ''
   });
+
+  // States cho mã giảm giá và điểm (sử dụng Redux state)
+  const userPoints = points || 0;
+  const [showCouponModal, setShowCouponModal] = useState(false);
+  const [selectedCoupon, setSelectedCoupon] = useState(null);
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [additionalDiscount, setAdditionalDiscount] = useState(0);
+  const POINT_VALUE = 1000; // 1 điểm = 1000 VND
 
   const [errors, setErrors] = useState({});
 
@@ -46,6 +63,42 @@ export default function CheckoutPage() {
       navigate('/cart');
     }
   }, [items, navigate]);
+
+  // Dispatch fetch điểm của user
+  useEffect(() => {
+    if (user && token) {
+      dispatch(getUserPointsThunk());
+    }
+  }, [user, token, dispatch]);
+
+  // Dispatch fetch danh sách mã giảm giá của user
+  useEffect(() => {
+    if (user && token) {
+      dispatch(getUserCouponsThunk());
+    }
+  }, [user, token, dispatch]);
+
+  // Xử lý lỗi từ Redux (points và coupons)
+  useEffect(() => {
+    if (pointsStatus === 'rejected') {
+      toast.error('Lỗi khi lấy điểm');
+    }
+  }, [pointsStatus]);
+
+  useEffect(() => {
+    if (couponsStatus === 'rejected') {
+      toast.error('Lỗi khi lấy danh sách mã giảm giá');
+    }
+  }, [couponsStatus]);
+
+  // Tính additionalDiscount khi thay đổi
+  useEffect(() => {
+    const pointsDiscount = pointsToRedeem * POINT_VALUE;
+    const couponDiscount = selectedCoupon ? Math.round(totalPrice * (selectedCoupon.discount / 100)) : 0;
+    setAdditionalDiscount(pointsDiscount + couponDiscount);
+  }, [pointsToRedeem, selectedCoupon, totalPrice]);
+
+  const calculatedFinalTotal = finalTotal - additionalDiscount;
 
   // Validation form
   const validateForm = () => {
@@ -78,6 +131,17 @@ export default function CheckoutPage() {
     }
   };
 
+  const handleSelectCoupon = (coupon) => {
+    setSelectedCoupon(coupon);
+    setShowCouponModal(false);
+    toast.success(`Đã chọn mã ${coupon.code}: Giảm ${coupon.discount}%`);
+  };
+
+  const handleRemoveCoupon = () => {
+    setSelectedCoupon(null);
+    toast.info('Đã xóa mã giảm giá');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -89,7 +153,9 @@ export default function CheckoutPage() {
     const orderData = {
       customerInfo: formData,
       paymentMethod,
-      eventDate
+      eventDate,
+      couponCode: selectedCoupon ? selectedCoupon.code : '',
+      pointsToRedeem
     };
 
     try {
@@ -120,6 +186,15 @@ export default function CheckoutPage() {
     } catch (err) {
       toast.error(err || 'Lỗi khi tạo đơn hàng');
     }
+  };
+
+  // Format ngày dd/MM/yyyy
+  const formatDate = (date) => {
+    return new Date(date).toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   // Tính ngày tối thiểu (hôm nay + 7 ngày)
@@ -281,6 +356,130 @@ export default function CheckoutPage() {
                       ></textarea>
                     </div>
 
+                    {/* Áp dụng mã giảm giá */}
+                    <div className="mb-4">
+                      <h6 className="fw-bold mb-3">🎟️ Áp dụng mã giảm giá</h6>
+                      <div className="input-group mb-2">
+                        <button
+                          type="button"
+                          className="form-control text-start d-flex align-items-center"
+                          style={{ borderRadius: '0.375rem 0 0 0.375rem' }}
+                          onClick={() => setShowCouponModal(true)}
+                        >
+                          <i className="fas fa-coupon me-2"></i>
+                          {selectedCoupon ? `${selectedCoupon.code} (${selectedCoupon.discount}%)` : 'Chọn mã giảm giá'}
+                        </button>
+                        <button
+                          className="btn btn-outline-secondary"
+                          type="button"
+                          onClick={selectedCoupon ? handleRemoveCoupon : undefined}
+                          disabled={!selectedCoupon}
+                        >
+                          {selectedCoupon ? 'Xóa' : ''}
+                        </button>
+                      </div>
+                      {selectedCoupon && (
+                        <div className="alert alert-success small">
+                          Đã áp dụng mã {selectedCoupon.code}: Giảm {selectedCoupon.discount}% (HSD: {formatDate(selectedCoupon.expiryDate)})
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Modal danh sách mã giảm giá */}
+                    {showCouponModal && (
+                      <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} tabIndex="-1">
+                        <div className="modal-dialog modal-dialog-centered">
+                          <div className="modal-content">
+                            <div className="modal-header">
+                              <h5 className="modal-title">Danh sách mã giảm giá</h5>
+                              <button
+                                type="button"
+                                className="btn-close"
+                                onClick={() => setShowCouponModal(false)}
+                              ></button>
+                            </div>
+                            <div className="modal-body">
+                              {coupons.length === 0 ? (
+                                <p className="text-center text-muted">Bạn chưa có mã giảm giá nào</p>
+                              ) : (
+                                <div className="list-group">
+                                  {coupons.map((coupon) => (
+                                    <button
+                                      key={coupon._id}
+                                      type="button"
+                                      className="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                                      onClick={() => handleSelectCoupon(coupon)}
+                                    >
+                                      <div>
+                                        <div className="fw-bold">{coupon.code}</div>
+                                        <small className="text-muted">Giảm {coupon.discount}% - HSD: {formatDate(coupon.expiryDate)}</small>
+                                      </div>
+                                      <i className="fas fa-chevron-right"></i>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                            <div className="modal-footer">
+                              <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={() => setShowCouponModal(false)}
+                              >
+                                Đóng
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Đổi điểm tích lũy */}
+                    <div className="mb-4">
+                      <h6 className="fw-bold mb-3">⭐ Đổi điểm tích lũy</h6>
+                      <p className="small text-muted mb-2">Điểm hiện có: <strong>{userPoints}</strong> pts (1 pt = ₫{POINT_VALUE.toLocaleString('vi-VN')})</p>
+                      <div className="input-group">
+                        <input
+                          type="number"
+                          className="form-control"
+                          placeholder="Số điểm muốn đổi"
+                          value={pointsToRedeem === 0 ? '' : pointsToRedeem}
+                          step={1}
+                          min={0}
+                          max={userPoints}
+                          onKeyDown={(e) => {
+                            if (e.key === '.' || e.key === ',' || e.key === '-') {
+                              e.preventDefault();
+                            }
+                          }}
+                          onChange={(e) => {
+                            const raw = e.target.value;
+
+                            // khi user xóa hết
+                            if (raw === '') {
+                              setPointsToRedeem('');
+                              return;
+                            }
+
+                            const value = Math.floor(Number(raw));
+                            setPointsToRedeem(Math.min(Math.max(0, value), userPoints));
+                          }}
+                          onBlur={() => {
+                            // rời input mà vẫn rỗng → về 0
+                            if (pointsToRedeem === '') {
+                              setPointsToRedeem(0);
+                            }
+                          }}
+                        />
+                        <span className="input-group-text">pts</span>
+                      </div>
+                      {pointsToRedeem > 0 && (
+                        <div className="alert alert-success mt-2 small">
+                          Giảm thêm: ₫{(pointsToRedeem * POINT_VALUE).toLocaleString('vi-VN')}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Phương thức thanh toán */}
                     <div className="mb-4">
                       <h6 className="fw-bold mb-3">Phương thức thanh toán</h6>
@@ -390,18 +589,30 @@ export default function CheckoutPage() {
                     </div>
                     {discount > 0 && (
                       <div className="d-flex justify-content-between mb-2 text-success">
-                        <span>Giảm giá:</span>
+                        <span>Giảm giá giỏ hàng:</span>
                         <span>-₫{discount.toLocaleString('vi-VN')}</span>
+                      </div>
+                    )}
+                    {selectedCoupon && (
+                      <div className="d-flex justify-content-between mb-2 text-success">
+                        <span>Mã giảm giá ({selectedCoupon.discount}%):</span>
+                        <span>-₫{Math.round(totalPrice * (selectedCoupon.discount / 100)).toLocaleString('vi-VN')}</span>
+                      </div>
+                    )}
+                    {pointsToRedeem > 0 && (
+                      <div className="d-flex justify-content-between mb-2 text-success">
+                        <span>Điểm tích lũy ({pointsToRedeem} pts):</span>
+                        <span>-₫{(pointsToRedeem * POINT_VALUE).toLocaleString('vi-VN')}</span>
                       </div>
                     )}
                     <div className="d-flex justify-content-between border-top pt-3 mt-3">
                       <span className="fw-bold">Tổng cộng:</span>
-                      <span className="fw-bold text-success fs-5">₫{finalTotal.toLocaleString('vi-VN')}</span>
+                      <span className="fw-bold text-success fs-5">₫{calculatedFinalTotal.toLocaleString('vi-VN')}</span>
                     </div>
                   </div>
 
                   <div className="alert alert-info mt-4 small mb-0">
-                    ℹ️ Bạn sẽ thanh toán <strong>₫{finalTotal.toLocaleString('vi-VN')}</strong> khi hoàn tất dịch vụ
+                    ℹ️ Bạn sẽ thanh toán <strong>₫{calculatedFinalTotal.toLocaleString('vi-VN')}</strong> khi hoàn tất dịch vụ
                   </div>
                 </div>
               </div>

@@ -89,6 +89,16 @@ const orderSchema = new mongoose.Schema(
       required: true,
       min: 0
     },
+    // Coupon và điểm
+    couponId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Coupon',
+      default: null
+    },
+    pointsRedeemed: {
+      type: Number,
+      default: 0
+    },
     // Thanh toán
     paymentMethod: {
       type: String,
