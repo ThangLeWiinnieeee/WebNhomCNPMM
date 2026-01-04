@@ -11,6 +11,7 @@ const FilterDateRange = ({ onFilter, loading = false }) => {
   const [filterType, setFilterType] = useState('all');
   const [customStartDate, setCustomStartDate] = useState('');
   const [customEndDate, setCustomEndDate] = useState('');
+  const [isCustomDateFocused, setIsCustomDateFocused] = useState(false);
 
   // Tính toán ngày bắt đầu dựa trên loại bộ lọc
   const getDateRange = (type) => {
@@ -72,6 +73,7 @@ const FilterDateRange = ({ onFilter, loading = false }) => {
     setFilterType('all');
     setCustomStartDate('');
     setCustomEndDate('');
+    setIsCustomDateFocused(false);
     onFilter({ startDate: '', endDate: '' });
   };
 
@@ -135,8 +137,15 @@ const FilterDateRange = ({ onFilter, loading = false }) => {
               type="date"
               className="form-control form-control-sm"
               value={customStartDate}
-              onChange={(e) => setCustomStartDate(e.target.value)}
-              disabled={loading || filterType !== 'custom'}
+              onChange={(e) => {
+                setCustomStartDate(e.target.value);
+                if (filterType !== 'custom') {
+                  setFilterType('custom');
+                }
+              }}
+              onFocus={() => setIsCustomDateFocused(true)}
+              disabled={loading}
+              title="Nhập ngày bắt đầu"
             />
           </div>
           <div className="date-input-group">
@@ -145,12 +154,19 @@ const FilterDateRange = ({ onFilter, loading = false }) => {
               type="date"
               className="form-control form-control-sm"
               value={customEndDate}
-              onChange={(e) => setCustomEndDate(e.target.value)}
-              disabled={loading || filterType !== 'custom'}
+              onChange={(e) => {
+                setCustomEndDate(e.target.value);
+                if (filterType !== 'custom') {
+                  setFilterType('custom');
+                }
+              }}
+              onFocus={() => setIsCustomDateFocused(true)}
+              disabled={loading}
+              title="Nhập ngày kết thúc"
             />
           </div>
           <button
-            className={`filter-btn ${filterType === 'custom' ? 'active' : ''}`}
+            className={`filter-btn ${filterType === 'custom' && customStartDate && customEndDate ? 'active' : ''}`}
             onClick={() => {
               setFilterType('custom');
               handleCustomDateFilter();
