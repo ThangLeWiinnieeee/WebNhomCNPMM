@@ -29,6 +29,7 @@ import Orders from './modules/admin/pages/Orders/Orders';
 import Settings from './modules/admin/pages/Settings/Settings';
 import Reviews from './modules/admin/pages/Reviews/Reviews';
 import Promotions from './modules/admin/pages/Promotions/Promotions';
+import Customers from './modules/admin/pages/Customers/Customers';
 import AdminRoute from './modules/admin/components/AdminRoute/AdminRoute';
 import { useAuthInit } from './stores/hooks/useAuthInit.js';
 
@@ -81,6 +82,7 @@ function App() {
             <Route path="categories" element={<Categories />} />
             <Route path="products" element={<Products />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="customers" element={<Customers />} />
             <Route path="reviews" element={<Reviews />} />
             <Route path="promotions" element={<Promotions />} />
             <Route path="settings" element={<Settings />} />

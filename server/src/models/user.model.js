@@ -53,6 +53,12 @@ const schema = new mongoose.Schema({
     type: String,
     required: true,
     enum: ['login', 'loginGoogle']
+  },
+  // Trạng thái tài khoản
+  status: {
+    type: String,
+    enum: ['active', 'suspended', 'inactive'],
+    default: 'active'
   }
 },{
     timestamps: true // Tự động tạo createdAt và updatedAt
