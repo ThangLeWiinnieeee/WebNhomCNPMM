@@ -64,6 +64,22 @@ Nền tảng đặt dịch vụ tiệc cưới trực tuyến toàn diện với
 - ✅ 6 danh mục: Catering, Decoration, Photography, Music, Venue, Other
 - ✅ Tùy chọn tuỳ chỉnh cho mỗi dịch vụ (số lượng khách, chủ đề, ngày, v.v.)
 
+### 👨‍💼 Admin Panel
+- ✅ **Dashboard** với thống kê tổng quan (doanh thu, đơn hàng, khách hàng)
+- ✅ **Quản lý sản phẩm** (CRUD) - thêm, sửa, xóa dịch vụ
+- ✅ **Quản lý danh mục** - tổ chức phân loại dịch vụ
+- ✅ **Quản lý đơn hàng** - xem, cập nhật trạng thái, xử lý đơn
+- ✅ **Quản lý khách hàng** ⭐ - xem danh sách, chi tiết, cập nhật trạng thái
+  - 📊 Danh sách 32+ khách hàng với dữ liệu đầy đủ
+  - 🔍 Tìm kiếm theo tên, email, số điện thoại
+  - 📋 Phân trang, sắp xếp
+  - 👁️ Xem chi tiết thông tin khách hàng
+  - ⚙️ Cập nhật trạng thái (active/suspended/inactive)
+  - 🗑️ Xóa khách hàng
+- ✅ **Quản lý đánh giá** - kiểm duyệt và phản hồi reviews
+- ✅ **Quản lý khuyến mãi** - tạo và quản lý mã giảm giá
+- ✅ **Thống kê nâng cao** - biểu đồ doanh thu, sản phẩm bán chạy
+
 ---
 
 ## 🚀 Stack Công Nghệ
@@ -165,9 +181,12 @@ VITE_BACKEND_URL=http://localhost:5001
 
 ### Seed Database
 
+#### 1️⃣ Seed Dịch Vụ (Products & Categories)
+
 ```bash
-# Tạo 12 dịch vụ mẫu trong MongoDB
 cd server
+npm run seed
+# hoặc
 node src/seed/seed.js
 ```
 
@@ -182,6 +201,48 @@ Xóa các dịch vụ cũ
 2. Menu Tiệc Cưới Premium 10 Món (catering) - 4.500.000 ₫
 3. Trang Trí Tiệc Cơ Bản (decoration) - 1.500.000 ₫
 ...
+```
+
+#### 2️⃣ Seed Gói Tiệc Cưới (Wedding Packages)
+
+```bash
+cd server
+node src/seed/seed-wedding-packages.js
+```
+
+#### 3️⃣ Seed Users (Khách Hàng) ⭐ MỚI
+
+```bash
+cd server
+node src/seed/seed-users.js
+```
+
+**Dữ liệu được tạo:**
+- ✅ **30 users** với thông tin đầy đủ
+- 📧 Email, họ tên, số điện thoại, địa chỉ đa dạng
+- 🔐 Mật khẩu: `Password123!` (đã hash)
+- 👤 Avatar từ pravatar.cc
+- 🏷️ Loại: `login` (21) và `loginGoogle` (11)
+- 📊 Trạng thái: `active` (30), `suspended` (1), `inactive` (1)
+- 📍 Địa chỉ phân bố khắp TP.HCM
+
+**Test login với user mẫu:**
+```
+Email: nguyenvanan@gmail.com
+Password: Password123!
+```
+
+**Xem danh sách đầy đủ:** `server/SEED_RESULT.md`
+
+#### 🚀 Chạy Tất Cả Seeds
+
+```bash
+cd server
+
+# Seed toàn bộ dữ liệu mẫu
+npm run seed                              # Categories & Products
+node src/seed/seed-wedding-packages.js   # Wedding Packages
+node src/seed/seed-users.js              # 30 Users
 ```
 
 ---
@@ -267,15 +328,22 @@ WebNhomCNPMM/
 │   │   │   └── auth.middleware.js   # verifyToken (JWT verification)
 │   │   ├── helpers/                 # Utility functions
 │   │   │   ├── generate.helper.js   # Generate OTP
-│   │   │   └── mail.helper.js       # Send emails
-│   │   └── validates/               # Data validation
-│   │       ├── auth.validate.js     # Login/Register validation
-│   │       └── user.validate.js     # updateProfile/changePassword validation (Joi)
+│   │   │   ├── mail.helper.js       # Send emails
+│   │   │   ├── cloudinary.helper.js # Cloudinary upload/delete
+│   │   │   └── category.helper.js   # Category helpers
+│   │   ├── validates/               # Data validation
+│   │   │   ├── auth.validate.js     # Login/Register validation
+│   │   │   └── user.validate.js     # updateProfile/changePassword validation (Joi)
+│   │   └── seed/                    # 📦 Database seed scripts
+│   │       ├── seed.js              # Seed categories & products (50+ items)
+│   │       ├── seed-wedding-packages.js  # Seed wedding packages
+│   │       ├── seed-users.js        # 🆕 Seed 30 users (khách hàng)
+│   │       └── README.md            # Hướng dẫn sử dụng seeds
 │   ├── scripts/
-│   │   ├── seedServices.js          # Seed database with sample services
 │   │   └── check-users.js           # Migration script (add avatar fields)
 │   ├── index.js                     # Express app entry point
 │   ├── .env                         # Environment variables
+│   ├── SEED_RESULT.md              # 📋 Danh sách 30 users đã seed
 │   ├── package.json
 │   └── README.md
 │
@@ -1388,6 +1456,80 @@ phone: "abcdefghij"              ❌ (not digits)
 # MongoDB shell
 use wedding-services
 db.users.dropIndex("username_1")
+```
+
+---
+
+## 🧪 Testing & Demo
+
+### Test Accounts
+
+#### Admin Account
+```
+Email: admin@example.com
+Password: [Check seeded data]
+Access: http://localhost:5173/admin
+```
+
+#### User Accounts (30+ khách hàng)
+**Mật khẩu chung:** `Password123!`
+
+Một số tài khoản test:
+```
+1. nguyenvanan@gmail.com       (login, active)
+2. tranthibinh@gmail.com       (login, active)
+3. leminhcuong@gmail.com       (loginGoogle, active)
+4. phamthidung@gmail.com       (login, active)
+5. hoangvanem@gmail.com        (login, active)
+...
+21. dinhvanuyen@gmail.com      (loginGoogle, suspended)
+27. kimvanchau@gmail.com       (loginGoogle, inactive)
+```
+
+**Xem danh sách đầy đủ:** `server/SEED_RESULT.md`
+
+### Test Workflow
+
+#### 1. Test User Features
+```bash
+# 1. Đăng nhập với user
+Login: nguyenvanan@gmail.com / Password123!
+
+# 2. Test các chức năng
+- ✅ Xem danh sách dịch vụ
+- ✅ Thêm dịch vụ vào giỏ hàng
+- ✅ Cập nhật thông tin cá nhân
+- ✅ Upload avatar
+- ✅ Đổi mật khẩu
+- ✅ Thanh toán COD
+- ✅ Xem đơn hàng
+```
+
+#### 2. Test Admin Features
+```bash
+# 1. Đăng nhập admin
+Login: [admin credentials]
+
+# 2. Test admin panel
+- ✅ Xem dashboard (thống kê)
+- ✅ Quản lý sản phẩm (CRUD)
+- ✅ Quản lý đơn hàng
+- ✅ Quản lý khách hàng (32+ users)
+  - Tìm kiếm: "Nguyễn", "0901234567"
+  - Sắp xếp: theo tên, email, ngày tạo
+  - Xem chi tiết khách hàng
+  - Cập nhật trạng thái
+- ✅ Xem thống kê nâng cao
+```
+
+#### 3. Test với Dữ Liệu Mẫu
+```bash
+# Sau khi seed xong, test với:
+- 6 categories
+- 50+ products/services
+- 30 users với địa chỉ đa dạng
+- Các loại đăng nhập khác nhau (login/loginGoogle)
+- Các trạng thái khác nhau (active/suspended/inactive)
 ```
 
 ---

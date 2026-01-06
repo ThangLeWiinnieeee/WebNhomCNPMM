@@ -10,7 +10,6 @@ const AdminSidebar = () => {
     { icon: 'fa-box', label: 'Sản phẩm', path: '/admin/products' },
     { icon: 'fa-list', label: 'Danh mục', path: '/admin/categories' },
     { icon: 'fa-shopping-cart', label: 'Đơn hàng', path: '/admin/orders' },
-    { icon: 'fa-users', label: 'Người dùng', path: '/admin/users' },
     { icon: 'fa-address-card', label: 'Khách hàng', path: '/admin/customers' },
     { icon: 'fa-star', label: 'Đánh giá', path: '/admin/reviews' },
     { icon: 'fa-tags', label: 'Khuyến mãi', path: '/admin/promotions' },
