@@ -22,6 +22,7 @@ import adminWeddingPackageRoutes from './admin/wedding-package.route.js';
 import adminSettingsRoutes from './admin/settings.route.js';
 import promotionRoutes from './admin/promotion.route.js';
 import reviewsRoutes from './admin/review.route.js';
+import adminCustomerRoutes from './admin/customer.route.js';
 // Shared routes
 import uploadRoutes from './upload.route.js';
 import paymentRoutes from './payment.route.js';
@@ -52,6 +53,7 @@ router.use('/admin/wedding-packages', adminWeddingPackageRoutes);
 router.use('/admin/settings', adminSettingsRoutes);
 router.use('/admin/promotions', promotionRoutes);
 router.use('/admin/reviews', reviewsRoutes);
+router.use('/admin/customers', adminCustomerRoutes);
 
 // Payment routes
 router.use('/payment', paymentRoutes);
