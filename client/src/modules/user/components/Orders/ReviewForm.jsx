@@ -285,13 +285,21 @@ const ReviewForm = ({ productId, orderId, onClose }) => {
       </div>
 
       {/* Submit Button */}
-      <button
-        disabled={loading || !rating}
-        onClick={handleSubmit}
-        className="btn btn-gradient-pink btn-sm text-white w-full"
-      >
-        {loading ? 'Đang gửi...' : 'Gửi đánh giá'}
-      </button>
+      <div>
+        <button
+          disabled={loading || !rating}
+          onClick={handleSubmit}
+          className="btn btn-gradient-pink btn-sm text-white w-full"
+          title={!rating ? 'Vui lòng chọn số sao trước khi gửi' : ''}
+        >
+          {loading ? 'Đang gửi...' : 'Gửi đánh giá'}
+        </button>
+        {!rating && (
+          <small className="text-danger d-block mt-2">
+            ⚠️ Vui lòng chọn số sao để gửi đánh giá
+          </small>
+        )}
+      </div>
     </div>
   );
 };

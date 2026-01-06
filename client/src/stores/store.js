@@ -12,6 +12,7 @@ import settingsReducer from './Slice/settingsSlice';
 import adminDashboardReducer from './Slice/adminDashboardSlice';
 import adminOrderReducer from './Slice/adminOrderSlice';
 import adminStatisticsReducer from './Slice/adminStatisticsSlice';
+import reviewReducer from './Slice/review.slice';
 
 // Cáºu hÃnh persist cho auth slice
 const authPersistConfig = {
@@ -34,6 +35,7 @@ export const store = configureStore({
     payment: paymentReducer,
     weddingPackage: weddingPackageReducer,
     settings: settingsReducer,
+    review: reviewReducer,
     adminDashboard: adminDashboardReducer,
     adminOrder: adminOrderReducer,
     adminStatistics: adminStatisticsReducer,

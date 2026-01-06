@@ -41,10 +41,15 @@ export const submitReview = async (req, res) => {
     const userId = req.user.id; // Từ middleware auth
     const images = req.files || [];
 
-    // Kiểm tra order completed
-    const order = await Order.findOne({ _id: orderId, userId, orderStatus: 'completed' });
+    // Kiểm tra order đã sẵn sàng để đánh giá
+    // Cho phép đánh giá ở các status: processing, ready, completed
+    const order = await Order.findOne({ 
+      _id: orderId, 
+      userId, 
+      orderStatus: { $in: ['processing', 'ready', 'completed'] }
+    });
     if (!order) {
-      return res.status(400).json({ error: 'Chỉ đánh giá sản phẩm đã mua thành công' });
+      return res.status(400).json({ error: 'Chỉ có thể đánh giá đơn hàng đang xử lý hoặc đã hoàn thành' });
     }
 
     // Kiểm tra đã review chưa
