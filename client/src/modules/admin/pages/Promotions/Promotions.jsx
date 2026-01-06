@@ -133,7 +133,7 @@ const Promotions = () => {
       closeModal();
       fetchPromotions(page);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Có lỗi xảy ra');
+      toast.error(err.message || 'Có lỗi xảy ra');
     }
   };
 
@@ -157,6 +157,12 @@ const Promotions = () => {
     } catch {
       toast.error('Xóa thất bại');
     }
+  };
+
+  const formatDateVN = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    return d.toLocaleDateString('vi-VN'); // dd/MM/yyyy
   };
 
   return (
@@ -206,7 +212,7 @@ const Promotions = () => {
                       <td>{p.discount}%</td>
                       <td>{p.quantity}</td>
                       <td>{p.userId ? 'Cá nhân' : 'Toàn bộ'}</td>
-                      <td>{new Date(p.expiryDate).toLocaleDateString()}</td>
+                      <td>{formatDateVN(p.expiryDate)}</td>
                       <td className="text-center">
                         <button className="btn btn-sm btn-outline-primary me-2" onClick={() => openEditModal(p)}>
                           <i className="fas fa-edit"></i>
@@ -249,6 +255,105 @@ const Promotions = () => {
             </li>
           </ul>
         </nav>
+      )}
+
+      {/* CREATE / EDIT MODAL */}
+      {showModal && (
+        <div className="modal show d-block" style={{ background: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <div className="modal-header">
+                  <h5 className="modal-title">
+                    {editingPromotion ? 'Cập nhật khuyến mãi' : 'Thêm khuyến mãi'}
+                  </h5>
+                  <button type="button" className="btn-close" onClick={closeModal}></button>
+                </div>
+
+                <div className="modal-body">
+                  {/* CODE */}
+                  <div className="mb-3">
+                    <label className="form-label">Mã</label>
+                    <input
+                      type="text"
+                      className={`form-control ${editingPromotion ? 'bg-light' : ''}`}
+                      readOnly={!!editingPromotion}
+                      {...register('code')}
+                    />
+                    {errors.code && <small className="text-danger">{errors.code.message}</small>}
+                  </div>
+
+                  {/* DISCOUNT */}
+                  <div className="mb-3">
+                    <label className="form-label">Giảm (%)</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      min={1}
+                      max={100}
+                      step={1}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        const paste = e.clipboardData.getData('text');
+                        if (!/^\d+$/.test(paste)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      {...register('discount', { valueAsNumber: true })}
+                    />
+                  </div>
+
+                  {/* QUANTITY */}
+                  <div className="mb-3">
+                    <label className="form-label">Số lượng</label>
+                    <input
+                      type="number"
+                      className="form-control"
+                      min={1}
+                      step={1}
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onPaste={(e) => {
+                        const paste = e.clipboardData.getData('text');
+                        if (!/^\d+$/.test(paste)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      {...register('quantity', { valueAsNumber: true })}
+                    />
+                  </div>
+
+                  {/* EXPIRY */}
+                  <div className="mb-3">
+                    <label className="form-label">Hạn sử dụng</label>
+                    <input
+                      type="date"
+                      className="form-control"
+                      min={new Date().toISOString().split('T')[0]}
+                      {...register('expiryDate')}
+                    />
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={closeModal}>
+                    Hủy
+                  </button>
+                  <button type="submit" className="btn btn-primary">
+                    {editingPromotion ? 'Cập nhật' : 'Tạo mới'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* DELETE MODAL */}

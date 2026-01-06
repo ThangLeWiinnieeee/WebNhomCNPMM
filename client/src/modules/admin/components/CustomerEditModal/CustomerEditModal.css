@@ -1,0 +1,157 @@
+/* Customer Edit Modal Styles */
+.customer-edit-modal {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+.customer-edit-modal .modal-body {
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Form Groups */
+.customer-edit-modal .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.customer-edit-modal .form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+
+.customer-edit-modal .form-group .required {
+  color: #e74c3c;
+}
+
+.customer-edit-modal .form-group input,
+.customer-edit-modal .form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.customer-edit-modal .form-group input:focus,
+.customer-edit-modal .form-group textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.customer-edit-modal .form-group input.error,
+.customer-edit-modal .form-group textarea.error {
+  border-color: #e74c3c;
+}
+
+.customer-edit-modal .form-group input.error:focus,
+.customer-edit-modal .form-group textarea.error:focus {
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.customer-edit-modal .error-message {
+  display: block;
+  margin-top: 0.5rem;
+  color: #e74c3c;
+  font-size: 0.85rem;
+}
+
+/* Form Actions */
+.customer-edit-modal .form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.customer-edit-modal .btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.customer-edit-modal .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.customer-edit-modal .btn-cancel {
+  background: #95a5a6;
+  color: white;
+}
+
+.customer-edit-modal .btn-cancel:hover:not(:disabled) {
+  background: #7f8c8d;
+}
+
+.customer-edit-modal .btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.customer-edit-modal .btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.customer-edit-modal .spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: customer-edit-spin 0.8s linear infinite;
+}
+
+@keyframes customer-edit-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .customer-edit-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .customer-edit-modal .modal-body {
+    padding: 1.5rem;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

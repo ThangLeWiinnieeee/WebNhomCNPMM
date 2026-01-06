@@ -13,6 +13,7 @@ import adminDashboardReducer from './Slice/adminDashboardSlice';
 import adminOrderReducer from './Slice/adminOrderSlice';
 import adminStatisticsReducer from './Slice/adminStatisticsSlice';
 import reviewReducer from './Slice/review.slice';
+import customerReducer from './Slice/customerSlice';
 
 // Cáºu hÃnh persist cho auth slice
 const authPersistConfig = {
@@ -39,6 +40,7 @@ export const store = configureStore({
     adminDashboard: adminDashboardReducer,
     adminOrder: adminOrderReducer,
     adminStatistics: adminStatisticsReducer,
+    customer: customerReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
